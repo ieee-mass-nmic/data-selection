@@ -1,0 +1,22 @@
+selector_model: meta-llama/Llama-2-7b-hf
+global_seed: 0
+n_layers_signature: 8
+d_proj: 256
+
+horizons: [1, 4]
+anchors: 2
+q_hi_total: 10000
+phase_split: [0.5, 0.3, 0.2]
+
+scorer:
+  epochs_phase_a: 3
+  epochs_phase_b: 2
+  lr_phase_a: 3.0e-4
+  lr_phase_b: 1.0e-4
+  loss_weights: [1.0, 0.3, 0.5, 0.2]
+
+apply:
+  lambda_unc: 0.2
+  cluster_alpha: 0.6
+  enable_calibration: true
+  ood_quantile: 0.95

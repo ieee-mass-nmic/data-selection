@@ -1,0 +1,4 @@
+name: gsm8k
+sketch_path: runs/exp1/task/sketches/gsm8k_seed0.json
+loss_type: response_lm
+eval_protocol: exact_match

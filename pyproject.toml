@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pcu-select"
+version = "0.0.1"
+description = "PEFT-Conditional Utility Selection: cross-PEFT data-efficient fine-tuning."
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "transformers>=4.40",
+    "peft>=0.10",
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "scikit-learn",
+    "pyyaml",
+    "tqdm",
+    "sentence-transformers",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
