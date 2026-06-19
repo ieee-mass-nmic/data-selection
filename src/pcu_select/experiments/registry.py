@@ -17,7 +17,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Literal
 
-from pcu_select.types import PEFTConfig, PEFTRecipe
+from pcu_select.types import PEFTConfig, PEFTFamily, PEFTRecipe
 from pcu_select.utils import peft_id_of
 
 Group = Literal["seen", "unseen_config", "ood_family"]
@@ -47,7 +47,7 @@ class PeftSpec:
     """Backbone-agnostic PEFT description. Materializes to a `PEFTConfig`."""
 
     name: str
-    family: str
+    family: PEFTFamily
     modules_key: str
     group: Group
     layer_range: LayerRange = "all"

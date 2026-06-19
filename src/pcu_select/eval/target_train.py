@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 import numpy as np
 import torch
@@ -70,11 +70,13 @@ class TargetTrainResult:
 def load_backbone(model_id: str, *, device: str = "cuda", dtype: str = "bfloat16"):
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    tok = AutoTokenizer.from_pretrained(model_id)
+    tokenizer_cls = cast(Any, AutoTokenizer)
+    model_cls = cast(Any, AutoModelForCausalLM)
+    tok = tokenizer_cls.from_pretrained(model_id)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     torch_dtype = getattr(torch, dtype) if device == "cuda" else torch.float32
-    model = AutoModelForCausalLM.from_pretrained(model_id, torch_dtype=torch_dtype)
+    model = model_cls.from_pretrained(model_id, torch_dtype=torch_dtype)
     model.to(device if torch.cuda.is_available() else "cpu")
     return model, tok
 

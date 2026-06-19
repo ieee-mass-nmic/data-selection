@@ -23,6 +23,7 @@ TaskID = str
 SiteID = tuple[int, str]  # (layer_idx, module_name)
 
 ModuleName = Literal["attn_out", "mlp_out", "block_residual"]
+PEFTFamily = Literal["lora", "ia3", "adapter", "prefix", "bitfit", "ptuning"]
 OperatorType = Literal[
     "additive_low_rank",
     "multiplicative",
@@ -106,7 +107,7 @@ class PEFTConfig:
     """Structured PEFT description. See design doc §1, §8."""
 
     peft_id: PEFTID
-    family: Literal["lora", "ia3", "adapter", "prefix", "bitfit", "ptuning"]
+    family: PEFTFamily
     target_modules: list[str]  # e.g. ["q_proj", "v_proj"]
     target_layers: list[int]  # which transformer layers
     rank: int | None = None

@@ -92,8 +92,10 @@ def fig_config_vs_selection(out_dir: Path) -> None:
             d = _config_distance(ci, cj)
             # selection difference scatters around the trend (per-pair variation)
             diff = (1.0 - _pcu_jaccard(d)) + rng.normal(0.0, 0.07)
-            xs_pcu.append(d); ys_pcu.append(float(np.clip(diff, 0.02, 0.96)))
-            xs_rds.append(d); ys_rds.append(0.0)  # RDS+ Jaccard ≈ 1 -> diff ≈ 0
+            xs_pcu.append(d)
+            ys_pcu.append(float(np.clip(diff, 0.02, 0.96)))
+            xs_rds.append(d)
+            ys_rds.append(0.0)  # RDS+ Jaccard ≈ 1 -> diff ≈ 0
     fig, ax = plt.subplots(figsize=(7, 4.5))
     ax.scatter(xs_pcu, ys_pcu, s=70, color="#238b45", alpha=0.8,
                label="PCU-Select (ours)", zorder=3)
@@ -101,7 +103,7 @@ def fig_config_vs_selection(out_dir: Path) -> None:
     z = np.polyfit(xs_pcu, ys_pcu, 1)
     xr = np.linspace(min(xs_pcu), max(xs_pcu), 50)
     ax.plot(xr, np.polyval(z, xr), color="#238b45", ls="--", alpha=0.6,
-            label=f"PCU trend (Spearman ρ=0.79)")
+            label="PCU trend (Spearman ρ=0.79)")
     ax.scatter(xs_rds, ys_rds, s=40, color="#74a9cf", alpha=0.8,
                marker="s", label="RDS+ (PEFT-agnostic)", zorder=3)
     ax.set_xlabel("config distance  (rank / placement / module changes)")
