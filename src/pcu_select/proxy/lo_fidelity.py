@@ -43,6 +43,7 @@ class LoFidelityScorer:
     def score(self, *, peft: PEFTConfig, g_t_per_site: np.ndarray) -> LoFidelityResult:
         """g_t_per_site: (|Ω|, d_proj) — already normalized per row."""
         self._ensure_grads()
+        assert self._grads is not None  # populated by _ensure_grads
         alpha = alpha_vector(peft, self.sites, normalize=True)  # (|Ω|,)
         # cos(g_x^ω, g_t^ω) = g_x^ω · g_t^ω because both unit-length.
         # einsum: 'noi,oi->no' → (N, |Ω|)

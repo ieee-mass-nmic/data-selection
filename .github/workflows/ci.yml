@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install runtime + dev deps (CPU torch, no heavy model stack)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.1"
+          pip install numpy pandas pyarrow scikit-learn pyyaml tqdm pytest ruff mypy
+          # transformers powers the SelectorRunner integration test (built from a
+          # tiny in-memory Llama config — no checkpoint download). sentence-
+          # transformers / peft are only needed for full runs, so we skip them.
+          pip install "transformers>=4.40"
+          # Install the package itself without re-resolving heavy deps.
+          pip install -e . --no-deps
+
+      - name: Lint (ruff)
+        run: ruff check src tests scripts
+
+      - name: Type check (mypy)
+        run: mypy
+
+      - name: Run tests
+        run: pytest

@@ -8,14 +8,14 @@ by other modules.
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field
-from typing import Iterable, Iterator
+from dataclasses import dataclass
+from typing import Iterator, cast
 
 import torch
 from torch import nn
 
 from pcu_select.peft_space.site_mask import SiteSpace
-from pcu_select.types import ModuleName, SiteID
+from pcu_select.types import SiteID
 
 
 @dataclass
@@ -53,9 +53,9 @@ class SiteHookManager:
         cur = self.model
         for part in self.layers_path.split("."):
             cur = getattr(cur, part)
-        return cur[l]
+        return cast("nn.ModuleList", cur)[l]
 
-    def _submodule_for(self, layer: nn.Module, m: ModuleName) -> nn.Module:
+    def _submodule_for(self, layer: nn.Module, m: str) -> nn.Module:
         if m == "attn_out":
             return getattr(layer, "self_attn", None) or getattr(layer, "attention")
         if m == "mlp_out":

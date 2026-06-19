@@ -10,8 +10,7 @@ For each layer in `L_sig` we collect 8 stats:
 from __future__ import annotations
 
 from dataclasses import dataclass
-
-import numpy as np
+from typing import Any
 
 from pcu_select.peft_space.site_mask import SiteSpace
 from pcu_select.types import ActivationSignature, Sample
@@ -36,17 +35,29 @@ class ActivationSignatureExtractor:
     def __init__(self, sites: SiteSpace, cfg: ActivationSignatureConfig | None = None):
         self.sites = sites
         self.cfg = cfg or ActivationSignatureConfig()
+        self._runner: Any = None
+
+    def _ensure_runner(self) -> None:
+        if self._runner is not None:
+            return
+        from pcu_select.features.selector_runner import SelectorRunner, SelectorRunnerConfig
+
+        self._runner = SelectorRunner(
+            self.sites,
+            SelectorRunnerConfig(
+                selector_model=self.cfg.selector_model,
+                device=self.cfg.device,
+                dtype="float16" if self.cfg.fp16 else "auto",
+            ),
+        )
 
     def extract(self, samples: list[Sample]) -> list[ActivationSignature]:
-        # Skeleton signature: iterate samples, hook target layers, compute stats.
-        n_layers = len(self.sites.layer_indices)
+        """Forward-only: hook the chosen layers, compute the 8 per-layer stats."""
+        self._ensure_runner()
+        assert self._runner is not None
         out: list[ActivationSignature] = []
-        for _ in samples:
-            vec = np.zeros(n_layers * PER_LAYER_DIM, dtype=np.float32)
-            out.append(ActivationSignature(vector=vec))
-        # Real implementation:
-        #   for each batch:
-        #     register forward hooks on the chosen layers
-        #     do model(**inputs) without grad
-        #     read hidden states, compute the 8 stats per layer, write into vec
-        raise NotImplementedError("See design doc §7.3 for the 8 per-layer stats.")
+        for sample in samples:
+            res = self._runner.process(sample, want_grads=False, want_activations=True)
+            assert res.activation is not None
+            out.append(ActivationSignature(vector=res.activation))
+        return out

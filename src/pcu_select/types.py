@@ -173,18 +173,29 @@ class HiFidelityLabel:
 @dataclass
 class OfflineConfig:
     selector_model: str = "meta-llama/Llama-2-7b-hf"
+    # Backbone trained in the high-fidelity short-update protocol. Defaults to
+    # `selector_model` (selector == smallest backbone in the family) when None.
+    backbone_model: str | None = None
+    n_layers_total: int = 32  # selector model depth; must match the backbone
     n_layers_signature: int = 8
     site_modules: tuple[ModuleName, ...] = ("attn_out", "mlp_out", "block_residual")
     d_proj: int = 256
+    device: str = "cuda"
+    max_len: int = 1024
     global_seed: int = 0
     horizons: tuple[int, ...] = (1, 4)
+    horizon_weights: tuple[float, ...] = (0.4, 0.6)
     anchors: int = 2
+    anchor_warm_steps: int = 200
+    anchor_warm_slice: int = 1000
+    anchor_lora_rank: int = 8
     q_hi_total: int = 10_000
     phase_split: tuple[float, float, float] = (0.5, 0.3, 0.2)
     scorer_epochs_phase_a: int = 3
     scorer_epochs_phase_b: int = 2
     scorer_lr_phase_a: float = 3e-4
     scorer_lr_phase_b: float = 1e-4
+    scorer_batch_size: int = 256
     loss_weights: tuple[float, float, float, float] = (1.0, 0.3, 0.5, 0.2)  # rank,reg,proxy,unc
 
 

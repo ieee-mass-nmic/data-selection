@@ -8,11 +8,9 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import numpy as np
 import torch
-from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
 from pcu_select.scorer.losses import combine_losses
@@ -142,7 +140,8 @@ def train_scorer(
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 opt.step()
                 if step % 100 == 0:
-                    log.info(f"[phase {tag}][epoch {epoch}][step {step}] loss={float(loss):.4f} {parts}")
+                    log.info(f"[phase {tag}][epoch {epoch}][step {step}] "
+                             f"loss={float(loss.detach()):.4f} {parts}")
 
     _run_phase(phase_a_loader, epochs=cfg.epochs_phase_a, lr=cfg.lr_phase_a,
                weights=cfg.weights_phase_a, tag="A")

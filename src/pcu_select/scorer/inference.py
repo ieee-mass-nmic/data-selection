@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Iterator
 
@@ -10,6 +11,25 @@ import numpy as np
 import torch
 
 from pcu_select.scorer.model import PCUScorer, ScorerConfig
+
+SCORER_CONFIG_FILENAME = "scorer_config.json"
+
+
+def save_scorer_config(cfg: ScorerConfig, ckpt_dir: Path | str) -> Path:
+    """Persist the scorer tower dimensions next to its checkpoint."""
+    path = Path(ckpt_dir) / SCORER_CONFIG_FILENAME
+    path.write_text(json.dumps(asdict(cfg)))
+    return path
+
+
+def load_scorer_config(ckpt: Path | str) -> ScorerConfig | None:
+    """Load the ScorerConfig saved beside `ckpt`, if present."""
+    path = Path(ckpt).parent / SCORER_CONFIG_FILENAME
+    if not path.exists():
+        return None
+    raw = json.loads(path.read_text())
+    valid = {f.name for f in fields(ScorerConfig)}
+    return ScorerConfig(**{k: v for k, v in raw.items() if k in valid})
 
 
 @dataclass
@@ -23,6 +43,10 @@ class ScorerInference:
     def __init__(self, ckpt: Path | str, model_cfg: ScorerConfig | None = None,
                  cfg: InferenceConfig | None = None):
         self.cfg = cfg or InferenceConfig()
+        # Prefer the config persisted alongside the checkpoint so the tower
+        # dimensions match the trained weights (they are inferred at train time).
+        if model_cfg is None:
+            model_cfg = load_scorer_config(ckpt)
         self.model = PCUScorer(model_cfg)
         state = torch.load(ckpt, map_location="cpu")
         self.model.load_state_dict(state)

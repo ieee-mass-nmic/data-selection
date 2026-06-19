@@ -80,6 +80,8 @@ def fit_calibration(
     for _ in range(epochs):
         pred = head(mu_t, zx_t, zp_t, zt_t)
         loss = ((pred - u_t) ** 2).mean()
-        opt.zero_grad(); loss.backward(); opt.step()
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
     head.eval()
     return None

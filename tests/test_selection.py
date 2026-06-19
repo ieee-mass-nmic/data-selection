@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 
 from pcu_select.selection.adaptive_quota import (
-    QuotaConfig,
     allocate_cluster_budgets,
     compute_cluster_values,
     pick_top_in_clusters,

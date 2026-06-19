@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable
 
 import numpy as np
 
@@ -26,7 +26,7 @@ class SemanticEncoder:
 
     def __init__(self, cfg: SemanticEncoderConfig | None = None):
         self.cfg = cfg or SemanticEncoderConfig()
-        self._model = None  # lazy
+        self._model: Any = None  # lazy SentenceTransformer
 
     def _ensure_model(self):
         if self._model is not None:

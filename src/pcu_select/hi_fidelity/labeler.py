@@ -1,21 +1,27 @@
 """Orchestrates high-fidelity labeling: short updates + RankNorm aggregation.
 
-Design doc §10.3. Produces `HiFidelityLabel` records ready to feed scorer.
+Design doc §10.3. Produces `HiFidelityLabel` records ready to feed the scorer.
+
+The expensive resource is the anchor model, so we load it once per anchor (via
+`updater_factory`) and run every triple × horizon against that one
+`ShortUpdater`, instead of reloading per call.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
 
-from pcu_select.hi_fidelity.anchors import AnchorRegistry
+from pcu_select.hi_fidelity.anchors import AnchorRegistry, AnchorSpec
 from pcu_select.hi_fidelity.sampler import TripleSample
-from pcu_select.hi_fidelity.short_update import ShortUpdateConfig, run_short_update
+from pcu_select.hi_fidelity.short_update import ShortUpdater
 from pcu_select.types import HiFidelityLabel, PEFTConfig, Sample, ValidationSketch
+
+UpdaterFactory = Callable[[AnchorSpec], ShortUpdater]
 
 
 @dataclass
@@ -33,28 +39,29 @@ class HiFidelityLabeler:
         samples_by_id: dict[str, Sample],
         pefts_by_id: dict[str, PEFTConfig],
         sketches_by_id: dict[str, ValidationSketch],
+        updater_factory: UpdaterFactory,
         cfg: LabelerConfig | None = None,
     ):
         self.anchors = anchors
         self.samples_by_id = samples_by_id
         self.pefts_by_id = pefts_by_id
         self.sketches_by_id = sketches_by_id
+        self.updater_factory = updater_factory
         self.cfg = cfg or LabelerConfig()
 
     def _compute_raw_deltas(self, triples: Iterable[TripleSample]) -> pd.DataFrame:
+        triples = list(triples)
         rows = []
-        for tri in triples:
-            sample = self.samples_by_id[tri.sample_id]
-            peft = self.pefts_by_id[tri.peft_id]
-            sketch = self.sketches_by_id[tri.task_id]
-            for a_idx, anchor in enumerate(self.anchors.all()):
+        for a_idx, anchor in enumerate(self.anchors.all()):
+            updater = self.updater_factory(anchor)  # loads this anchor once
+            for tri in triples:
+                sample = self.samples_by_id[tri.sample_id]
+                peft = self.pefts_by_id[tri.peft_id]
+                sketch = self.sketches_by_id[tri.task_id]
                 for h in self.cfg.horizons:
-                    delta = run_short_update(
-                        anchor_checkpoint=anchor.checkpoint_path,
-                        peft=peft,
-                        sample=sample,
-                        sketch=sketch,
-                        cfg=ShortUpdateConfig(horizon=h, seed=self.cfg.seed),
+                    delta = updater.delta(
+                        peft=peft, sample=sample, sketch=sketch,
+                        horizon=h, seed=self.cfg.seed,
                     )
                     rows.append({
                         "sample_id": tri.sample_id,
@@ -67,12 +74,13 @@ class HiFidelityLabeler:
         return pd.DataFrame(rows)
 
     def _rank_norm_within_bucket(self, df: pd.DataFrame) -> pd.DataFrame:
-        def _rn(g: pd.DataFrame) -> pd.DataFrame:
-            ranks = g["delta_raw"].rank(method="average")
-            g = g.copy()
-            g["delta_norm"] = (ranks - 1) / max(len(g) - 1, 1)
-            return g
-        return df.groupby(["peft_id", "task_id", "anchor_idx", "horizon"], group_keys=False).apply(_rn)
+        """RankNorm Δ to [0,1] within each (p, t, anchor, horizon) bucket (§10.3)."""
+        df = df.copy()
+        bucket = df.groupby(["peft_id", "task_id", "anchor_idx", "horizon"])["delta_raw"]
+        ranks = bucket.rank(method="average")
+        sizes = bucket.transform("size")
+        df["delta_norm"] = (ranks - 1) / (sizes - 1).clip(lower=1)
+        return df
 
     def _aggregate(self, df: pd.DataFrame) -> list[HiFidelityLabel]:
         # mean over anchors, weighted average over horizons, std for σ_est
@@ -90,8 +98,8 @@ class HiFidelityLabeler:
                     std_acc.append(row["std"])
             sigma_est = float(np.mean(std_acc)) if std_acc else 0.0
             out.append(HiFidelityLabel(
-                sample_id=sid, peft_id=pid, task_id=tid,
-                u_hi=float(mean_weighted - 0.0),  # β·std penalty handled in scorer if desired
+                sample_id=str(sid), peft_id=str(pid), task_id=str(tid),
+                u_hi=float(mean_weighted),
                 horizon=int(self.cfg.horizons[-1]),  # representative
                 anchor_idx=-1,
                 seed=self.cfg.seed,
@@ -102,10 +110,12 @@ class HiFidelityLabeler:
 
     def run(self, triples: Iterable[TripleSample]) -> list[HiFidelityLabel]:
         raw = self._compute_raw_deltas(triples)
+        if raw.empty:
+            return []
         normed = self._rank_norm_within_bucket(raw)
         return self._aggregate(normed)
 
     @staticmethod
     def save_labels(labels: list[HiFidelityLabel], path: Path | str) -> None:
-        rows = [vars(l) for l in labels]
+        rows = [vars(label) for label in labels]
         pd.DataFrame(rows).to_parquet(Path(path))

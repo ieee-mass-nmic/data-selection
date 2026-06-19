@@ -47,7 +47,7 @@ class SiteSpace:
         return len(self.layer_indices) * len(self.modules)
 
 
-def operator_of(family: str, module: ModuleName) -> OperatorType:
+def operator_of(family: str, module: str) -> OperatorType:
     if family == "lora":
         return "additive_low_rank"
     if family == "ia3":

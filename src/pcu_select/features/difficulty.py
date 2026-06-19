@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any
 
 import numpy as np
 
+from pcu_select.features.stats import N_MODEL_STATS
 from pcu_select.types import DifficultyStats, Sample
 
 
@@ -64,30 +65,39 @@ class ModelStatsExtractor:
     """Run selector model forward to obtain loss / ppl / entropy / mean logprob.
 
     Fills slots 4..10 of the difficulty vector. The cheap stats from
-    `quick_text_stats` are assumed to be already in place.
+    `quick_text_stats` are assumed to be already in place. Delegates the actual
+    forward to a stats-only `SelectorRunner` (no hooks, no backward).
     """
 
     def __init__(self, cfg: DifficultyConfig | None = None):
         self.cfg = cfg or DifficultyConfig()
-        self._tokenizer = None
-        self._model = None
+        self._runner: Any = None
 
-    def _ensure_model(self) -> None:
-        if self._model is not None:
+    def _ensure_runner(self) -> None:
+        if self._runner is not None:
             return
-        from transformers import AutoModelForCausalLM, AutoTokenizer
+        from pcu_select.features.selector_runner import SelectorRunner, SelectorRunnerConfig
+        from pcu_select.peft_space.site_mask import SiteSpace
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self.cfg.selector_model)
-        if self._tokenizer.pad_token_id is None:
-            self._tokenizer.pad_token = self._tokenizer.eos_token
-        self._model = AutoModelForCausalLM.from_pretrained(
-            self.cfg.selector_model, torch_dtype="auto"
-        ).to(self.cfg.device).eval()
+        self._runner = SelectorRunner(
+            SiteSpace(layer_indices=(), modules=()),  # stats-only: no hooked sites
+            SelectorRunnerConfig(
+                selector_model=self.cfg.selector_model,
+                device=self.cfg.device,
+                dtype="float16" if self.cfg.fp16 else "auto",
+            ),
+        )
 
-    def extract(self, samples: list[Sample], cheap_vectors: list[np.ndarray]) -> list[DifficultyStats]:
+    def extract(
+        self, samples: list[Sample], cheap_vectors: list[np.ndarray]
+    ) -> list[DifficultyStats]:
         """For each sample, fill in the model-side stats and return DifficultyStats."""
-        self._ensure_model()
-        # Implementation: batched forward, compute per-sample response-mask
-        # CE loss / mean logprob / token-level entropy.
-        # NOTE: detailed batching omitted in skeleton; see docstring contract.
-        raise NotImplementedError("Hook into selector model forward; see design doc §7.2.")
+        self._ensure_runner()
+        assert self._runner is not None
+        out: list[DifficultyStats] = []
+        for sample, cheap in zip(samples, cheap_vectors):
+            res = self._runner.process(sample, want_grads=False, want_activations=False)
+            vec = np.asarray(cheap, dtype=np.float32).copy()
+            vec[4 : 4 + N_MODEL_STATS] = res.model_stats
+            out.append(DifficultyStats(vector=vec))
+        return out

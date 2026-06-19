@@ -1,0 +1,8 @@
+{"instruction": "What is 2 + 2?", "response": "2 + 2 equals 4.", "source": "arith"}
+{"instruction": "Translate 'hello' into French.", "response": "'hello' in French is 'bonjour'.", "source": "translate"}
+{"instruction": "Write a Python function that returns the square of a number.", "response": "def square(x):\n    return x * x", "source": "code"}
+{"instruction": "What is the capital of Japan?", "response": "The capital of Japan is Tokyo.", "source": "qa"}
+{"instruction": "Summarize: The cat sat on the mat and slept all afternoon.", "response": "A cat napped on a mat all afternoon.", "source": "summarize"}
+{"instruction": "Solve for x: 3x = 12.", "response": "Dividing both sides by 3 gives x = 4.", "source": "arith"}
+{"instruction": "List three primary colors.", "response": "The three primary colors are red, blue, and yellow.", "source": "qa"}
+{"instruction": "Reverse the string 'abc'.", "response": "The reversed string is 'cba'.", "source": "code"}

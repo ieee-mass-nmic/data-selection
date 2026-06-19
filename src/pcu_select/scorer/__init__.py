@@ -1,4 +1,9 @@
-from pcu_select.scorer.inference import InferenceConfig, ScorerInference
+from pcu_select.scorer.inference import (
+    InferenceConfig,
+    ScorerInference,
+    load_scorer_config,
+    save_scorer_config,
+)
 from pcu_select.scorer.losses import (
     combine_losses,
     heteroscedastic_nll,
@@ -24,6 +29,8 @@ __all__ = [
     "TripletDataset",
     "combine_losses",
     "heteroscedastic_nll",
+    "load_scorer_config",
+    "save_scorer_config",
     "huber_reg",
     "make_loader",
     "pairwise_rank_loss",

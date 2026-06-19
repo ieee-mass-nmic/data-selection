@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -18,8 +18,8 @@ from pcu_select.selection.cluster import ClusterAssignment, ClusterConfig, clust
 @dataclass
 class SelectorConfig:
     lambda_unc: float = 0.2
-    quota: QuotaConfig = QuotaConfig()
-    cluster: ClusterConfig = ClusterConfig()
+    quota: QuotaConfig = field(default_factory=QuotaConfig)
+    cluster: ClusterConfig = field(default_factory=ClusterConfig)
 
 
 @dataclass
