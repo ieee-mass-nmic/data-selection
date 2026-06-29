@@ -75,6 +75,8 @@
 - AlpacaEval/MT-Bench、MATH、Safety 作为补充任务，至少在 E1 出现一次。
 - GPT-judge 类评估固定评审模型与 prompt 版本，报告版本号。
 
+> **实现注**：内联训练评估（`pcu_select.eval.target_train`）默认报告 held-out response-LM 损失（`metric = −eval_loss`），保证零依赖即可跑通整个矩阵；上表的真实指标（EM / pass@k / F1 等）通过向 `train_and_eval(..., task_metric=...)` 注入评测回调接入（例如 lm-eval-harness 包装器），见 [scripts/experiments/README](../scripts/experiments/README.md)「Downstream metric」。
+
 ### 1.4 PEFT 配置空间（全实验统一注册表）
 
 把 PEFT 配置划分为三个集合，所有实验复用这一注册表。`★` 表示进入 scorer 离线训练支持分布（"seen"）。
@@ -297,7 +299,9 @@ T ∈ {1, 3, 5, 10}  个目标 PEFT（从 SEEN ∪ UNSEEN-config 注册表抽取
 |---|---|---|---|
 | **L0 ID 内插** | UNSEEN-config 中 rank/placement 落在 SEEN 凸包内（如 `L-r32-qkvo`、`AD-b16`） | family 见过、具体配置没见过 | zero-shot 直接打分 |
 | **L1 ID 外推** | 极端配置（`L-r64-all`、`AD-b256`、`L-r8-highlayers`） | family 见过、配置超出训练范围 | zero-shot + 校准对照 |
-| **L2 OOD family** | `PRE-l16`、`PT-l32`、`BF`（prefix/ptuning/bitfit） | family 完全没见过 | **必须**走校准模式 |
+| **L2 OOD family** | `PRE-l16`、`PT-l32`、`BF`（prefix/ptuning/bitfit） | family 完全没见过 | 校准模式（prefix/ptuning 见下注） |
+
+> **实现边界（与实现版 §13.2 一致）**：校准所需的高保真短程更新仅支持 native 家族（lora / ia3 / adapter / **bitfit**）。`PRE-l16`(prefix)、`PT-l32`(ptuning) 无法生成校准标签，故只能 zero-shot，按失败边界如实报告（§6.5）；同属 L2 的 `BF`(bitfit) 可正常校准。校准标签由 `scripts/experiments/build_calib_labels.py` 生成。
 
 ### 6.3 校准协议（L1/L2）
 按实现版 §13.2：

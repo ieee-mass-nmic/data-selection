@@ -1,0 +1,314 @@
+% !TeX root = ../main.tex
+% Chapter 4: Experimental Design and Evaluation
+% This file assumes that the main document is already in a two-column layout and has loaded common packages such as amsmath, amssymb, and graphicx.
+
+\chapter{Experimental Design and Evaluation Plan}
+\label{chap:experiments}
+
+\section{Experimental Objectives and Research Questions}
+\label{sec:exp-objectives}
+
+This chapter designs experiments for the PCU-Select method proposed in Chapter~\ref{chap:method}, focusing on its ability to select high-value training samples under a target PEFT configuration and target task. The core contribution of PCU-Select is not a single ranking function, but the combination of PEFT-conditional modeling, multi-fidelity utility learning, and coverage-aware selection. Therefore, the experiments examine the method from five perspectives: effectiveness, necessity, proxy quality, cost efficiency, and generalization.
+
+The research questions are as follows:
+
+\begin{enumerate}
+  \item \textbf{RQ1: End-to-end effectiveness.} Under the same data budget, can the subset selected by PCU-Select produce lower validation loss or better task metrics after target PEFT fine-tuning than baselines such as Random, PPL, LESS, and RDS+?
+  \item \textbf{RQ2: Necessity of PEFT-conditional modeling.} Does explicitly providing the PEFT representation $z_p$ improve sample-ranking quality, especially in terms of NDCG@K or target validation loss on hold-out PEFT configurations?
+  \item \textbf{RQ3: Effectiveness of the low-fidelity proxy.} Is the site-gradient-similarity-based $u^{\mathrm{lo}}$ positively correlated with the high-fidelity short-horizon gain $u^{\mathrm{hi}}$?
+  \item \textbf{RQ4: Benefit of multi-fidelity training.} Compared with using only low-fidelity labels or only a small number of high-fidelity labels, does low-fidelity pretraining followed by high-fidelity fine-tuning yield more stable ranking performance?
+  \item \textbf{RQ5: Cost and reusability.} As the number of target PEFT configurations or tasks increases, can the offline cost of PCU-Select be amortized, and can it achieve lower total cost than methods that construct a separate selector for each target?
+\end{enumerate}
+
+\section{Experimental Setup}
+\label{sec:exp-settings}
+
+\subsection{Data Pools and Task Splits}
+\label{subsec:data-and-tasks}
+
+The experiments involve three types of data. The first is the offline meta-training sample pool $\mathcal{D}_{\mathrm{meta}}$, which is used for extracting sample features, computing low-fidelity labels, and sampling high-fidelity labels. The second is the candidate sample pool in the application stage, $\mathcal{D}_{\mathrm{cand}}$, from which training subsets are selected according to the target pair $(p^{*},t^{*})$. The third is the target-task data, including the task sketch $V_t$ sampled from the training or development split, a validation split for model selection, and a test split for final reporting.
+
+Task sketches are strictly sampled from the train or dev split of the target task, with default size $N_V=32$; the final test split must not be used. To control length bias, samples are divided into short, medium, and long groups by length, and then sampled proportionally with a fixed random seed. The sketch indices of each task are saved as \texttt{sketch\_\{task\}\_\{seed\}.json}, ensuring that different methods are compared under the same task condition.
+
+Table~\ref{tab:task-config-placeholder} gives a recommended template for recording task configurations. In the final thesis, ``TBD'' should be replaced with the actual dataset names, sample counts, and primary metrics.
+
+\begin{table*}[t]
+  \centering
+  \caption{Record template for target tasks and data configuration}
+  \label{tab:task-config-placeholder}
+  \begin{tabular}{llllll}
+    \hline
+    Task & Candidate pool & Number of candidates & Sketch source & Sketch size & Primary metric \\
+    \hline
+    TBD task 1 & TBD & TBD & train/dev & 32 & Validation loss / task metric \\
+    TBD task 2 & TBD & TBD & train/dev & 32 & Validation loss / task metric \\
+    TBD task 3 & TBD & TBD & train/dev & 32 & Validation loss / task metric \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\subsection{Backbone Model and Selector Model}
+\label{subsec:backbone-selector}
+
+The experiments are conducted within the same backbone family. The target model can be a larger model in the family, while the selector model is chosen as the smallest available model in the same family. This choice reduces the cost of gradient-signature extraction while preserving layer semantics. The default site set uses the 8-layer $\times$ 3-module configuration defined in Section~\ref{subsec:intervention-sites}, resulting in 24 sites. If the target model and the selector model have different numbers of layers, site indices are defined on the selector model. Generalization across backbone families is not a main claim of this chapter.
+
+Table~\ref{tab:model-config-placeholder} is used to record model configurations.
+
+\begin{table*}[t]
+  \centering
+  \caption{Record template for the backbone model and selector model}
+  \label{tab:model-config-placeholder}
+  \begin{tabular}{lllll}
+    \hline
+    Item & Model name & Parameter scale & Number of layers & Usage \\
+    \hline
+    Target backbone & TBD & TBD & TBD & Target PEFT fine-tuning and final evaluation \\
+    Selector model & TBD & TBD & TBD & Sample features, activation signatures, and gradient signatures \\
+    Sentence encoder & TBD & TBD & -- & Sample semantic representation $e_x^{\mathrm{joint}}$ \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\subsection{PEFT Configuration Space}
+\label{subsec:peft-space-exp}
+
+Offline training constructs the configuration space $\mathcal{P}$ using multiple PEFT families and capacity buckets. It should cover at least several types among LoRA, IA3, Bottleneck Adapter, Prefix tuning, and BitFit. Each configuration records the affected modules, rank or bottleneck size, trainable parameter count, training recipe, and whether the functional fingerprint is enabled. In the experiments, PEFT configurations are divided into train, validation, and hold-out splits. The hold-out PEFT configurations are used to evaluate the Scorer's generalization to unseen configurations.
+
+Table~\ref{tab:peft-config-placeholder} gives a PEFT configuration record template.
+
+\begin{table*}[t]
+  \centering
+  \caption{Record template for the PEFT configuration space}
+  \label{tab:peft-config-placeholder}
+  \begin{tabular}{lllllll}
+    \hline
+    PEFT family & Affected modules & Key capacity parameter & Trainable parameters & Recipe & Split & Notes \\
+    \hline
+    LoRA & TBD & rank=TBD & TBD & TBD & train/val/test & TBD \\
+    IA3 & TBD & TBD & TBD & TBD & train/val/test & TBD \\
+    Adapter & TBD & bottleneck=TBD & TBD & TBD & train/val/test & TBD \\
+    Prefix & TBD & prefix length=TBD & TBD & TBD & train/val/test & TBD \\
+    BitFit & TBD & -- & TBD & TBD & train/val/test & TBD \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\section{Implementation Details and Hyperparameters}
+\label{sec:implementation-details}
+
+\subsection{Feature and Signature Extraction}
+\label{subsec:feature-extraction-exp}
+
+The sample semantic representation has default dimension 768; the difficulty statistics have dimension 16; and the layerwise activation signature has dimension 64. Therefore, the default dimension of the sample representation $z_x$ is 848. The site gradient signature is projected to 256 dimensions at each site. The random projection matrices are determined by the site identifier and the global random seed, and are persisted. Temporal pooling uses response-token mean pooling aligned with the loss mask by default.
+
+To reduce repeated computation, all sample features, gradient signatures, task sketches, PEFT encodings, and multi-fidelity labels are written to cache directories. The experimental report should include the cache hit rate, disk usage, feature-extraction time, and GPU-hours for each stage.
+
+\subsection{Low-Fidelity and High-Fidelity Labels}
+\label{subsec:labeling-exp}
+
+Low-fidelity labels are computed using Eq.~\eqref{eq:lo-utility} and should cover as many $(x,p,t)$ triples as possible. High-fidelity labels are obtained using the PEFT-only short-horizon update described in Section~\ref{subsec:short-update}. The default number of anchors is 2, namely $\theta_{\mathrm{base}}$ and $\theta_{\mathrm{warm}}$. The default horizons are $h\in\{1,4\}$, weighted by $w_1=0.4,w_4=0.6$. The default high-fidelity label budget is $Q_H=10\mathrm{k}$, allocated across coverage sampling, uncertainty sampling, and boundary sampling in proportions of $50\%$, $30\%$, and $20\%$, respectively.
+
+\subsection{Scorer Training}
+\label{subsec:scorer-training-exp}
+
+The Scorer uses the three-branch architecture described in Section~\ref{sec:scorer}. Stage A pretrains the model for 3 epochs using low-fidelity labels with AdamW learning rate $3\times10^{-4}$. Stage B adds high-fidelity labels and jointly fine-tunes the model for 2 epochs with learning rate $1\times10^{-4}$. The default loss weights are
+\begin{equation}
+  \lambda_{\mathrm{rank}}=1.0,\quad
+  \lambda_{\mathrm{reg}}=0.3,\quad
+  \lambda_{\mathrm{proxy}}=0.5,\quad
+  \lambda_{\mathrm{unc}}=0.2.
+\end{equation}
+Checkpoint selection is performed on validation PEFT configurations and validation tasks, avoiding the use of final test tasks or hold-out PEFT results for model selection.
+
+\subsection{Application-Stage Selection}
+\label{subsec:apply-exp}
+
+In the application stage, $z_{p^{*}}$ and $z_{t^{*}}$ are computed for the target pair $(p^{*},t^{*})$, and the candidate pool is scored in batches to obtain $\hat{\mu}$ and $\hat{\sigma}$. The conservative score follows Eq.~\eqref{eq:conservative-score}, with default $\lambda=0.2$. Clustering uses $e_x^{\mathrm{joint}}$ as the space, with the number of clusters $k=\max(50,\lfloor\sqrt{N}\rfloor)$. Cluster quotas follow Eq.~\eqref{eq:cluster-quota}, with default $\alpha=0.6$. The data budget $B$ can be set as a proportion of the candidate pool, such as $1\%$, $5\%$, or $10\%$, or as a fixed number of samples.
+
+\section{Baseline Methods}
+\label{sec:baselines}
+
+For a fair evaluation of PCU-Select, all methods must use the same candidate pool, target PEFT configuration, target task, and data budget. The following baselines are recommended:
+
+\begin{enumerate}
+  \item \textbf{Random}: Uniformly select $B$ samples from the candidate pool. This method estimates the lower bound of variance caused by the task and model.
+  \item \textbf{PPL}: Compute sample perplexity using the selector model or target backbone, and select samples by ascending perplexity or by a moderate perplexity interval. This baseline tests whether single-sample language-modeling difficulty is sufficient for data selection.
+  \item \textbf{LESS}: A gradient-similarity-based data selection method. This baseline is used to compare whether PCU-Select's PEFT-conditional weights and multi-fidelity training provide additional benefits.
+  \item \textbf{RDS+}: A data selection baseline under the same budget. If the original implementation is unavailable, the thesis should clearly specify reproduction details and differences.
+  \item \textbf{PCU-Select w/o $z_p$}: Remove the PEFT representation and train the Scorer only with $z_x$ and $z_t$, testing the necessity of PEFT-conditional modeling.
+  \item \textbf{PCU-Select $u^{\mathrm{lo}}$ only}: Train only with low-fidelity labels and do not perform high-fidelity fine-tuning, testing the contribution of multi-fidelity correction.
+  \item \textbf{PCU-Select score-only}: Do not use cluster quotas; directly select the global top-$B$ samples by $q(x)$, testing the contribution of coverage-aware selection.
+\end{enumerate}
+
+All baselines should use the same final training procedure, target PEFT recipe, number of training epochs, batch size, learning rate, and random seeds as PCU-Select. If a baseline requires additional gradient computation, results should be reported under either equal wall-time or equal GPU-hours constraints.
+
+\section{Evaluation Metrics}
+\label{sec:metrics}
+
+\subsection{End-to-End Task Metrics}
+\label{subsec:end-to-end-metrics}
+
+End-to-end metrics directly measure the effect of the selected data subset on target PEFT fine-tuning. For generative tasks, report validation loss, test loss, and the primary task metric. For question-answering, mathematical reasoning, or code tasks, report exact match, accuracy, pass@k, or the primary metric specified by the dataset. All results should report the mean and standard deviation over at least 3 random seeds.
+
+\subsection{Ranking-Quality Metrics}
+\label{subsec:ranking-metrics}
+
+For hold-out triples with high-fidelity labels, use NDCG@K, Spearman correlation, and Kendall correlation to evaluate ranking quality. NDCG@K measures top-region ranking quality and is well suited to data selection. Spearman correlation measures global monotonic consistency, while Kendall correlation is more sensitive to local pairwise inversions.
+
+\subsection{Proxy-Consistency Metrics}
+\label{subsec:proxy-metrics}
+
+The quality of the low-fidelity proxy is measured by the correlation between $u^{\mathrm{lo}}$ and $u^{\mathrm{hi}}$. Following the minimal validation experiment, sample 200 triples $(x,p,t)$, compute both $u^{\mathrm{lo}}$ and $u^{\mathrm{hi}}$, and report Spearman $\rho$. If $\rho<0.3$, the site definition, PEFT-conditional weights, or gradient-pooling method should be re-examined.
+
+\subsection{Cost Metrics}
+\label{subsec:cost-metrics}
+
+Cost metrics include GPU-hours for offline feature extraction, low-fidelity label construction cost, high-fidelity label construction cost, Scorer training cost, application-stage scoring cost, clustering and selection cost, and final target PEFT fine-tuning cost. Each stage should record wall-time, GPU-hours, peak memory, disk writes, number of samples, PEFT identifier, and task identifier.
+
+\section{Main Experimental Design}
+\label{sec:main-experiments}
+
+\subsection{End-to-End Data Selection Effectiveness}
+\label{subsec:main-end-to-end}
+
+This experiment compares the task performance of PCU-Select and all baselines after target PEFT fine-tuning. For each target task $t^{*}$ and target PEFT $p^{*}$, each method selects a training subset from the candidate pool under budget $B$, and the target model is fine-tuned using exactly the same training recipe. Validation loss, test loss, and the primary task metric are reported.
+
+Table~\ref{tab:main-results-placeholder} is the template for the main results. In the final version, each cell should be replaced by mean $\pm$ standard deviation, with the best and second-best results marked.
+
+\begin{table*}[t]
+  \centering
+  \caption{Template for end-to-end data selection results}
+  \label{tab:main-results-placeholder}
+  \begin{tabular}{llllllll}
+    \hline
+    Task & PEFT & Budget & Random & PPL & LESS & RDS+ & PCU-Select \\
+    \hline
+    TBD & TBD & $1\%$ & TBD & TBD & TBD & TBD & TBD \\
+    TBD & TBD & $5\%$ & TBD & TBD & TBD & TBD & TBD \\
+    TBD & TBD & $10\%$ & TBD & TBD & TBD & TBD & TBD \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\subsection{Low-Fidelity and High-Fidelity Correlation}
+\label{subsec:lo-hi-correlation}
+
+This experiment verifies whether the site-gradient proxy can serve as an effective pretraining label. Following the triple-sampling strategy, 200 triples $(x,p,t)$ are sampled, and both $u^{\mathrm{lo}}$ and $u^{\mathrm{hi}}$ are computed. The global Spearman $\rho$ is reported, and additional grouped correlations are reported by PEFT family, capacity bucket, and task type. If the correlation of a specific PEFT family is substantially lower than the average, its site mapping and operator weight $\rho_{\operatorname{op}}$ should be inspected.
+
+\begin{table*}[t]
+  \centering
+  \caption{Template for correlation between low-fidelity and high-fidelity utilities}
+  \label{tab:lo-hi-correlation-placeholder}
+  \begin{tabular}{lllll}
+    \hline
+    Group & Number of triples & Spearman $\rho$ & Kendall $\tau$ & Notes \\
+    \hline
+    All & 200 & TBD & TBD & Revise the proxy if $\rho<0.3$ \\
+    LoRA & TBD & TBD & TBD & TBD \\
+    IA3 & TBD & TBD & TBD & TBD \\
+    Adapter & TBD & TBD & TBD & TBD \\
+    Prefix & TBD & TBD & TBD & TBD \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\subsection{Necessity of PEFT Conditioning}
+\label{subsec:peft-condition-necessity}
+
+This experiment compares the full Scorer with a Scorer that removes the PEFT representation. Both models use the same sample representations, task representations, training labels, and number of training epochs. The only difference is whether $z_p$ is provided as input. On hold-out PEFT configurations, NDCG@K, Spearman correlation, and end-to-end target-task results are computed. If the full model improves NDCG@K by at least $5\%$ over the model without $z_p$, the necessity of PEFT-conditional modeling is supported.
+
+\begin{table*}[t]
+  \centering
+  \caption{Template for the necessity of PEFT-conditional modeling}
+  \label{tab:peft-condition-placeholder}
+  \begin{tabular}{llllll}
+    \hline
+    Model & Hold-out PEFT & NDCG@10 & NDCG@50 & Spearman $\rho$ & End-to-end metric \\
+    \hline
+    PCU-Select w/o $z_p$ & TBD & TBD & TBD & TBD & TBD \\
+    PCU-Select full & TBD & TBD & TBD & TBD & TBD \\
+    Relative gain & -- & TBD & TBD & TBD & TBD \\
+    \hline
+  \end{tabular}
+\end{table*}
+
+\subsection{Equal-Cost Baseline Comparison}
+\label{subsec:equal-cost-comparison}
+
+Since PCU-Select consumes additional cost in the offline stage, it must be compared with baselines under equal wall-time or equal GPU-hours. This experiment constrains LESS, PPL, RDS+, and PCU-Select to the same total cost budget, lets each method select samples, and then trains the target PEFT. For gradient-based baselines, if only part of the candidate pool can be processed under the budget, the candidate-pool coverage ratio should be clearly reported. For PCU-Select, offline cost should be amortized by the number of target configurations and included in total cost.
+
+\section{Ablation Studies}
+\label{sec:ablations}
+
+\subsection{Intervention Site Set Ablation}
+\label{subsec:site-ablation}
+
+This ablation compares the default $8\times3=24$ sites with smaller or larger site configurations. For example, the variants can be $4\times3$, $8\times2$, $8\times3$, and $12\times3$. The evaluation includes low-/high-fidelity correlation, Scorer ranking quality, cache size, and end-to-end performance. This experiment tests whether the default number of sites achieves a reasonable trade-off between cost and discriminative power.
+
+\subsection{PEFT-Conditional Weight Ablation}
+\label{subsec:alpha-ablation}
+
+This ablation compares three settings of $\alpha_p^{\omega}$: using only the site mask without capacity or operator information; using the mask plus capacity; and using the full mask, capacity, and operator weights. The evaluation metrics include the correlation between $u^{\mathrm{lo}}$ and $u^{\mathrm{hi}}$, Scorer NDCG@K, and end-to-end results. If the full weights substantially outperform the mask-only setting, it indicates that the different effective perturbations of PEFT operators have practical impact on sample selection.
+
+\subsection{Representation Channel Ablation}
+\label{subsec:representation-ablation}
+
+For the sample representation, remove $e_x^{\mathrm{joint}}$, $d_x$, and $a_x$ separately. For the PEFT representation, remove the capacity vector $c_p$, the recipe vector $r_p$, and the functional fingerprint $f_p$ separately. This experiment analyzes the contribution of each channel to Scorer ranking and final selection. If the functional fingerprint is costly but brings limited benefit, it can remain disabled in the main experiments and be enabled only for OOD configurations.
+
+\subsection{Task-Sketch Encoding Ablation}
+\label{subsec:task-encoder-ablation}
+
+This ablation compares mean pooling with Set Transformer-style attention pooling. The sketch size is kept at $N_V=32$, and additional experiments test $N_V\in\{8,16,32,64\}$. This experiment analyzes the robustness of the task-condition representation to sketch size and outlier samples.
+
+\subsection{Multi-Fidelity Training Ablation}
+\label{subsec:multi-fidelity-ablation}
+
+This ablation compares the following training strategies: low-fidelity-only training, high-fidelity-only training, direct mixing of low- and high-fidelity labels, and low-fidelity pretraining followed by high-fidelity fine-tuning. Both ranking metrics and end-to-end metrics are evaluated. The expected outcome is that two-stage training is more stable when the high-fidelity label budget is limited.
+
+\subsection{Cluster-Quota Ablation}
+\label{subsec:cluster-quota-ablation}
+
+This ablation compares global top-$B$ selection, allocation by cluster size, allocation by cluster utility, and the default adaptive quota. The quota parameter $\alpha$ can take values in $\{0,0.3,0.6,0.9,1.0\}$. In addition to end-to-end metrics, the semantic diversity of the selected subset should be reported, including cluster coverage, average within-cluster similarity, and source-dataset distribution.
+
+\subsection{OOD Calibration Ablation}
+\label{subsec:ood-ablation}
+
+On hold-out PEFT configurations and PEFT configurations with substantially different capacities, this ablation compares three strategies: no calibration, uncertainty penalty only, and a linear calibration head. The report should include the Mahalanobis distance $d^2(p^{*})$, whether it exceeds the threshold $\tau_{\mathrm{id}}$, the number of calibration samples, NDCG@K before and after calibration, and end-to-end results. This experiment evaluates whether OOD detection and lightweight calibration improve robustness on unseen PEFT configurations.
+
+\section{Cost Accounting and Break-Even Analysis}
+\label{sec:break-even}
+
+Every experimental run should write cost logs. A single cost event should at least contain the stage name, wall-time, GPU identifier, GPU-hours, peak memory, disk writes, PEFT identifier, task identifier, and number of samples. Stage names include feature extraction, low-fidelity labeling, high-fidelity labeling, Scorer training, apply scoring, apply selection, and target training.
+
+Let $C_{\mathrm{offline}}$ be the offline cost of PCU-Select, $C_{\mathrm{apply}}$ be the application cost for a single target configuration, and $C_{\mathrm{specific}}$ be the cost of constructing a selector or performing high-cost sample-level selection separately for a single target configuration. When serving $T$ target PEFT configurations or tasks, the break-even point of PCU-Select relative to a task-specific method is
+\begin{equation}
+  T_{\mathrm{be}}=\frac{C_{\mathrm{offline}}}{\max(10^{-6},C_{\mathrm{specific}}-C_{\mathrm{apply}})}.
+  \label{eq:break-even}
+\end{equation}
+When $T>T_{\mathrm{be}}$, the offline cost is sufficiently amortized, and PCU-Select has an advantage in total cost.
+
+The thesis should plot the break-even curve, with the number of targets $T$ on the x-axis and total cost on the y-axis. The total costs of the two method families can be written as
+\begin{align}
+  C_{\mathrm{PCU}}(T) &= C_{\mathrm{offline}} + T\cdot C_{\mathrm{apply}} + T\cdot C_{\mathrm{target}},\\
+  C_{\mathrm{specific}}(T) &= T\cdot C_{\mathrm{specific}} + T\cdot C_{\mathrm{target}},
+\end{align}
+where $C_{\mathrm{target}}$ is the final target PEFT fine-tuning cost and is identical for both methods; therefore, the comparison focuses on selection cost.
+
+\section{Statistical Testing and Reporting Protocol}
+\label{sec:statistical-test}
+
+All end-to-end experiments should run at least 3 random seeds and report mean and standard deviation. For two selection methods evaluated on the same task and PEFT configuration, use paired bootstrap or a paired t-test to test statistical significance. For ranking metrics, report confidence intervals for NDCG@K and Spearman correlation. If an experiment can only be run with a single seed due to cost limitations, this should be explicitly marked in tables and text, and strong statistical claims should be avoided.
+
+The result report should include the following information: candidate-pool size, selection budget, target PEFT configuration, training recipe, task-sketch random seed, Scorer checkpoint, whether OOD calibration is triggered, final number of training steps, hardware environment, and total cost. Negative results should also report the corresponding configuration so that failure causes can be analyzed.
+
+\section{Expected Results and Failure Diagnosis}
+\label{sec:expected-results-diagnostics}
+
+If the method design holds, the experiments should show the following phenomena. First, $u^{\mathrm{lo}}$ and $u^{\mathrm{hi}}$ should be positively correlated overall, and Spearman $\rho$ should be no lower than 0.3 in the minimal validation experiment. Second, the full PCU-Select model should outperform the version without $z_p$ in NDCG@K on hold-out PEFT configurations, ideally by at least $5\%$. Third, under the same training budget, PCU-Select should at least match and usually outperform equal-cost baselines in end-to-end validation loss. Finally, as the number of target PEFT configurations or tasks increases, the break-even curve should show a total-cost advantage after offline cost amortization.
+
+If the experiments do not meet expectations, diagnosis can proceed in the following order. First, check whether the site gradient signatures are aligned with the response mask and whether the random projection matrices are consistent across runs. Second, check whether the PEFT-to-site mapping covers the actual modules affected by the target configuration. Third, check whether the task sketch leaks test-set data or is biased by the length distribution. Fourth, check whether the high-fidelity short-horizon update only updates PEFT parameters and whether the optimizer state is reinitialized for each run. Fifth, check whether the Scorer overfits noisy proxy labels when the low-fidelity signal is too strong; this can be mitigated by reducing $\lambda_{\mathrm{proxy}}$ or increasing high-fidelity boundary sampling.
+
+\section{Chapter Summary}
+\label{sec:exp-summary}
+
+This chapter presented the experimental design and evaluation plan for PCU-Select. The experiments evaluate the method from the perspectives of end-to-end performance, low-/high-fidelity correlation, the necessity of PEFT-conditional modeling, equal-cost comparison, ablation analysis, OOD calibration, and break-even cost curves. This plan can verify whether PCU-Select improves target PEFT fine-tuning, and can also identify the contribution of each module to final performance and cost.

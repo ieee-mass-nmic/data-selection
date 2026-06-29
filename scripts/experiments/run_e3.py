@@ -48,8 +48,8 @@ def main() -> None:
     p.add_argument("--pefts", type=str, nargs="+", default=["L-r16-qkvo", "AD-b64"])
     p.add_argument("--scorer-variants", type=str, nargs="*", default=[],
                    help="tag=ckpt_path entries for representation/condition ablations.")
+    p.set_defaults(tasks=["gsm8k", "humaneval"])  # design §4.3 reduced grid (2 tasks)
     args = p.parse_args()
-    args.tasks = args.tasks if args.tasks else ["gsm8k", "humaneval"]
     variants = parse_variants(args.scorer_variants)
 
     ctx = RunContext(args, experiment="E3")

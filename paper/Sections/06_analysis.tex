@@ -1,0 +1,43 @@
+\section{Analysis}
+
+\subsection{How Consistent Is Sample Utility across PEFT Methods?}
+
+We first analyze whether sample utility is consistent across different PEFT methods. For each pair of PEFT configurations, we compute the correlation between their sample-level utility scores. A high correlation would indicate that a PEFT-agnostic selector is sufficient, while a moderate or low correlation would suggest that PEFT-specific conditioning is necessary.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{lcc}
+\toprule
+PEFT Pair & Pearson & Spearman \\
+\midrule
+LoRA vs. Prefix & -- & -- \\
+LoRA vs. IA3 & -- & -- \\
+Prefix vs. IA3 & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Correlation of sample utility across PEFT methods.}
+\label{tab:utility_correlation}
+\end{table}
+
+\subsection{Effect of PEFT Conditioning}
+
+We further investigate whether PEFT conditioning helps the scorer distinguish utility patterns across adaptation methods. Compared with a sample-only scorer, the PEFT-conditioned scorer can adjust the ranking of samples according to the target PEFT method.
+
+This analysis supports the hypothesis that sample utility is not solely determined by the sample itself, but also depends on the adaptation mechanism.
+
+\subsection{Generalization to Unseen PEFT Configurations}
+
+We evaluate whether the scorer can generalize to PEFT configurations that are not observed during scorer training. This setting is important because training a separate utility estimator for every possible PEFT configuration is expensive.
+
+The results show whether the proposed scorer learns transferable signals from source PEFT methods or merely memorizes configuration-specific rankings.
+
+\subsection{Cost Analysis}
+
+Finally, we compare the computational cost of different data selection strategies. Methods that require repeated fine-tuning or gradient computation for every target PEFT method can become expensive. In contrast, our scorer can reuse sample representations and only changes the PEFT condition vector when the target PEFT method changes.
+
+Let $C_{rep}$ denote the cost of extracting sample representations, $C_{score}$ denote the cost of scorer inference, and $C_{tune}$ denote the cost of target PEFT fine-tuning. The total selection cost of our method can be approximated as:
+\begin{equation}
+C_{\mathrm{ours}} = C_{rep} + C_{score}.
+\end{equation}
+
+When the same candidate pool is reused across multiple target PEFT methods, $C_{rep}$ can be amortized, making the method more efficient than repeatedly estimating utility from scratch.

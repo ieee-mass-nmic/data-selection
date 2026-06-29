@@ -1,0 +1,14 @@
+\begin{tabular}{llllllrr l}
+\toprule
+PEFT & Family & Inserted into & Layers & Operator & Capacity & \# Trainable & \% bb & Sites \\
+\midrule
+L-r8-qv & lora & q\_proj,v\_proj & all (32) & add. low-rank & r=8 & 4,194,304 & 0.062 & 8/24 \\
+L-r8-mlp & lora & up\_proj,down\_proj & all (32) & add. low-rank & r=8 & 4,194,304 & 0.062 & 8/24 \\
+L-r4-qv & lora & q\_proj,v\_proj & all (32) & add. low-rank & r=4 & 2,097,152 & 0.031 & 8/24 \\
+L-r32-qkvo & lora & q\_proj,k\_proj,v\_proj,o\_proj & all (32) & add. low-rank & r=32 & 33,554,432 & 0.498 & 8/24 \\
+L-r8-lowlayers & lora & q\_proj,v\_proj & low ⅓ (10) & add. low-rank & r=8 & 1,310,720 & 0.019 & 2/24 \\
+L-r8-highlayers & lora & q\_proj,v\_proj & high ⅓ (10) & add. low-rank & r=8 & 1,310,720 & 0.019 & 3/24 \\
+IA3-attnmlp & ia3 & k\_proj,v\_proj,down\_proj & all (32) & multiplicative & — & 393,216 & 0.006 & 16/24 \\
+AD-b64 & adapter & o\_proj,down\_proj & all (32) & add. bottleneck & b=64 & 16,777,216 & 0.249 & 24/24 \\
+\bottomrule
+\end{tabular}

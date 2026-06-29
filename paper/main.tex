@@ -1,0 +1,124 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage[submission]{aaai2027}  % DO NOT CHANGE THIS
+
+% Required packages by AAAI template
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\usepackage{natbib}  % DO NOT CHANGE THIS
+\usepackage{caption} % DO NOT CHANGE THIS
+\frenchspacing  % DO NOT CHANGE THIS
+
+% Commonly used packages for ML papers
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+
+% Packages for algorithms
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% Keep the \pdfinfo as shown here.
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+% AAAI papers usually do not use section numbers.
+% You may change this to 1 if you want numbered sections during drafting,
+% but keep 0 for the final submission unless the conference instructions say otherwise.
+\setcounter{secnumdepth}{0}
+
+% =========================================================
+% Title
+% =========================================================
+% The title must use Title Case.
+% This is a temporary title; you can revise it later.
+\title{PEFT-Conditioned Data Selection for Cross-PEFT Data-Efficient Fine-Tuning}
+
+% =========================================================
+% Anonymous Submission
+% =========================================================
+% For anonymous submission, do NOT include real author names,
+% affiliations, emails, lab names, project URLs, or acknowledgments.
+\author{
+    Anonymous Submission
+}
+
+\affiliations{
+}
+
+\begin{document}
+
+\maketitle
+
+% =========================================================
+% Abstract
+% =========================================================
+\begin{abstract}
+\input{Sections/00_abstract}
+\end{abstract}
+
+% =========================================================
+% Optional Links
+% =========================================================
+% If you later want to include code, datasets, or extended version links,
+% use the following block.
+% For anonymous submission, make sure these links do NOT reveal your identity.
+%
+% \begin{links}
+%     \link{Code}{https://anonymous.4open.science/your-code}
+%     \link{Datasets}{https://anonymous.4open.science/your-data}
+%     \link{Extended version}{https://anonymous.4open.science/your-appendix}
+% \end{links}
+
+% =========================================================
+% Main Paper
+% =========================================================
+\input{Sections/01_introduction}
+\input{Sections/02_related_work}
+\input{Sections/03_problem_formulation}
+\input{Sections/04_method}
+\input{Sections/05_experiments}
+\input{Sections/06_analysis}
+\input{Sections/07_conclusion}
+
+% =========================================================
+% Ethical Statement
+% =========================================================
+% Optional. If your paper has ethical considerations, uncomment this block.
+% During anonymous submission, make sure it does not reveal author identity.
+%
+% \section*{Ethical Statement}
+% This work studies data selection for parameter-efficient fine-tuning.
+% The proposed method is intended to reduce computational cost and improve
+% data efficiency. Potential risks include biased data selection if the
+% candidate training data or utility supervision contains systematic biases.
+
+% =========================================================
+% Acknowledgments
+% =========================================================
+% Do NOT include acknowledgments in the anonymous submission,
+% because funding information, project names, or collaborators may reveal identity.
+%
+% \section*{Acknowledgments}
+% This section should be added only in the camera-ready version.
+
+% =========================================================
+% References
+% =========================================================
+% If you continue using aaai2027.bib, keep this line.
+% If you rename your bibliography file to refs.bib, change it to:
+% \bibliography{refs}
+\bibliography{aaai2027}
+
+% =========================================================
+% Reproducibility Checklist
+% =========================================================
+% Check the AAAI-27 instructions to see whether this must be included
+% in the main paper or submitted separately.
+% If required inside the paper, uncomment the following line:
+%
+% \input{ReproducibilityChecklist.tex}
+
+\end{document}

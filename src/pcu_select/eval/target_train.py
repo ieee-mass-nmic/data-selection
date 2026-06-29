@@ -33,7 +33,7 @@ import torch
 from pcu_select.features.stats import response_lm_loss
 from pcu_select.features.tokenization import encode_response_lm
 from pcu_select.hi_fidelity.native_peft import SUPPORTED_FAMILIES, attach_peft
-from pcu_select.types import PEFTConfig, Sample, ValidationSketch
+from pcu_select.types import PEFTConfig, PEFTRecipe, Sample, ValidationSketch
 from pcu_select.utils import get_logger
 
 TaskMetric = Callable[[Any, Any], float]
@@ -211,6 +211,7 @@ def train_and_eval(
     t0 = time.time()
     try:
         opt = _build_optimizer(trainable.params, peft)
+        scheduler = _build_scheduler(opt, peft.recipe, cfg.max_steps)
         order = rng.permutation(len(samples))
         model.train()
         step = 0
@@ -228,6 +229,7 @@ def train_and_eval(
             if cfg.grad_clip > 0:
                 torch.nn.utils.clip_grad_norm_(trainable.params, cfg.grad_clip)
             opt.step()
+            scheduler.step()
             step += 1
             if step % cfg.log_every == 0:
                 log.info(f"step {step}/{cfg.max_steps} loss={float(loss):.4f}")
@@ -258,3 +260,22 @@ def _build_optimizer(params: list[torch.nn.Parameter], peft: PEFTConfig) -> torc
     if r.optimizer == "sgd":
         return torch.optim.SGD(params, lr=r.lr, weight_decay=r.weight_decay)
     return torch.optim.AdamW(params, lr=r.lr, weight_decay=r.weight_decay)
+
+
+def _build_scheduler(opt: torch.optim.Optimizer, recipe: PEFTRecipe, num_training_steps: int) -> Any:
+    """LR schedule with warmup, per the PEFT recipe (design §8.3 encodes both into r_p).
+
+    `recipe.scheduler` ∈ {cosine, linear, constant, constant_with_warmup} maps
+    directly onto `transformers.get_scheduler`; `warmup_ratio` → warmup steps.
+    Keeping this on the recipe (not a fixed global) means every method trains the
+    target PEFT under the *same* schedule, preserving the compute-matched protocol.
+    """
+    from transformers import get_scheduler
+
+    num_warmup = max(0, int(recipe.warmup_ratio * num_training_steps))
+    return get_scheduler(
+        recipe.scheduler,
+        optimizer=opt,
+        num_warmup_steps=num_warmup,
+        num_training_steps=max(1, num_training_steps),
+    )

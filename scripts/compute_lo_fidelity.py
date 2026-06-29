@@ -38,7 +38,7 @@ def main() -> None:
     rows = []
     for sketch_path in args.task_sketches:
         sketch = load_sketch(sketch_path)
-        task_grad_path = layout.task / f"task_grad_signature_{sketch.task_id}.npy"
+        task_grad_path = layout.task / f"task_grad_{sketch.task_id}.npy"
         if not task_grad_path.exists():
             log.warning(f"missing {task_grad_path}; skip")
             continue

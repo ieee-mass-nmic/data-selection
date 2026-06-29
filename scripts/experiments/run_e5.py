@@ -9,14 +9,24 @@ behaviour for each, plus the Mahalanobis d² that the OOD detector uses:
 
 Calibration consumes a SMALL pre-computed high-fidelity label set for the target
 PEFT (`--calib-labels <parquet>` with columns sample_id, peft_id, task_id,
-u_hi). Generate it with the hi-fidelity labeler on 200/500 sampled triples
-(design §13.2). If labels for a (peft, task) are missing, only zero-shot is run
-and a note is logged — honest about what the calibration step needs.
+u_hi). Generate it with scripts/experiments/build_calib_labels.py on 200/500
+sampled samples (design §13.2).
+
+IMPORTANT (implementation boundary): the native short-update backend cannot
+train prefix/ptuning, so calibration labels can only be produced for native
+families (lora / ia3 / adapter / bitfit). The L2 prefix/ptuning targets
+therefore run zero-shot only and are reported as the generalization failure
+boundary (design §6.5); bitfit (also L2) *can* be calibrated. If labels for a
+(peft, task) are missing, only zero-shot is run and a note is logged.
+
+Per design §1.7 each cell repeats over `--seeds` (default 0 1 2). OOD stats and
+the per-sample features are task/seed-independent and computed once.
 
 Example:
     python scripts/experiments/run_e5.py \
         --workdir runs/exp1 --pool data/pool_300k.jsonl --eval-dir data/eval \
-        --task gsm8k --calib-labels runs/exp1/labels/calib.parquet
+        --tasks gsm8k humaneval mmlu --seeds 0 1 2 \
+        --calib-labels runs/exp1/labels/calib.parquet
 """
 
 from __future__ import annotations
@@ -49,70 +59,74 @@ def mahalanobis2(z: np.ndarray, mu: np.ndarray, sinv: np.ndarray) -> float:
 def main() -> None:
     p = argparse.ArgumentParser(description="E5: unseen PEFT generalization")
     add_common_args(p)
-    p.add_argument("--task", type=str, default="gsm8k")
     p.add_argument("--test-pefts", type=str, nargs="+", default=L0 + L1 + L2)
     p.add_argument("--calib-labels", type=str, default=None)
     p.add_argument("--calib-sizes", type=int, nargs="+", default=[200, 500])
+    p.set_defaults(tasks=["gsm8k"])  # E5 defaults to one task; pass more to fill the matrix
     args = p.parse_args()
-    budget, seed = args.budgets[0], args.seeds[0]
+    budget = args.budgets[0]
 
     ctx = RunContext(args, experiment="E5")
-    tc = ctx.task(args.task)
 
-    # ---- OOD stats from the SEEN PEFT support ----
+    # ---- OOD stats from the SEEN PEFT support (task/seed-independent) ----
     seen = [resolve_peft(s.name, args.model) for s in peft_specs_by_group("seen")]
     z_p_seen = np.stack([encode_peft(p, ctx.sites) for p in seen], axis=0)
     ood = fit_ood_stats(z_p_seen, quantile=0.95)
 
     calib = pd.read_parquet(args.calib_labels) if args.calib_labels else None
 
-    # ---- precompute z_x / z_t once ----
+    # ---- per-sample features z_x (task/seed-independent) ----
     feats = ctx.cache.read_features()
     ids = ctx.cache.read_sample_id_index()
     z_x = np.stack([feats[i].as_z_x() for i in ids], axis=0)
-    z_t = tc.z_t[None, :]
 
-    for name in args.test_pefts:
-        peft = resolve_peft(name, args.model)
-        z_p = encode_peft(peft, ctx.sites)[None, :]
-        d2 = mahalanobis2(z_p[0], ood.mu, ood.sigma_inv)
-        is_ood = d2 > ood.threshold
-        meta = {"level": LEVEL.get(name, "?"), "d2": d2, "ood_threshold": ood.threshold,
-                "is_ood": bool(is_ood)}
-        mu, sigma = ctx.scorer().score(z_x, z_p, z_t)
+    for task in args.tasks:
+        tc = ctx.task(task)
+        z_t = tc.z_t[None, :]
+        for name in args.test_pefts:
+            peft = resolve_peft(name, args.model)
+            z_p = encode_peft(peft, ctx.sites)[None, :]
+            d2 = mahalanobis2(z_p[0], ood.mu, ood.sigma_inv)
+            meta = {"level": LEVEL.get(name, "?"), "d2": d2, "ood_threshold": ood.threshold,
+                    "is_ood": bool(d2 > ood.threshold)}
+            mu, sigma = ctx.scorer().score(z_x, z_p, z_t)
 
-        # zero-shot
-        res = cluster_select(sample_ids=ids, mu=mu, sigma=sigma,
-                             joint_embeddings=tc.inp.joint, budget=_k(budget, len(ids)),
-                             cfg=SelectorConfig())
-        evaluate_selection(ctx, peft_name=name, task_name=args.task, budget=budget,
-                           seed=seed, ids=res.selected_ids, method_tag="pcu_zeroshot",
-                           dense=mu, extra={**meta, "mode": "zeroshot"})
+            # zero-shot: deterministic selection, repeated target-train per seed
+            res = cluster_select(sample_ids=ids, mu=mu, sigma=sigma,
+                                 joint_embeddings=tc.inp.joint, budget=_k(budget, len(ids)),
+                                 cfg=SelectorConfig())
+            for seed in args.seeds:
+                evaluate_selection(ctx, peft_name=name, task_name=task, budget=budget,
+                                   seed=seed, ids=res.selected_ids, method_tag="pcu_zeroshot",
+                                   dense=mu, extra={**meta, "mode": "zeroshot"})
 
-        # calibrated modes
-        sub = calib[(calib["peft_id"] == peft.peft_id) & (calib["task_id"] == tc.task_id)] \
-            if calib is not None else None
-        if sub is None or sub.empty:
-            ctx_note = "no calib labels" if calib is not None else "no --calib-labels"
-            print(f"  {name}: {ctx_note}; zero-shot only")
-        else:
-            for n_cal in args.calib_sizes:
-                mu_cal = _calibrate(z_x, z_p, z_t, mu, sub, ids, n_cal, args.device)
-                resc = cluster_select(sample_ids=ids, mu=mu_cal, sigma=sigma,
-                                      joint_embeddings=tc.inp.joint,
-                                      budget=_k(budget, len(ids)), cfg=SelectorConfig())
-                evaluate_selection(ctx, peft_name=name, task_name=args.task, budget=budget,
-                                   seed=seed, ids=resc.selected_ids,
-                                   method_tag=f"pcu_cal{n_cal}", dense=mu_cal,
-                                   extra={**meta, "mode": f"cal{n_cal}"})
+            # calibrated modes (only if labels for this peft/task exist)
+            sub = calib[(calib["peft_id"] == peft.peft_id) & (calib["task_id"] == tc.task_id)] \
+                if calib is not None else None
+            if sub is None or sub.empty:
+                why = "no calib labels" if calib is not None else "no --calib-labels"
+                print(f"  {task}/{name}: {why}; zero-shot only")
+            else:
+                for n_cal in args.calib_sizes:
+                    mu_cal = _calibrate(z_x, z_p, z_t, mu, sub, ids, n_cal, args.device)
+                    resc = cluster_select(sample_ids=ids, mu=mu_cal, sigma=sigma,
+                                          joint_embeddings=tc.inp.joint,
+                                          budget=_k(budget, len(ids)), cfg=SelectorConfig())
+                    for seed in args.seeds:
+                        evaluate_selection(ctx, peft_name=name, task_name=task, budget=budget,
+                                           seed=seed, ids=resc.selected_ids,
+                                           method_tag=f"pcu_cal{n_cal}", dense=mu_cal,
+                                           extra={**meta, "mode": f"cal{n_cal}"})
 
-        # reference baselines (skip influence on prefix/ptuning — native PEFT can't train them)
-        for m in REFERENCE_METHODS:
-            try:
-                run_cell(ctx, method=m, peft_name=name, task_name=args.task,
-                         budget=budget, seed=seed, extra=meta)
-            except (NotImplementedError, ValueError) as e:
-                print(f"  {name}: baseline {m} skipped ({e})")
+            # reference baselines (influence skips prefix/ptuning — can't recompute its signal)
+            for m in REFERENCE_METHODS:
+                for seed in args.seeds:
+                    try:
+                        run_cell(ctx, method=m, peft_name=name, task_name=task,
+                                 budget=budget, seed=seed, extra=meta)
+                    except (NotImplementedError, ValueError) as e:
+                        print(f"  {task}/{name}: baseline {m} skipped ({e})")
+                        break  # same failure for every seed; don't repeat
     print(f"E5 done → {ctx.results_path}")
 
 

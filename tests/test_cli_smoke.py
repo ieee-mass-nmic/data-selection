@@ -17,6 +17,7 @@ HELP_SCRIPTS = (
     "scripts/build_features.py",
     "scripts/encode_task.py",
     "scripts/compute_lo_fidelity.py",
+    "scripts/build_hi_fidelity.py",
     "scripts/train_scorer.py",
     "scripts/select_subset.py",
     "scripts/experiments/run_e1.py",
@@ -25,6 +26,10 @@ HELP_SCRIPTS = (
     "scripts/experiments/run_e4.py",
     "scripts/experiments/run_e5.py",
     "scripts/experiments/dump_peft_registry.py",
+    "scripts/experiments/build_calib_labels.py",
+    "scripts/experiments/build_table1.py",
+    "scripts/experiments/build_motivation_values.py",
+    "scripts/experiments/run_motivation_transfer.py",
 )
 
 
@@ -38,6 +43,28 @@ def test_script_help_loads(script: str) -> None:
         check=True,
     )
     assert "usage:" in proc.stdout
+
+
+def test_build_table1_writes_rows(tmp_path: Path) -> None:
+    """Table 1 is zero-GPU and analytic — exercise it end to end."""
+    import csv
+
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/experiments/build_table1.py"),
+            "--model", "llama2-7b",
+            "--pefts", "L-r8-qv", "IA3-attnmlp", "AD-b64",
+            "--out-dir", str(tmp_path),
+        ],
+        cwd=ROOT, text=True, capture_output=True, check=True,
+    )
+    rows = list(csv.DictReader((tmp_path / "table1.csv").open()))
+    assert [r["peft"] for r in rows] == ["L-r8-qv", "IA3-attnmlp", "AD-b64"]
+    # trainable-param counts must span a wide range (IA3 ≪ Adapter), the whole point.
+    counts = {r["peft"]: int(r["n_trainable"]) for r in rows}
+    assert counts["IA3-attnmlp"] < counts["L-r8-qv"] < counts["AD-b64"]
+    assert (tmp_path / "table1.md").exists() and (tmp_path / "table1.tex").exists()
 
 
 def test_dump_peft_registry_writes_loadable_configs(tmp_path: Path) -> None:

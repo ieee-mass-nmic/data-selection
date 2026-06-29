@@ -25,12 +25,43 @@ for T in gsm8k humaneval mmlu tydiqa; do
 done
 python scripts/compute_lo_fidelity.py --workdir $WD --peft-configs configs/peft/registry/seen/*.yaml \
                                       --task-sketches $WD/task/sketches/*.json
-# (+ high-fidelity labeling, then) :
+python scripts/build_hi_fidelity.py --workdir $WD --pool data/pool_300k.jsonl --model llama2-7b \
+                                    --tasks gsm8k humaneval mmlu tydiqa --q-hi-total 10000
 python scripts/train_scorer.py --workdir $WD
 python scripts/experiments/dump_peft_registry.py --model llama2-7b   # materialize registry yamls
 ```
 
 Held-out eval sets go in `--eval-dir/<task>.jsonl` (separate from the sketches).
+
+## Motivation experiments (Table 1, Figure 1, Figure 2)
+
+These **precede** E1–E5 and establish the project's premise — *data value is
+PEFT-dependent* — using signals **independent of PCU's scorer** (real
+short-update Δ truth + LESS influence), so the argument is not circular. See
+[docs/pcu_select_motivation_design.md](../../docs/pcu_select_motivation_design.md).
+
+```bash
+WD=runs/exp1
+
+# Table 1 — PEFT configs + trainable params (zero-GPU; --from-model for exact counts)
+python scripts/experiments/build_table1.py --model llama2-7b --out-dir tables
+
+# Figure 1 — per-PEFT data-value vectors on a small estimation pool.
+#   u_hi = short-update truth (needs backbone); 2 seeds → noise floor (§3.3).
+#   u_grad/u_rds are cache-only (no GPU). Add --warm-anchor for a 2nd anchor.
+python scripts/experiments/build_motivation_values.py --workdir $WD \
+    --pool data/pool_300k.jsonl --model llama2-7b --tasks gsm8k humaneval \
+    --n-val 2000 --seeds 0 1 --signals u_hi u_grad u_rds
+python scripts/plots/plot_motivation_f1.py --values $WD/motivation/values.parquet \
+    --signal u_hi --out-dir figs        # left=Spearman, right=Top-5% overlap, +noise floor
+
+# Figure 2 — cross-PEFT transfer matrix (diagonal dominance). Source selection is
+# non-PCU (LESS by default; --select-signal u_hi reads values.parquet).
+python scripts/experiments/run_motivation_transfer.py --workdir $WD \
+    --pool data/pool_20k.jsonl --eval-dir data/eval --tasks gsm8k humaneval \
+    --budgets 0.10 --seeds 0 1 2 --select-signal less
+python scripts/plots/plot_motivation_f2.py --results $WD/results/MOT_F2.jsonl --out-dir figs
+```
 
 ## Running the experiments
 
@@ -41,8 +72,13 @@ python scripts/experiments/run_e1.py $COMMON --budgets 0.05 0.10 0.30 --seeds 0 
 python scripts/experiments/run_e2.py $COMMON --per-peft-recompute-h 1.5
 python scripts/experiments/run_e3.py $COMMON --tasks gsm8k humaneval --pefts L-r16-qkvo AD-b64 \
     --scorer-variants no_zp=$WD/scorer/ckpt_no_zp.pt lo_only=$WD/scorer/ckpt_lo_only.pt
-python scripts/experiments/run_e4.py $COMMON --task gsm8k
-python scripts/experiments/run_e5.py $COMMON --task gsm8k --calib-labels runs/exp1/labels/calib.parquet
+python scripts/experiments/run_e4.py $COMMON --tasks gsm8k humaneval --seeds 0 1 2
+# E5: first build the small calibration label set (high-fidelity, native families
+# only), then run across tasks/seeds. prefix/ptuning (L2) are zero-shot only — see Notes.
+python scripts/experiments/build_calib_labels.py --workdir runs/exp1 --pool data/pool_300k.jsonl \
+    --model llama2-7b --tasks gsm8k --pefts L-r64-all AD-b256 L-r8-highlayers BF --n-calib 500
+python scripts/experiments/run_e5.py $COMMON --tasks gsm8k humaneval mmlu --seeds 0 1 2 \
+    --calib-labels runs/exp1/labels/calib.parquet
 ```
 
 Each writes flat result rows to `runs/exp1/results/E*.jsonl` (+ a couple of
@@ -74,8 +110,11 @@ F7/F8 (E5). See design §9.
   (loss-dispersion) are single-checkpoint proxies; the exact signals
   (instruction-free forward / loss trajectories) are noted in
   `baselines/selectors.py` and can be wired in.
-- **Prefix / P-Tuning (E5 L2).** Selection works via z_p; target training uses
-  the `peft` library (native backend defers prompt families). Calibration needs
-  a small pre-computed high-fidelity label set (`--calib-labels`).
+- **Prefix / P-Tuning (E5 L2).** Selection works via z_p and target training
+  uses the `peft` library, so *zero-shot* E5 runs fine. But the native
+  short-update backend can't train prompt families, so **calibration labels
+  cannot be generated for prefix/ptuning** (`build_calib_labels.py` skips them):
+  those L2 targets are reported zero-shot only (design §6.5). BitFit (also L2)
+  is native, so it calibrates normally.
 - **Cost.** Stage GPU-hours come from `cost/accounting.jsonl`; E2's break-even
   charges influence baselines a per-PEFT recompute that PCU amortizes offline.

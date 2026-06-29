@@ -487,7 +487,7 @@ d²(p*) = (z_{p*} - μ_z_p)^T Σ_z_p^{-1} (z_{p*} - μ_z_p)
 
 若 `d²(p*) > τ_id`：
 
-1. 抽样 500 条样本；
+1. 抽样 200 / 500 条样本（两档对照，见实验设计 §6.3）；
 2. 对 `p*` 计算高保真 `u^hi`（horizon=1，单 anchor，约 1/4 完整成本）；
 3. 冻结 scorer 主体，仅训练一个 calibration head：
 
@@ -495,8 +495,10 @@ d²(p*) = (z_{p*} - μ_z_p)^T Σ_z_p^{-1} (z_{p*} - μ_z_p)
 μ_cal = μ̂ + W_cal · [z_x; z_{p*}; z_t] + b_cal
 ```
 
-4. 用这 500 条做线性回归 fit `W_cal, b_cal`；
+4. 用这些样本做线性回归 fit `W_cal, b_cal`；
 5. 全量打分时使用 `μ_cal`。
+
+> **实现边界（native 短程更新后端）**：步骤 2 的高保真短程更新由 `hi_fidelity.native_peft` 实现，仅支持 `lora / ia3 / adapter / bitfit`（prefix / ptuning 需 prompt/KV 注入，无法表示为 `nn.Linear` 包装，见 `native_peft.SUPPORTED_FAMILIES`）。因此 **prefix / ptuning 目标无法生成校准标签**，E5 中这类 L2 配置只能走 zero-shot，按失败边界如实报告（实验设计 §6.5）；同属 L2 的 BitFit 可正常校准。校准标签由 `scripts/experiments/build_calib_labels.py` 生成。
 
 ---
 
@@ -511,7 +513,8 @@ runs/<exp_id>/
     sample_grad_signature/        # 分片 npy: site_id_xxx.npy, 形状 (N, d_proj)
   task/
     sketches/<task>_<seed>.json
-    task_grad_signature.npy
+    z_t_<task_id>.npy             # 任务条件向量 z_t（每任务一份，runner 读取）
+    task_grad_<task_id>.npy       # 任务梯度签名（每任务一份）
   peft/
     configs.jsonl                 # 已编码的 z_p 与原始 yaml
     fingerprints.npy              # 若启用
@@ -574,13 +577,18 @@ def run_apply(
 ### 15.3 调用示例
 
 ```python
+from pcu_select.data import JsonlPool, load_sketch
+from pcu_select.peft_space.schema import load_peft_config
+from pcu_select.types import ApplyConfig, TaskConfig
+
+sketch = load_sketch("runs/exp1/task/sketches/gsm8k_0.json")
 selected = run_apply(
-    candidate_pool=load_pool("data/alpaca_100k.jsonl"),
-    peft_target=PEFTConfig.from_yaml("configs/peft/lora_r16_qkvo.yaml"),
-    task_target=TaskConfig.from_yaml("configs/task/gsm8k.yaml"),
+    candidate_pool=JsonlPool.from_jsonl("data/alpaca_100k.jsonl"),
+    peft_target=load_peft_config("configs/peft/lora_r16_qkvo.yaml"),
+    task_target=TaskConfig(name="gsm8k", task_id=sketch.task_id, sketch=sketch),
     budget=0.1,
     scorer_ckpt=Path("runs/exp1/scorer/ckpt_b.pt"),
-    cfg=ApplyConfig(λ_unc=0.2, cluster_α=0.6),
+    cfg=ApplyConfig(lambda_unc=0.2, cluster_alpha=0.6),
     workdir=Path("runs/exp1"),
 )
 ```

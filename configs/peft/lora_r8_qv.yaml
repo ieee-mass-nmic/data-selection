@@ -1,3 +1,9 @@
+# Materialized snapshot of registry spec "L-r8-qv" (group: seen) for llama2-7b / 32 layers.
+# Source of truth: src/pcu_select/experiments/registry.py (PEFT_REGISTRY).
+# The E1–E5 runners read the registry via resolve_peft(); they do NOT read this file.
+# Regenerate the full registry with:
+#   python scripts/experiments/dump_peft_registry.py --model llama2-7b --out-dir configs/peft/registry
+# Do not hand-edit — keep it identical to the registry to avoid config drift.
 family: lora
 target_modules: [q_proj, v_proj]
 target_layers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
@@ -5,13 +11,16 @@ rank: 8
 alpha: 16
 recipe:
   optimizer: adamw
-  lr: 3.0e-4
+  lr: 2.0e-4
   weight_decay: 0.0
   warmup_ratio: 0.03
   scheduler: cosine
   batch_size: 16
-  dropout: 0.05
+  dropout: 0.0
   max_steps: 1000
   grad_clip: 1.0
   init_method: default
 use_fingerprint: false
+extra:
+  spec_name: L-r8-qv
+  group: seen

@@ -1,0 +1,136 @@
+{
+  "task": "gsm8k",
+  "budget": 0.1,
+  "overlap": {
+    "pcu": {
+      "L-r4-qv": {
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 0.7669,
+        "L-r16-qkvo": 0.4911,
+        "L-r32-qkvo": 0.0671,
+        "L-r64-all": 0.06,
+        "L-r8-lowlayers": 0.6145,
+        "L-r8-highlayers": 0.6502
+      },
+      "L-r8-qv": {
+        "L-r4-qv": 0.7179,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 0.5702,
+        "L-r32-qkvo": 0.342,
+        "L-r64-all": 0.1935,
+        "L-r8-lowlayers": 0.7081,
+        "L-r8-highlayers": 0.7477
+      },
+      "L-r16-qkvo": {
+        "L-r4-qv": 0.4043,
+        "L-r8-qv": 0.6372,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 0.8145,
+        "L-r64-all": 0.3491,
+        "L-r8-lowlayers": 0.3444,
+        "L-r8-highlayers": 0.3939
+      },
+      "L-r32-qkvo": {
+        "L-r4-qv": 0.135,
+        "L-r8-qv": 0.3586,
+        "L-r16-qkvo": 0.8293,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 0.649,
+        "L-r8-lowlayers": 0.1649,
+        "L-r8-highlayers": 0.06
+      },
+      "L-r64-all": {
+        "L-r4-qv": 0.06,
+        "L-r8-qv": 0.0634,
+        "L-r16-qkvo": 0.4132,
+        "L-r32-qkvo": 0.6127,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 0.06,
+        "L-r8-highlayers": 0.06
+      },
+      "L-r8-lowlayers": {
+        "L-r4-qv": 0.5753,
+        "L-r8-qv": 0.845,
+        "L-r16-qkvo": 0.3026,
+        "L-r32-qkvo": 0.1024,
+        "L-r64-all": 0.06,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 0.6845
+      },
+      "L-r8-highlayers": {
+        "L-r4-qv": 0.649,
+        "L-r8-qv": 0.9142,
+        "L-r16-qkvo": 0.4044,
+        "L-r32-qkvo": 0.1146,
+        "L-r64-all": 0.06,
+        "L-r8-lowlayers": 0.7542,
+        "L-r8-highlayers": 1.0
+      }
+    },
+    "rds_plus": {
+      "L-r4-qv": {
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 0.9871,
+        "L-r16-qkvo": 0.9931,
+        "L-r32-qkvo": 0.9658,
+        "L-r64-all": 0.9968,
+        "L-r8-lowlayers": 0.9869,
+        "L-r8-highlayers": 0.9858
+      },
+      "L-r8-qv": {
+        "L-r4-qv": 0.9787,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 0.9719,
+        "L-r32-qkvo": 0.9656,
+        "L-r64-all": 0.99,
+        "L-r8-lowlayers": 0.9818,
+        "L-r8-highlayers": 0.9889
+      },
+      "L-r16-qkvo": {
+        "L-r4-qv": 0.9706,
+        "L-r8-qv": 0.9802,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 0.9915,
+        "L-r64-all": 0.9893,
+        "L-r8-lowlayers": 0.9849,
+        "L-r8-highlayers": 0.9797
+      },
+      "L-r32-qkvo": {
+        "L-r4-qv": 0.9888,
+        "L-r8-qv": 0.9845,
+        "L-r16-qkvo": 0.9859,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 0.9902,
+        "L-r8-lowlayers": 0.9841,
+        "L-r8-highlayers": 0.9826
+      },
+      "L-r64-all": {
+        "L-r4-qv": 0.9825,
+        "L-r8-qv": 0.9963,
+        "L-r16-qkvo": 0.98,
+        "L-r32-qkvo": 0.9928,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 0.9929,
+        "L-r8-highlayers": 0.999
+      },
+      "L-r8-lowlayers": {
+        "L-r4-qv": 0.9739,
+        "L-r8-qv": 0.9793,
+        "L-r16-qkvo": 0.9905,
+        "L-r32-qkvo": 0.9791,
+        "L-r64-all": 0.9778,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 0.9924
+      },
+      "L-r8-highlayers": {
+        "L-r4-qv": 0.9713,
+        "L-r8-qv": 0.9825,
+        "L-r16-qkvo": 0.992,
+        "L-r32-qkvo": 0.9846,
+        "L-r64-all": 0.9807,
+        "L-r8-lowlayers": 0.9846,
+        "L-r8-highlayers": 1.0
+      }
+    }
+  }
+}
