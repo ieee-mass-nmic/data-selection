@@ -1,6 +1,6 @@
 # Experiment harness (E1–E5)
 
-Runner + figure scripts for [docs/pcu_select_experiment_design.md](../../docs/pcu_select_experiment_design.md).
+Runner + figure scripts for [docs/experiment_design.md](../../docs/experiment_design.md).
 Reusable logic lives in the package (`pcu_select.experiments`, `pcu_select.baselines`,
 `pcu_select.eval`); these scripts are thin orchestration.
 
@@ -32,13 +32,20 @@ python scripts/experiments/dump_peft_registry.py --model llama2-7b   # materiali
 ```
 
 Held-out eval sets go in `--eval-dir/<task>.jsonl` (separate from the sketches).
+Full target-training runs also require a task metric adapter:
+
+```bash
+# pcu_eval_adapters.build_task_metric returns task_metric(model, tokenizer)
+# for the requested task and registry metric_name.
+METRIC="--task-metric-factory pcu_eval_adapters:build_task_metric"
+```
 
 ## Motivation experiments (Table 1, Figure 1, Figure 2)
 
 These **precede** E1–E5 and establish the project's premise — *data value is
 PEFT-dependent* — using signals **independent of PCU's scorer** (real
 short-update Δ truth + LESS influence), so the argument is not circular. See
-[docs/pcu_select_motivation_design.md](../../docs/pcu_select_motivation_design.md).
+[docs/motivation_experiment_design.md](../../docs/motivation_experiment_design.md).
 
 ```bash
 WD=runs/exp1
@@ -66,15 +73,15 @@ python scripts/plots/plot_motivation_f2.py --results $WD/results/MOT_F2.jsonl --
 ## Running the experiments
 
 ```bash
-COMMON="--workdir runs/exp1 --pool data/pool_300k.jsonl --eval-dir data/eval --model llama2-7b"
+COMMON="--workdir runs/exp1 --pool data/pool_300k.jsonl --eval-dir data/eval --model llama2-7b $METRIC"
 
 python scripts/experiments/run_e1.py $COMMON --budgets 0.05 0.10 0.30 --seeds 0 1 2
 python scripts/experiments/run_e2.py $COMMON --per-peft-recompute-h 1.5
 python scripts/experiments/run_e3.py $COMMON --tasks gsm8k humaneval --pefts L-r16-qkvo AD-b64 \
     --scorer-variants no_zp=$WD/scorer/ckpt_no_zp.pt lo_only=$WD/scorer/ckpt_lo_only.pt
 python scripts/experiments/run_e4.py $COMMON --tasks gsm8k humaneval --seeds 0 1 2
-# E5: first build the small calibration label set (high-fidelity, native families
-# only), then run across tasks/seeds. prefix/ptuning (L2) are zero-shot only — see Notes.
+# E5: first build the small calibration label set for native PEFT families,
+# then run across tasks/seeds. Prompt families use the target-training path.
 python scripts/experiments/build_calib_labels.py --workdir runs/exp1 --pool data/pool_300k.jsonl \
     --model llama2-7b --tasks gsm8k --pefts L-r64-all AD-b256 L-r8-highlayers BF --n-calib 500
 python scripts/experiments/run_e5.py $COMMON --tasks gsm8k humaneval mmlu --seeds 0 1 2 \
@@ -102,19 +109,17 @@ F7/F8 (E5). See design §9.
 
 ## Notes / integration points
 
-- **Downstream metric.** Inline eval reports held-out response-LM loss
-  (`metric = −eval_loss`). For real EM / pass@k / F1, pass a
-  `task_metric(model, tokenizer) -> float` into `eval.target_train.train_and_eval`
-  (e.g. an lm-eval-harness wrapper). Documented hook; no harness dependency.
-- **Baseline approximations.** `ifd` (length-normalized loss) and `s2l`
-  (loss-dispersion) are single-checkpoint proxies; the exact signals
-  (instruction-free forward / loss trajectories) are noted in
-  `baselines/selectors.py` and can be wired in.
-- **Prefix / P-Tuning (E5 L2).** Selection works via z_p and target training
-  uses the `peft` library, so *zero-shot* E5 runs fine. But the native
-  short-update backend can't train prompt families, so **calibration labels
-  cannot be generated for prefix/ptuning** (`build_calib_labels.py` skips them):
-  those L2 targets are reported zero-shot only (design §6.5). BitFit (also L2)
-  is native, so it calibrates normally.
+- **Downstream metric.** `eval.target_train.train_and_eval` always logs
+  held-out response-LM loss as `eval_loss`, while the primary `metric` is
+  supplied by `--task-metric-factory` (EM / pass@k / F1 / accuracy / judge
+  score). A metric callback may return either a float or `(metric_name, value)`.
+- **IFD/S2L signals.** The default E1 matrix uses cached features and gradient
+  signatures produced by the offline pipeline. If IFD or S2L are included in
+  `--methods`, export their per-sample scores to
+  `<workdir>/features/baseline_scores.parquet` with columns `sample_id`, `ifd`
+  and/or `s2l`; the runner fails when a requested score is absent.
+- **Prompt PEFT families.** LoRA / IA3 / adapter / BitFit use the native
+  short-update calibration path. Prefix tuning and P-Tuning use the `peft`
+  library for target training and share the same downstream metric adapter.
 - **Cost.** Stage GPU-hours come from `cost/accounting.jsonl`; E2's break-even
   charges influence baselines a per-PEFT recompute that PCU amortizes offline.

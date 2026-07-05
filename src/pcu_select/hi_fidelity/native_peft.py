@@ -37,21 +37,40 @@ SUPPORTED_FAMILIES = ("lora", "ia3", "adapter", "bitfit")
 
 
 # ---------------------------------------------------------------------------
-# Wrapper modules. Each holds a frozen `base` Linear plus a small trainable
+# Wrapper modules. Each holds a frozen `base` module plus a small trainable
 # adapter whose parameters are registered under predictable names so that
 # `PeftHandle.state_dict()` round-trips.
 # ---------------------------------------------------------------------------
 
 
+def _module_dims_device_dtype(base: nn.Module) -> tuple[int, int, torch.device, torch.dtype]:
+    """Return linear-like input/output dims and parameter placement.
+
+    Fresh short-update adapters may be stacked on top of an already-attached warm
+    adapter. Those warm wrappers are not `nn.Linear`, but they expose the same
+    in/out feature dimensions and can be treated as the frozen base transform.
+    """
+    in_features = getattr(base, "in_features", None)
+    out_features = getattr(base, "out_features", None)
+    if in_features is None or out_features is None:
+        raise TypeError(f"module {type(base).__name__} is not linear-like")
+    first = next(base.parameters(), None)
+    if first is None:
+        return int(in_features), int(out_features), torch.device("cpu"), torch.float32
+    return int(in_features), int(out_features), first.device, first.dtype
+
+
 class LoRALinear(nn.Module):
     """y = base(x) + scaling · (dropout(x) Aᵀ) Bᵀ.   B is zero-init → Δ₀ = 0."""
 
-    def __init__(self, base: nn.Linear, *, rank: int, alpha: float, dropout: float):
+    def __init__(self, base: nn.Module, *, rank: int, alpha: float, dropout: float):
         super().__init__()
         self.base = base
-        dev, dt = base.weight.device, base.weight.dtype
-        self.lora_A = nn.Parameter(torch.empty(rank, base.in_features, device=dev, dtype=dt))
-        self.lora_B = nn.Parameter(torch.zeros(base.out_features, rank, device=dev, dtype=dt))
+        in_features, out_features, dev, dt = _module_dims_device_dtype(base)
+        self.in_features = in_features
+        self.out_features = out_features
+        self.lora_A = nn.Parameter(torch.empty(rank, in_features, device=dev, dtype=dt))
+        self.lora_B = nn.Parameter(torch.zeros(out_features, rank, device=dev, dtype=dt))
         nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
         self.scaling = alpha / rank
         self.dropout = nn.Dropout(dropout)
@@ -64,11 +83,13 @@ class LoRALinear(nn.Module):
 class IA3Linear(nn.Module):
     """y = base(x) ⊙ s.   s is ones-init → Δ₀ = 0 (multiplicative, design §3)."""
 
-    def __init__(self, base: nn.Linear):
+    def __init__(self, base: nn.Module):
         super().__init__()
         self.base = base
-        dev, dt = base.weight.device, base.weight.dtype
-        self.ia3 = nn.Parameter(torch.ones(base.out_features, device=dev, dtype=dt))
+        in_features, out_features, dev, dt = _module_dims_device_dtype(base)
+        self.in_features = in_features
+        self.out_features = out_features
+        self.ia3 = nn.Parameter(torch.ones(out_features, device=dev, dtype=dt))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.base(x) * self.ia3
@@ -77,11 +98,13 @@ class IA3Linear(nn.Module):
 class BitFitLinear(nn.Module):
     """y = base(x) + b.   b is zero-init → Δ₀ = 0 (bias shift, design §3)."""
 
-    def __init__(self, base: nn.Linear):
+    def __init__(self, base: nn.Module):
         super().__init__()
         self.base = base
-        dev, dt = base.weight.device, base.weight.dtype
-        self.delta_bias = nn.Parameter(torch.zeros(base.out_features, device=dev, dtype=dt))
+        in_features, out_features, dev, dt = _module_dims_device_dtype(base)
+        self.in_features = in_features
+        self.out_features = out_features
+        self.delta_bias = nn.Parameter(torch.zeros(out_features, device=dev, dtype=dt))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.base(x) + self.delta_bias
@@ -90,11 +113,12 @@ class BitFitLinear(nn.Module):
 class AdapterLinear(nn.Module):
     """y = base(x) + up(relu(down(base(x)))).   up is zero-init → Δ₀ = 0."""
 
-    def __init__(self, base: nn.Linear, *, bottleneck: int):
+    def __init__(self, base: nn.Module, *, bottleneck: int):
         super().__init__()
         self.base = base
-        dev, dt = base.weight.device, base.weight.dtype
-        out = base.out_features
+        in_features, out, dev, dt = _module_dims_device_dtype(base)
+        self.in_features = in_features
+        self.out_features = out
         self.down = nn.Linear(out, bottleneck, device=dev, dtype=dt)
         self.up = nn.Linear(bottleneck, out, device=dev, dtype=dt)
         nn.init.zeros_(self.up.weight)
@@ -174,17 +198,21 @@ def _layer_of(name: str) -> int | None:
     return int(m.group(1)) if m else None
 
 
-def _find_target_linears(model: nn.Module, peft: PEFTConfig) -> list[tuple[str, str, nn.Linear]]:
-    """Locate `nn.Linear` modules whose leaf name and layer index match `peft`.
+def _is_attachable_module(mod: nn.Module) -> bool:
+    return isinstance(mod, (nn.Linear, *_WRAPPER_TYPES))
+
+
+def _find_target_linears(model: nn.Module, peft: PEFTConfig) -> list[tuple[str, str, nn.Module]]:
+    """Locate linear-like modules whose leaf name and layer index match `peft`.
 
     An empty `target_layers` means "all layers". Returns (parent_path, leaf,
     module) triples in stable named-module order.
     """
     wanted_mods = set(peft.target_modules)
     wanted_layers = set(peft.target_layers)
-    out: list[tuple[str, str, nn.Linear]] = []
+    out: list[tuple[str, str, nn.Module]] = []
     for name, mod in model.named_modules():
-        if not isinstance(mod, nn.Linear):
+        if not _is_attachable_module(mod):
             continue
         leaf = name.rsplit(".", 1)[-1]
         if leaf not in wanted_mods:
@@ -197,7 +225,7 @@ def _find_target_linears(model: nn.Module, peft: PEFTConfig) -> list[tuple[str, 
     return out
 
 
-def _make_wrapper(family: str, base: nn.Linear, peft: PEFTConfig) -> nn.Module:
+def _make_wrapper(family: str, base: nn.Module, peft: PEFTConfig) -> nn.Module:
     if family == "lora":
         rank = peft.rank or 8
         alpha = float(peft.alpha if peft.alpha is not None else rank)

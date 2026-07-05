@@ -1,0 +1,185 @@
+\begin{thebibliography}{23}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Ben~Zaken, Goldberg, and Ravfogel(2022)}]{zaken2022bitfit}
+Ben~Zaken, E.; Goldberg, Y.; and Ravfogel, S. 2022.
+\newblock {BitFit}: Simple Parameter-efficient Fine-tuning for
+  Transformer-based Masked Language-models.
+\newblock In \emph{Proceedings of the 60th Annual Meeting of the Association
+  for Computational Linguistics (Volume 2: Short Papers)}, 1--9. Association
+  for Computational Linguistics.
+
+\bibitem[{Bukharin et~al.(2023)Bukharin, Li, Wang, Yang, Yin, Li, Zhang, Zhao,
+  and Jiang}]{bukharin2023diversity}
+Bukharin, A.; Li, S.; Wang, Z.; Yang, J.; Yin, B.; Li, X.; Zhang, C.; Zhao, T.;
+  and Jiang, H. 2023.
+\newblock Data Diversity Matters for Robust Instruction Tuning.
+\newblock \emph{arXiv preprint arXiv:2311.14736}.
+
+\bibitem[{Chen et~al.(2024)Chen, Li, Yan, Wang, Gunaratna, Yadav, Tang,
+  Srinivasan, Zhou, Huang, and Jin}]{chen2024alpagasus}
+Chen, L.; Li, S.; Yan, J.; Wang, H.; Gunaratna, K.; Yadav, V.; Tang, Z.;
+  Srinivasan, V.; Zhou, T.; Huang, H.; and Jin, H. 2024.
+\newblock {AlpaGasus}: Training A Better Alpaca with Fewer Data.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+
+\bibitem[{Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and
+  Zettlemoyer}]{dettmers2023qlora}
+Dettmers, T.; Pagnoni, A.; Holtzman, A.; and Zettlemoyer, L. 2023.
+\newblock {QLoRA}: Efficient Finetuning of Quantized {LLMs}.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36.
+
+\bibitem[{Houlsby et~al.(2019)Houlsby, Giurgiu, Jastrzebski, Morrone,
+  de~Laroussilhe, Gesmundo, Attariyan, and Gelly}]{houlsby2019adapters}
+Houlsby, N.; Giurgiu, A.; Jastrzebski, S.; Morrone, B.; de~Laroussilhe, Q.;
+  Gesmundo, A.; Attariyan, M.; and Gelly, S. 2019.
+\newblock Parameter-Efficient Transfer Learning for {NLP}.
+\newblock In \emph{Proceedings of the 36th International Conference on Machine
+  Learning}, volume~97 of \emph{Proceedings of Machine Learning Research},
+  2790--2799. PMLR.
+
+\bibitem[{Hu et~al.(2022)Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, and
+  Chen}]{hu2022lora}
+Hu, E.~J.; Shen, Y.; Wallis, P.; Allen-Zhu, Z.; Li, Y.; Wang, S.; Wang, L.; and
+  Chen, W. 2022.
+\newblock {LoRA}: Low-Rank Adaptation of Large Language Models.
+\newblock In \emph{International Conference on Learning Representations}.
+
+\bibitem[{Koh and Liang(2017)}]{koh2017understanding}
+Koh, P.~W.; and Liang, P. 2017.
+\newblock Understanding Black-box Predictions via Influence Functions.
+\newblock In \emph{Proceedings of the 34th International Conference on Machine
+  Learning}, volume~70 of \emph{Proceedings of Machine Learning Research},
+  1885--1894. PMLR.
+
+\bibitem[{Kwon et~al.(2024)Kwon, Wu, Wu, and Zou}]{kwon2023datainf}
+Kwon, Y.; Wu, E.; Wu, K.; and Zou, J. 2024.
+\newblock {DataInf}: Efficiently Estimating Data Influence in {LoRA}-tuned
+  {LLMs} and Diffusion Models.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+
+\bibitem[{Lester, Al-Rfou, and Constant(2021)}]{lester2021prompttuning}
+Lester, B.; Al-Rfou, R.; and Constant, N. 2021.
+\newblock The Power of Scale for Parameter-Efficient Prompt Tuning.
+\newblock In \emph{Proceedings of the 2021 Conference on Empirical Methods in
+  Natural Language Processing}, 3045--3059. Association for Computational
+  Linguistics.
+
+\bibitem[{Li et~al.(2024)Li, Zhang, He, Li, Zhao, Wang, Cheng, and
+  Zhou}]{wang2024superfiltering}
+Li, M.; Zhang, Y.; He, S.; Li, Z.; Zhao, H.; Wang, J.; Cheng, N.; and Zhou, T.
+  2024.
+\newblock Superfiltering: Weak-to-Strong Data Filtering for Fast
+  Instruction-Tuning.
+\newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
+  for Computational Linguistics (Volume 1: Long Papers)}. Bangkok, Thailand:
+  Association for Computational Linguistics.
+
+\bibitem[{Li et~al.(2023)Li, Zhang, Li, Chen, Chen, Cheng, Wang, Zhou, and
+  Xiao}]{li2023cherry}
+Li, M.; Zhang, Y.; Li, Z.; Chen, J.; Chen, L.; Cheng, N.; Wang, J.; Zhou, T.;
+  and Xiao, J. 2023.
+\newblock From Quantity to Quality: Boosting {LLM} Performance with Self-Guided
+  Data Selection for Instruction Tuning.
+\newblock \emph{arXiv preprint arXiv:2308.12032}.
+
+\bibitem[{Li and Liang(2021)}]{li2021prefixtuning}
+Li, X.~L.; and Liang, P. 2021.
+\newblock Prefix-Tuning: Optimizing Continuous Prompts for Generation.
+\newblock In \emph{Proceedings of the 59th Annual Meeting of the Association
+  for Computational Linguistics and the 11th International Joint Conference on
+  Natural Language Processing}, 4582--4597. Association for Computational
+  Linguistics.
+
+\bibitem[{Liu et~al.(2022)Liu, Tam, Muqeeth, Mohta, Huang, Bansal, and
+  Raffel}]{liu2022ia3}
+Liu, H.; Tam, D.; Muqeeth, M.; Mohta, J.; Huang, T.; Bansal, M.; and Raffel, C.
+  2022.
+\newblock Few-Shot Parameter-Efficient Fine-Tuning is Better and Cheaper than
+  In-Context Learning.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~35.
+
+\bibitem[{Liu et~al.(2024)Liu, Zeng, He, Jiang, and He}]{liu2024deita}
+Liu, W.; Zeng, W.; He, K.; Jiang, Y.; and He, J. 2024.
+\newblock What Makes Good Data for Alignment? A Comprehensive Study of
+  Automatic Data Selection in Instruction Tuning.
+\newblock In \emph{The Twelfth International Conference on Learning
+  Representations}.
+
+\bibitem[{Lu et~al.(2023)Lu, Yuan, Yuan, Lin, Lin, Tan, Zhou, and
+  Zhou}]{lu2023instag}
+Lu, K.; Yuan, H.; Yuan, Z.; Lin, R.; Lin, J.; Tan, C.; Zhou, C.; and Zhou, J.
+  2023.
+\newblock {InsTag}: Instruction Tagging for Analyzing Supervised Fine-tuning of
+  Large Language Models.
+\newblock \emph{arXiv preprint arXiv:2308.07074}.
+
+\bibitem[{Min et~al.(2026)Min, Huang, Wan, and Chen}]{min2026gist}
+Min, G.; Huang, T.; Wan, K.; and Chen, C. 2026.
+\newblock {GIST}: Targeted Data Selection for Instruction Tuning via Coupled
+  Optimization Geometry.
+\newblock \emph{arXiv preprint arXiv:2602.18584}.
+
+\bibitem[{Pfeiffer et~al.(2021)Pfeiffer, Kamath, R{\"u}ckl{\'e}, Cho, and
+  Gurevych}]{pfeiffer2020adapterfusion}
+Pfeiffer, J.; Kamath, A.; R{\"u}ckl{\'e}, A.; Cho, K.; and Gurevych, I. 2021.
+\newblock {AdapterFusion}: Non-Destructive Task Composition for Transfer
+  Learning.
+\newblock In \emph{Proceedings of the 16th Conference of the European Chapter
+  of the Association for Computational Linguistics: Main Volume}, 487--503.
+  Online: Association for Computational Linguistics.
+
+\bibitem[{Pruthi et~al.(2020)Pruthi, Liu, Sundararajan, and
+  Kale}]{pruthi2020tracin}
+Pruthi, G.; Liu, F.; Sundararajan, M.; and Kale, S. 2020.
+\newblock Estimating Training Data Influence by Tracing Gradient Descent.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~33.
+
+\bibitem[{Rao et~al.(2024)Rao, Liu, Lian, Cheng, Liao, and
+  Zhang}]{rao2024commonit}
+Rao, J.; Liu, X.; Lian, L.; Cheng, S.; Liao, Y.; and Zhang, M. 2024.
+\newblock {CommonIT}: Commonality-Aware Instruction Tuning for Large Language
+  Models via Data Partitions.
+\newblock In \emph{Proceedings of the 2024 Conference on Empirical Methods in
+  Natural Language Processing}, 10064--10083. Miami, Florida, USA: Association
+  for Computational Linguistics.
+
+\bibitem[{Wang et~al.(2024)Wang, Shen, Guo, Stallone, Kim, Golland, and
+  Panda}]{wang2024diversity}
+Wang, P.; Shen, Y.; Guo, Z.; Stallone, M.; Kim, Y.; Golland, P.; and Panda, R.
+  2024.
+\newblock Diversity Measurement and Subset Selection for Instruction Tuning
+  Datasets.
+\newblock \emph{arXiv preprint arXiv:2402.02318}.
+
+\bibitem[{Xia et~al.(2024)Xia, Malladi, Gururangan, Arora, and
+  Chen}]{xia2024less}
+Xia, M.; Malladi, S.; Gururangan, S.; Arora, S.; and Chen, D. 2024.
+\newblock {LESS}: Selecting Influential Data for Targeted Instruction Tuning.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine
+  Learning}, volume 235 of \emph{Proceedings of Machine Learning Research},
+  54104--54132. PMLR.
+
+\bibitem[{Yang et~al.(2024)Yang, Mishra, Chiang, and
+  Mirzasoleiman}]{yang2024smalltolarge}
+Yang, Y.; Mishra, S.; Chiang, J.~N.; and Mirzasoleiman, B. 2024.
+\newblock {SmallToLarge} ({S2L}): Scalable Data Selection for Fine-tuning Large
+  Language Models by Summarizing Training Trajectories of Small Models.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~37.
+
+\bibitem[{Zhou et~al.(2023)Zhou, Liu, Xu, Iyer, Sun, Mao, Ma, Efrat, Yu, Yu,
+  Zhang, Ghosh, Lewis, Zettlemoyer, and Levy}]{zhou2023lima}
+Zhou, C.; Liu, P.; Xu, P.; Iyer, S.; Sun, J.; Mao, Y.; Ma, X.; Efrat, A.; Yu,
+  P.; Yu, L.; Zhang, S.; Ghosh, G.; Lewis, M.; Zettlemoyer, L.; and Levy, O.
+  2023.
+\newblock {LIMA}: Less Is More for Alignment.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36.
+
+\end{thebibliography}

@@ -55,14 +55,22 @@ def phase1_stratified(
                 keys.setdefault((cluster, fam, bucket, t.task_id), []).append((sid, p.peft_id, t.task_id))
     if not keys:
         return []
-    per_key = max(1, budget // len(keys))
+    strata = list(keys.values())
+    rng.shuffle(strata)
+    for triples in strata:
+        rng.shuffle(triples)
     out: list[TripleSample] = []
-    for triples in keys.values():
-        chosen = rng.sample(triples, min(per_key, len(triples)))
-        out.extend(TripleSample(sample_id=a, peft_id=b, task_id=c, phase=1) for a, b, c in chosen)
-        if len(out) >= budget:
+    while len(out) < budget:
+        progressed = False
+        for triples in strata:
+            if not triples or len(out) >= budget:
+                continue
+            a, b, c = triples.pop()
+            out.append(TripleSample(sample_id=a, peft_id=b, task_id=c, phase=1))
+            progressed = True
+        if not progressed:
             break
-    return out[:budget]
+    return out
 
 
 def phase2_uncertainty(

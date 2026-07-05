@@ -1,643 +1,649 @@
-# 跨 PEFT 泛用的数据高效微调算法方案设计
+# Cross-PEFT General-Purpose Data-Efficient Fine-Tuning Algorithm Design
 
-> 工作名：**PCU-Select: PEFT-Conditional Utility Selection**  
-> 当前版本定位：**面向稳定 PEFT 子空间的、任务条件化的、可复用多保真数据效用学习框架**  
-> 适用目标：在多种 PEFT 配置反复比较或部署的场景中，降低重复数据价值估计成本，并提升目标 PEFT 下的数据选择质量。
+> Working name: **PCU-Select: PEFT-Conditional Utility Selection**
+> Current version positioning: **A task-conditioned, reusable multi-fidelity data utility learning framework for stable PEFT subspaces**
+> Target use: In scenarios where multiple PEFT configurations are repeatedly compared or deployed, reduce the cost of repeated data-value estimation and improve data selection quality under the target PEFT.
 
 ---
 
-## 0. 一句话概括
+## 0. One-Sentence Summary
 
-本课题研究的问题不是“哪些训练样本普遍高质量”，而是：
+The problem studied in this project is not “which training samples are generally high quality,” but rather:
 
-> 给定目标任务、目标 PEFT 配置和候选数据池，如何低成本预测每个样本在该 PEFT 子空间下的边际微调价值，并选择一个高效、覆盖性好的训练子集。
+> Given a target task, a target PEFT configuration, and a candidate data pool, how can we predict at low cost the marginal fine-tuning value of each sample under that PEFT subspace, and select an efficient training subset with good coverage?
 
-核心方法是学习一个条件化效用函数：
+The core method is to learn a conditional utility function:
 
-\[
+[
 s_\phi(x,p,t)
-\]
+]
 
-其中：
+where:
 
-- \(x\)：候选训练样本；
-- \(p\)：目标 PEFT 配置；
-- \(t\)：目标任务草图，由小型 validation sketch 编码得到；
-- \(s_\phi(x,p,t)\)：样本 \(x\) 在任务 \(t\)、PEFT 配置 \(p\) 下的预测效用。
+* (x): candidate training sample;
+* (p): target PEFT configuration;
+* (t): target task sketch, encoded from a small validation sketch;
+* (s_\phi(x,p,t)): predicted utility of sample (x) under task (t) and PEFT configuration (p).
 
-最终目标是用一次离线训练得到的 scorer，在后续不同 PEFT 配置下复用，从而避免每次都重新计算昂贵的梯度、影响函数或短程更新信号。
+The final goal is to obtain a scorer through one round of offline training and reuse it across different downstream PEFT configurations, thereby avoiding the need to recompute expensive gradients, influence functions, or short-horizon update signals each time.
 
 ---
 
-## 1. 研究目标与关键前提
+## 1. Research Objective and Key Assumptions
 
-### 1.1 严谨问题定义
+### 1.1 Rigorous Problem Definition
 
-给定：
+Given:
 
-- 固定 backbone family \(\mathcal{M}\)；
-- 候选训练数据池 \(D=\{x_i\}_{i=1}^{N}\)；
-- 目标任务的小型验证草图 \(V\)，编码为任务条件 \(t\)；
-- 目标 PEFT 配置 \(p \in \mathcal{P}\)；
-- 数据预算 \(B\)，例如选择 5%、10%、30% 数据；
+* a fixed backbone family (\mathcal{M});
+* a candidate training data pool (D={x_i}_{i=1}^{N});
+* a small validation sketch (V) for the target task, encoded as task condition (t);
+* a target PEFT configuration (p \in \mathcal{P});
+* a data budget (B), such as selecting 5%, 10%, or 30% of the data;
 
-目标是选择子集：
+the goal is to select a subset:
 
-\[
+[
 S_B \subset D, \quad |S_B|\le B
-\]
+]
 
-使得目标模型经过 PEFT 微调后，在目标任务上的表现最大化：
+such that after PEFT fine-tuning, the target model maximizes performance on the target task:
 
-\[
-S_B^\* = \arg\max_{S_B \subset D, |S_B|\le B}
+[
+S_B^* = \arg\max_{S_B \subset D, |S_B|\le B}
 \text{Perf}\big(\text{Tune}(M_0,p,S_B), V_{\text{test}}\big)
-\]
+]
 
-由于直接枚举或逐样本真实训练代价过高，本课题转而学习一个近似效用函数：
+Since direct enumeration or per-sample true training is too costly, this project instead learns an approximate utility function:
 
-\[
+[
 s_\phi(x,p,t) \approx u(x,p,t)
-\]
+]
 
-并通过该函数对全量样本进行低成本打分与筛选。
-
----
-
-### 1.2 关键前提
-
-本课题成立依赖以下前提。
-
-#### 前提 1：同一样本在不同 PEFT 下的价值并不相同
-
-不同 PEFT 方法本质上限制了模型可更新的参数子空间或隐藏状态干预位置。例如：
-
-- LoRA：在特定线性层上引入低秩增量；
-- IA3：对中间激活进行乘性缩放；
-- Adapter：插入瓶颈模块；
-- Prefix/Prompt 类方法：通过可训练前缀或软提示影响模型状态。
-
-因此，同一个样本可能对 LoRA 有价值，但对 IA3 或 Adapter 的贡献较弱。
-
-#### 前提 2：PEFT 差异可以被结构化描述
-
-PEFT 不是简单的 family 名字，而应被描述为：
-
-- 改哪些层；
-- 改哪些模块；
-- 增量如何生成；
-- 更新容量多大；
-- 学习率、初始化、warmup、optimizer 等训练配方如何设置；
-- 资源开销是多少。
-
-这些结构化信息可以编码成条件向量 \(z_p\)。
-
-#### 前提 3：样本价值必须相对目标任务定义
-
-没有任务条件时，“数据价值”容易退化为普适质量分数。  
-因此本方案引入 validation sketch \(V\)，编码目标任务条件 \(t\)。
-
-#### 前提 4：离线元训练成本必须能被摊薄
-
-本课题不是声称“所有阶段都很便宜”，而是强调：
-
-- 第一阶段：离线构造监督信号和训练 scorer，成本较高；
-- 第二阶段：应用到新 PEFT 时，只需前向特征提取 + scorer 打分，成本较低。
-
-因此，该方法最适合多 PEFT、多配置、多轮实验复用的场景。
+and uses this function to score and filter the full set of samples at low cost.
 
 ---
 
-## 2. 当前方案的主要风险与设计原则
+### 1.2 Key Assumptions
 
-### 2.1 主要风险
+This project relies on the following assumptions.
 
-| 模块 | 风险 | 为什么会被质疑 |
-|---|---|---|
-| 研究范围 | 声称跨所有 PEFT 泛化 | 实验无法覆盖，Prompt/Prefix 类方法不稳定，公平调参困难 |
-| 效用标签 | 对大量 \((x,p)\) 做真实短程更新 | 成本可能高于直接运行 PEFT-specific selector |
-| 样本表示 | 只用语义 embedding | 无法刻画样本作用于哪些层/模块 |
-| PEFT 表示 | 只用 family one-hot | 无法反映 placement、rank、lr、warmup 等关键差异 |
-| 任务条件 | 不输入目标任务草图 | 学到的是通用质量分，而不是任务相关效用 |
-| 训练目标 | 只做绝对值回归 | 不同 PEFT 的效用量纲不同，回归不稳定 |
-| 数据选择 | 直接 global top-k | 可能选出语义高度冗余的数据 |
-| 成本分析 | 只报性能，不报 GPU-hours | 审稿人会质疑收益是否抵消离线成本 |
-| 泛化主张 | 直接 zero-shot 跨 family | 缺少理论和实验证据支撑 |
+#### Assumption 1: The same sample does not have identical value under different PEFT methods
+
+Different PEFT methods essentially constrain the model’s updatable parameter subspace or the intervention locations in hidden states. For example:
+
+* LoRA: introduces low-rank increments on specific linear layers;
+* IA3: applies multiplicative scaling to intermediate activations;
+* Adapter: inserts bottleneck modules;
+* Prefix/Prompt methods: influence model states through trainable prefixes or soft prompts.
+
+Therefore, the same sample may be valuable for LoRA but contribute less to IA3 or Adapter.
+
+#### Assumption 2: PEFT differences can be structurally described
+
+PEFT should not be described merely by a family name, but by:
+
+* which layers are modified;
+* which modules are modified;
+* how the increments are generated;
+* how large the update capacity is;
+* how the training recipe is configured, such as learning rate, initialization, warmup, and optimizer;
+* what the resource cost is.
+
+These structured pieces of information can be encoded into a condition vector (z_p).
+
+#### Assumption 3: Sample value must be defined relative to the target task
+
+Without task conditioning, “data value” easily degenerates into a universal quality score.
+Therefore, this proposal introduces a validation sketch (V), which encodes the target task condition (t).
+
+#### Assumption 4: Offline meta-training cost must be amortizable
+
+This project does not claim that “all stages are cheap.” Instead, it emphasizes:
+
+* Stage 1: offline construction of supervision signals and scorer training, with relatively high cost;
+* Stage 2: when applying to a new PEFT, only forward feature extraction + scorer scoring is needed, with relatively low cost.
+
+Therefore, this method is best suited for scenarios involving multiple PEFT methods, multiple configurations, and repeated experimental reuse.
 
 ---
 
-### 2.2 设计原则
+## 2. Main Risks and Design Principles of the Current Proposal
 
-为降低上述风险，当前方案遵循以下原则：
+### 2.1 Main Risks
 
-1. **收缩主张**  
-   主论文聚焦固定 backbone family 与稳定 PEFT 子空间，不承诺跨所有 PEFT 和所有模型 family。
-
-2. **引入任务草图**  
-   使用 validation sketch 明确目标任务，使效用定义闭环。
-
-3. **多保真效用建模**  
-   不直接对所有 \((x,p)\) 做真实短程更新，而是用低保真代理大规模覆盖，再用少量高保真标签校正。
-
-4. **PEFT 条件表示必须完整**  
-   不能只编码 PEFT family，还要编码 site mask、容量、训练配方和可选功能指纹。
-
-5. **部署阶段必须低成本**  
-   应用到新 PEFT 时，主要开销应接近 forward-only selection。
-
-6. **实验必须 compute-aware**  
-   不只比较最终性能，还要报告选择成本、总成本、break-even 使用次数。
+| Module                | Risk                                                         | Why it may be questioned                                                                                   |
+| --------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Research scope        | Claiming generalization across all PEFT methods              | Experiments cannot cover this; Prompt/Prefix methods are unstable; fair hyperparameter tuning is difficult |
+| Utility labels        | Performing true short-horizon updates for many ((x,p)) pairs | The cost may exceed directly running a PEFT-specific selector                                              |
+| Sample representation | Using only semantic embeddings                               | Cannot characterize which layers/modules a sample affects                                                  |
+| PEFT representation   | Using only family one-hot                                    | Cannot reflect key differences such as placement, rank, lr, and warmup                                     |
+| Task condition        | Not inputting a target task sketch                           | What is learned is a general quality score, not task-relevant utility                                      |
+| Training objective    | Only doing absolute-value regression                         | Utilities under different PEFT methods have different scales, making regression unstable                   |
+| Data selection        | Direct global top-k                                          | May select semantically highly redundant data                                                              |
+| Cost analysis         | Reporting only performance, not GPU-hours                    | Reviewers will question whether the benefits offset the offline cost                                       |
+| Generalization claim  | Direct zero-shot transfer across families                    | Lacks theoretical and experimental support                                                                 |
 
 ---
 
-## 3. 方法总览
+### 2.2 Design Principles
 
-### 3.1 整体流程
+To reduce the above risks, the current proposal follows these principles:
+
+1. **Narrow the claim**
+   The main paper focuses on a fixed backbone family and a stable PEFT subspace, without promising transfer across all PEFT methods and all model families.
+
+2. **Introduce a task sketch**
+   Use a validation sketch to explicitly specify the target task and close the loop of utility definition.
+
+3. **Multi-fidelity utility modeling**
+   Instead of performing true short-horizon updates for all ((x,p)) pairs, use a low-fidelity proxy for large-scale coverage and a small amount of high-fidelity labels for correction.
+
+4. **PEFT condition representation must be complete**
+   Do not encode only the PEFT family; also encode the site mask, capacity, training recipe, and optional functional fingerprint.
+
+5. **The deployment stage must be low-cost**
+   When applying to a new PEFT, the main cost should be close to forward-only selection.
+
+6. **Experiments must be compute-aware**
+   Compare not only final performance, but also selection cost, total cost, and break-even usage count.
+
+---
+
+## 3. Method Overview
+
+### 3.1 Overall Pipeline
 
 ```mermaid
 flowchart TD
-    A[候选数据池 D] --> B[样本特征提取]
-    C[目标任务验证草图 V] --> D[任务条件编码]
-    E[PEFT 配置空间 P] --> F[PEFT 条件编码]
+    A[Candidate data pool D] --> B[Sample feature extraction]
+    C[Target task validation sketch V] --> D[Task condition encoding]
+    E[PEFT configuration space P] --> F[PEFT condition encoding]
 
-    B --> G[低保真效用代理构造]
+    B --> G[Low-fidelity utility proxy construction]
     D --> G
     F --> G
 
-    G --> H[少量高保真短程 PEFT 更新校正]
-    H --> I[训练条件化效用 scorer]
+    G --> H[Small amount of high-fidelity short-horizon PEFT update correction]
+    H --> I[Train conditional utility scorer]
 
-    I --> J[目标 PEFT 下全量样本打分]
-    J --> K[不确定性惩罚]
-    K --> L[多样性约束子集选择]
-    L --> M[目标 PEFT 微调]
-    M --> N[评估与反馈]
+    I --> J[Full-sample scoring under target PEFT]
+    J --> K[Uncertainty penalty]
+    K --> L[Diversity-constrained subset selection]
+    L --> M[Target PEFT fine-tuning]
+    M --> N[Evaluation and feedback]
 ```
 
 ---
 
-### 3.2 两阶段视角
+### 3.2 Two-Stage Perspective
 
-#### 第一阶段：离线元训练阶段
+#### Stage 1: Offline Meta-Training Stage
 
-目标：训练一个可复用的条件化效用预测器。
+Goal: train a reusable conditional utility predictor.
 
-包括：
+Includes:
 
-1. 定义 PEFT 配置空间；
-2. 构造样本表示；
-3. 构造任务表示；
-4. 构造 PEFT 表示；
-5. 构造低保真效用代理；
-6. 对少量三元组计算高保真真实效用；
-7. 训练 scorer。
+1. Define the PEFT configuration space;
+2. Construct sample representations;
+3. Construct task representations;
+4. Construct PEFT representations;
+5. Construct low-fidelity utility proxies;
+6. Compute high-fidelity true utility for a small number of triples;
+7. Train the scorer.
 
-#### 第二阶段：在线应用阶段
+#### Stage 2: Online Application Stage
 
-目标：给定一个目标 PEFT 和目标任务，低成本筛选数据。
+Goal: given a target PEFT and target task, select data at low cost.
 
-包括：
+Includes:
 
-1. 输入目标 PEFT 配置；
-2. 输入目标 validation sketch；
-3. 对全量数据提取或读取缓存特征；
-4. scorer 打分；
-5. 多样性约束选择；
-6. 用选出的数据进行目标 PEFT 微调。
+1. Input the target PEFT configuration;
+2. Input the target validation sketch;
+3. Extract or read cached features for the full data;
+4. Score with the scorer;
+5. Select with diversity constraints;
+6. Fine-tune the target PEFT using the selected data.
 
 ---
 
-## 4. 样本表示设计
+## 4. Sample Representation Design
 
-### 4.1 当前不推荐的简单方案
+### 4.1 Simple Proposal Not Recommended
 
-不推荐只使用单一语义 embedding：
+It is not recommended to use only a single semantic embedding:
 
-\[
+[
 z_x = e_x
-\]
+]
 
-问题：
+Problems:
 
-- 只能表示“样本语义是什么”；
-- 无法表示“样本对模型哪些层/模块产生影响”；
-- 难以学习样本与 PEFT site mask 的交互；
-- 容易退化为普通 embedding-based selection。
+* It can only represent “what the sample semantics are”;
+* It cannot represent “which layers/modules of the model the sample affects”;
+* It is difficult to learn interactions between samples and the PEFT site mask;
+* It can easily degenerate into ordinary embedding-based selection.
 
 ---
 
-### 4.2 推荐样本表示
+### 4.2 Recommended Sample Representation
 
-推荐将样本表示设计为：
+It is recommended to design the sample representation as:
 
-\[
+[
 z_x = [e_x; d_x; a_x]
-\]
+]
 
-其中：
+where:
 
-#### 1. 语义表示 \(e_x\)
+#### 1. Semantic representation (e_x)
 
-建议包括：
+Recommended components include:
 
-- instruction embedding；
-- response embedding；
-- instruction-response joint embedding；
-- 可选：source/domain embedding。
+* instruction embedding;
+* response embedding;
+* instruction-response joint embedding;
+* optional: source/domain embedding.
 
-作用：
+Purpose:
 
-- 表示样本内容、任务类型、语义相似性。
+* Represent sample content, task type, and semantic similarity.
 
-#### 2. 难度与质量统计 \(d_x\)
+#### 2. Difficulty and quality statistics (d_x)
 
-建议包括：
+Recommended components include:
 
-- instruction 长度；
-- response 长度；
-- 当前模型上的 token-level loss；
-- 平均 log probability；
-- perplexity；
-- entropy；
-- 是否包含 Chain-of-Thought；
-- 数据来源；
-- 语言；
-- 格式类型。
+* instruction length;
+* response length;
+* token-level loss under the current model;
+* average log probability;
+* perplexity;
+* entropy;
+* whether Chain-of-Thought is included;
+* data source;
+* language;
+* format type.
 
-作用：
+Purpose:
 
-- 区分简单格式样本、困难推理样本、噪声样本和高价值能力样本。
+* Distinguish simple-format samples, difficult reasoning samples, noisy samples, and high-value capability samples.
 
-#### 3. 分层激活签名 \(a_x\)
+#### 3. Hierarchical activation signature (a_x)
 
-对若干代表层提取 forward-only 统计，例如：
+Extract forward-only statistics from several representative layers, such as:
 
-- early/mid/late 层 hidden norm；
-- MLP activation norm；
-- attention entropy；
-- attention output norm；
-- token-level variance；
-- residual stream norm。
+* early/mid/late layer hidden norm;
+* MLP activation norm;
+* attention entropy;
+* attention output norm;
+* token-level variance;
+* residual stream norm.
 
-作用：
+Purpose:
 
-- 粗略刻画样本主要激活模型哪些层段；
-- 使 scorer 能学习“样本层级特征”和“PEFT 修改位置”的交互。
+* Roughly characterize which layer segments of the model are mainly activated by the sample;
+* Enable the scorer to learn interactions between “sample-level layer features” and “PEFT modification locations.”
 
 ---
 
-## 5. PEFT 条件表示设计
+## 5. PEFT Condition Representation Design
 
-### 5.1 不推荐方案
+### 5.1 Proposal Not Recommended
 
-不推荐只使用：
+It is not recommended to use only:
 
-\[
+[
 z_p = \text{one-hot}(\text{PEFT family})
-\]
+]
 
-问题：
+Problems:
 
-- 无法区分 LoRA rank=8 和 rank=64；
-- 无法区分 q_proj/v_proj/o_proj placement；
-- 无法区分学习率、初始化、warmup 等训练配方；
-- 容易把超参差异误当作 PEFT 方法差异。
+* Cannot distinguish LoRA rank=8 from rank=64;
+* Cannot distinguish q_proj/v_proj/o_proj placement;
+* Cannot distinguish training recipes such as learning rate, initialization, and warmup;
+* Easily mistakes hyperparameter differences for PEFT-method differences.
 
 ---
 
-### 5.2 推荐 PEFT 表示
+### 5.2 Recommended PEFT Representation
 
-推荐将 PEFT 表示设计为：
+It is recommended to design the PEFT representation as:
 
-\[
+[
 z_p = [m_p; c_p; r_p; f_p]
-\]
+]
 
-其中：
+where:
 
-#### 1. Site mask \(m_p\)
+#### 1. Site mask (m_p)
 
-描述 PEFT 修改哪些位置：
+Describes which positions PEFT modifies:
 
-- layer mask：哪些层被修改；
-- module mask：attention / MLP / q_proj / k_proj / v_proj / o_proj / up_proj / down_proj 等；
-- direction mask：加性、乘性、前缀注入、bias-only 等。
+* layer mask: which layers are modified;
+* module mask: attention / MLP / q_proj / k_proj / v_proj / o_proj / up_proj / down_proj, etc.;
+* direction mask: additive, multiplicative, prefix injection, bias-only, etc.
 
-#### 2. Capacity vector \(c_p\)
+#### 2. Capacity vector (c_p)
 
-描述 PEFT 的容量与资源属性：
+Describes PEFT capacity and resource attributes:
 
-- trainable parameter count；
-- trainable parameter ratio；
-- LoRA rank；
-- LoRA alpha；
-- adapter bottleneck width；
-- prefix length；
-- 额外 FLOPs；
-- 显存增量；
-- 推理延迟增量；
-- 是否影响 KV cache。
+* trainable parameter count;
+* trainable parameter ratio;
+* LoRA rank;
+* LoRA alpha;
+* adapter bottleneck width;
+* prefix length;
+* extra FLOPs;
+* memory increment;
+* inference latency increment;
+* whether KV cache is affected.
 
-#### 3. Recipe vector \(r_p\)
+#### 3. Recipe vector (r_p)
 
-描述训练配方：
+Describes the training recipe:
 
-- optimizer；
-- learning rate；
-- scheduler；
-- warmup ratio；
-- weight decay；
-- dropout；
-- batch size；
-- initialization；
-- gradient clipping；
-- LoRA scaling 方式。
+* optimizer;
+* learning rate;
+* scheduler;
+* warmup ratio;
+* weight decay;
+* dropout;
+* batch size;
+* initialization;
+* gradient clipping;
+* LoRA scaling method.
 
-#### 4. Functional fingerprint \(f_p\)
+#### 4. Functional fingerprint (f_p)
 
-可选但推荐。  
-对固定 probe set 做一次轻量 profiling，得到 PEFT 的功能响应指纹，例如：
+Optional but recommended.
+Perform lightweight profiling on a fixed probe set to obtain the functional response fingerprint of the PEFT, such as:
 
-- 标准化短更新前后各层 hidden state 变化；
-- logit KL 变化；
-- probe loss 变化；
-- 层级敏感性曲线；
-- 不同 probe 类型上的响应差异。
+* normalized hidden-state changes across layers before and after short updates;
+* logit KL changes;
+* probe loss changes;
+* layer-wise sensitivity curves;
+* response differences across different probe types.
 
-作用：
+Purpose:
 
-- 弥补人工结构字段不够“物理”的问题；
-- 帮助 scorer 理解 PEFT 在当前 backbone 上实际产生的功能扰动。
+* Compensate for the fact that manually designed structural fields are not sufficiently “physical”;
+* Help the scorer understand the actual functional perturbation produced by the PEFT on the current backbone.
 
 ---
 
-## 6. 任务条件表示设计
+## 6. Task Condition Representation Design
 
-### 6.1 为什么必须引入任务条件
+### 6.1 Why Task Conditions Must Be Introduced
 
-如果 scorer 只输入 \(x\) 和 \(p\)，则效用缺少参照系。  
-一个样本是否有价值，取决于目标任务：
+If the scorer only takes (x) and (p) as input, the utility lacks a reference frame.
+Whether a sample is valuable depends on the target task:
 
-- 数学推理任务需要推理样本；
-- 代码任务需要代码相关样本；
-- 安全对齐任务需要安全偏好样本；
-- 多语言任务需要目标语言覆盖。
+* mathematical reasoning tasks need reasoning samples;
+* code tasks need code-related samples;
+* safety alignment tasks need safety preference samples;
+* multilingual tasks need coverage of the target language.
 
-因此推荐使用 validation sketch \(V\) 构造任务表示：
+Therefore, it is recommended to use a validation sketch (V) to construct the task representation:
 
-\[
+[
 z_t = f_t(V)
-\]
+]
 
 ---
 
-### 6.2 任务草图构造
+### 6.2 Task Sketch Construction
 
-推荐每个任务使用 32–64 条 validation sketch 样本。
+It is recommended to use 32–64 validation sketch samples for each task.
 
-编码方式：
+Encoding method:
 
-1. 对每条 validation 样本提取与训练样本相同的表示 \(z_x\)；
-2. 使用 mean pooling、attention pooling 或 set encoder 得到任务向量；
-3. 可选加入任务描述文本 embedding。
+1. Extract the same representation (z_x) as training samples for each validation sample;
+2. Use mean pooling, attention pooling, or a set encoder to obtain the task vector;
+3. Optionally add the embedding of the task description text.
 
-\[
-z_t = \text{Pool}(\{z_v: v\in V\})
-\]
+[
+z_t = \text{Pool}({z_v: v\in V})
+]
 
-注意：
+Notes:
 
-- validation sketch 不能来自最终测试集；
-- 必须在论文中清楚说明 sketch 构造协议；
-- 可以做 sketch size 消融，例如 8 / 16 / 32 / 64 条。
+* The validation sketch must not come from the final test set;
+* The paper must clearly describe the sketch construction protocol;
+* Sketch size ablations can be performed, such as 8 / 16 / 32 / 64 samples.
 
 ---
 
-## 7. 多保真效用定义
+## 7. Multi-Fidelity Utility Definition
 
-这是当前方案的核心。
+This is the core of the current proposal.
 
-### 7.1 为什么不直接全量真实短程更新
+### 7.1 Why Not Directly Perform Full True Short-Horizon Updates
 
-原始方案是对每个 \((x,p)\) 从当前模型出发进行 \(K\) 步 PEFT-only 更新，然后观察验证损失下降：
+The original idea is to perform (K) steps of PEFT-only updates from the current model for each ((x,p)), and then observe the validation loss decrease:
 
-\[
+[
 \Delta(x,p) = \mathcal{L}_V(\theta) -
-\mathcal{L}_V(\text{Adapt}_{p}^{K}(\theta,x))
-\]
+\mathcal{L}*V(\text{Adapt}*{p}^{K}(\theta,x))
+]
 
-该想法直观，但存在明显问题：
+This idea is intuitive, but has clear problems:
 
-1. 成本随 \((x,p)\) 对数量线性增长；
-2. 若覆盖多个 PEFT，成本接近 \(N\times P\)；
-3. 单 checkpoint、单 seed、单 horizon 标签噪声大；
-4. 容易被质疑为何不直接用该真实效用排序；
-5. 难以大规模部署。
+1. The cost grows linearly with the number of ((x,p)) pairs;
+2. If multiple PEFT methods are covered, the cost approaches (N\times P);
+3. Labels from a single checkpoint, single seed, and single horizon are noisy;
+4. It is easy to be questioned why the true utility is not directly used for ranking;
+5. It is difficult to deploy at scale.
 
-因此推荐使用多保真策略。
+Therefore, a multi-fidelity strategy is recommended.
 
 ---
 
-### 7.2 低保真效用代理 \(u^{lo}\)
+### 7.2 Low-Fidelity Utility Proxy (u^{lo})
 
-#### 核心思想
+#### Core Idea
 
-先在统一隐藏状态干预空间 \(\Omega\) 上计算样本和任务草图的局部梯度或响应签名，然后根据 PEFT 的 site mask 和容量权重组合得到 PEFT 条件代理效用。
+First compute local gradient or response signatures of samples and task sketches in a unified hidden-state intervention space (\Omega), then combine them according to the PEFT site mask and capacity weights to obtain a PEFT-conditioned proxy utility.
 
-定义干预 site 集合：
+Define the intervention site set:
 
-\[
-\Omega = \{(l,m)\}
-\]
+[
+\Omega = {(l,m)}
+]
 
-其中 \(l\) 表示层，\(m\) 表示模块或隐藏状态位置。
+where (l) denotes the layer and (m) denotes the module or hidden-state location.
 
-对样本 \(x\) 和任务草图 \(t\)，计算：
+For sample (x) and task sketch (t), compute:
 
-\[
+[
 g_x^\omega = \text{Proj}(\nabla_{h^\omega}\ell(x))
-\]
+]
 
-\[
+[
 g_t^\omega = \text{Proj}(\nabla_{h^\omega}\mathcal{L}_V)
-\]
+]
 
-其中：
+where:
 
-- \(h^\omega\)：site \(\omega\) 的隐藏状态；
-- \(\text{Proj}\)：随机投影或低维压缩；
-- \(g_x^\omega\)：样本在该 site 上的局部梯度签名；
-- \(g_t^\omega\)：目标任务在该 site 上的局部梯度签名。
+* (h^\omega): hidden state at site (\omega);
+* (\text{Proj}): random projection or low-dimensional compression;
+* (g_x^\omega): local gradient signature of the sample at this site;
+* (g_t^\omega): local gradient signature of the target task at this site.
 
-然后定义：
+Then define:
 
-\[
+[
 u^{lo}(x,p,t)
-=
+=============
+
 \sum_{\omega\in\Omega}
 \alpha_p^\omega \cdot
 \cos(g_x^\omega, g_t^\omega)
-\]
+]
 
-其中：
+where:
 
-- \(\alpha_p^\omega\)：由 PEFT site mask、capacity、operator type 决定；
-- 如果 PEFT 不作用于某 site，则该 site 权重为 0；
-- 如果 PEFT 在某 site 容量更大，则该 site 权重更高。
+* (\alpha_p^\omega): determined by the PEFT site mask, capacity, and operator type;
+* if the PEFT does not act on a site, the weight of that site is 0;
+* if the PEFT has larger capacity at a site, the weight of that site is higher.
 
-#### 优点
+#### Advantages
 
-- 样本梯度签名只需计算一次；
-- 对多个 PEFT 可通过 mask 和权重复用；
-- 避免对每个 PEFT 都单独做 backward 或 short-update；
-- 低成本覆盖大量 \((x,p,t)\) 三元组。
+* The sample gradient signature only needs to be computed once;
+* It can be reused across multiple PEFT methods through masks and weights;
+* It avoids performing separate backward passes or short updates for every PEFT;
+* It covers a large number of ((x,p,t)) triples at low cost.
 
-#### 局限
+#### Limitations
 
-- 仍是近似信号；
-- 不能完全反映 optimizer、非线性训练动态和长程微调效果；
-- 必须用高保真标签校正。
+* It is still an approximate signal;
+* It cannot fully reflect optimizer behavior, nonlinear training dynamics, and long-horizon fine-tuning effects;
+* It must be corrected with high-fidelity labels.
 
 ---
 
-### 7.3 高保真真实效用 \(u^{hi}\)
+### 7.3 High-Fidelity True Utility (u^{hi})
 
-对少量采样的 \((x,p,t)\) 三元组，计算真实短程 PEFT 更新效用。
+For a small number of sampled ((x,p,t)) triples, compute true short-horizon PEFT update utility.
 
-定义：
+Define:
 
-\[
+[
 \Delta_{a,p,h}(x,t)
-=
-\mathcal{L}_V(\theta_a)
--
-\mathcal{L}_V(\text{Adapt}^{h}_{p}(\theta_a,x))
-\]
+===================
 
-其中：
+## \mathcal{L}_V(\theta_a)
 
-- \(\theta_a\)：第 \(a\) 个 anchor checkpoint；
-- \(h\)：短程更新 horizon，例如 \(h\in\{1,4\}\)；
-- \(\text{Adapt}^{h}_{p}\)：只更新 PEFT 参数，主模型冻结；
-- \(V\)：目标任务 validation sketch。
+\mathcal{L}*V(\text{Adapt}^{h}*{p}(\theta_a,x))
+]
 
-为了降低噪声，不直接使用原始 \(\Delta\)，而是做组内归一化：
+where:
 
-\[
+* (\theta_a): the (a)-th anchor checkpoint;
+* (h): short-horizon update horizon, such as (h\in{1,4});
+* (\text{Adapt}^{h}_{p}): only updates PEFT parameters while the main model is frozen;
+* (V): validation sketch of the target task.
+
+To reduce noise, do not directly use the raw (\Delta); instead, perform within-group normalization:
+
+[
 \tilde{\Delta}_{a,p,h}(x,t)
-=
-\text{RankNorm}_{x}(\Delta_{a,p,h}(x,t))
-\]
+===========================
 
-最终高保真效用定义为：
+\text{RankNorm}*{x}(\Delta*{a,p,h}(x,t))
+]
 
-\[
+The final high-fidelity utility is defined as:
+
+[
 u^{hi}(x,p,t)
-=
+=============
+
 \sum_{h\in\mathcal{H}} w_h
 \cdot
-\mathbb{E}_{a}
+\mathbb{E}*{a}
 [
-\tilde{\Delta}_{a,p,h}(x,t)
+\tilde{\Delta}*{a,p,h}(x,t)
 ]
 -
+
 \beta \cdot
-\text{Std}_{a}
+\text{Std}*{a}
 [
-\tilde{\Delta}_{a,p,h}(x,t)
+\tilde{\Delta}*{a,p,h}(x,t)
 ]
-\]
+]
 
-推荐默认设置：
+Recommended default settings:
 
-- anchor 数 \(A=2\)；
-- horizon \(\mathcal{H}=\{1,4\}\)；
-- seed 默认 1 个；
-- 只对高不确定区域额外补 seed；
-- validation sketch 每任务 32–64 条。
+* number of anchors (A=2);
+* horizon (\mathcal{H}={1,4});
+* default seed count is 1;
+* add extra seeds only for high-uncertainty regions;
+* validation sketch has 32–64 samples per task.
 
 ---
 
-### 7.4 高保真样本采样策略
+### 7.4 High-Fidelity Sample Sampling Strategy
 
-高保真标签成本高，不能随机铺满。推荐三阶段采样。
+High-fidelity labels are expensive and cannot be randomly spread across the whole space. A three-stage sampling strategy is recommended.
 
-#### 阶段 1：覆盖采样
+#### Stage 1: Coverage Sampling
 
-按以下维度分层：
+Stratify by the following dimensions:
 
-- 样本语义簇；
-- 样本难度；
-- 数据来源；
-- 任务类型；
-- PEFT family；
-- PEFT placement；
-- PEFT capacity；
-- PEFT recipe。
+* sample semantic cluster;
+* sample difficulty;
+* data source;
+* task type;
+* PEFT family;
+* PEFT placement;
+* PEFT capacity;
+* PEFT recipe.
 
-目标是让初始高保真集合覆盖主要空间。
+The goal is to make the initial high-fidelity set cover the major space.
 
-#### 阶段 2：不确定性采样
+#### Stage 2: Uncertainty Sampling
 
-训练初始 scorer 后，优先选择：
+After training the initial scorer, prioritize:
 
-\[
+[
 q_{\text{query}}(x,p,t)
-=
+=======================
+
 \hat{\sigma}(x,p,t)
 \cdot
 (1+\gamma \cdot \text{ReLU}(\hat{u}^{lo}(x,p,t)))
-\]
+]
 
-即：
+That is:
 
-- 不确定性高；
-- 代理分数不低；
-- 可能影响最终 top-k 排序的样本。
+* high uncertainty;
+* non-low proxy score;
+* samples likely to affect the final top-k ranking.
 
-#### 阶段 3：边界样本补充
+#### Stage 3: Boundary Sample Supplementation
 
-补充一些 scorer 判断错误或排序边界附近的样本，提升 top-k 区域排序质量。
+Supplement samples that the scorer judges incorrectly or samples near ranking boundaries, improving ranking quality in the top-k region.
 
 ---
 
-## 8. Scorer 模型设计
+## 8. Scorer Model Design
 
-### 8.1 输入
+### 8.1 Input
 
-scorer 输入为：
+The scorer input is:
 
-\[
+[
 (z_x, z_p, z_t)
-\]
+]
 
-其中：
+where:
 
-- \(z_x\)：样本表示；
-- \(z_p\)：PEFT 条件表示；
-- \(z_t\)：任务条件表示。
+* (z_x): sample representation;
+* (z_p): PEFT condition representation;
+* (z_t): task condition representation.
 
 ---
 
-### 8.2 模型结构
+### 8.2 Model Architecture
 
-推荐使用轻量多塔结构：
+A lightweight multi-tower architecture is recommended:
 
-\[
+[
 h_x = f_x(z_x)
-\]
+]
 
-\[
+[
 h_p = f_p(z_p)
-\]
+]
 
-\[
+[
 h_t = f_t(z_t)
-\]
+]
 
-再进行条件融合：
+Then perform conditional fusion:
 
-\[
+[
 h =
 [
 h_x;
@@ -647,320 +653,329 @@ h_x \odot W_p h_p;
 h_x \odot W_t h_t;
 \text{Bilinear}(h_x,h_p)
 ]
-\]
+]
 
-也可以用 FiLM 调制：
+FiLM modulation can also be used:
 
-\[
+[
 \text{FiLM}(h_x|h_p,h_t)
-=
+========================
+
 \gamma(h_p,h_t)\odot h_x + \beta(h_p,h_t)
-\]
+]
 
 ---
 
-### 8.3 输出
+### 8.3 Output
 
-scorer 输出两个量：
+The scorer outputs two quantities:
 
-\[
+[
 \hat{\mu}(x,p,t)
-\]
+]
 
-\[
+[
 \hat{\sigma}(x,p,t)
-\]
+]
 
-其中：
+where:
 
-- \(\hat{\mu}\)：预测效用均值；
-- \(\hat{\sigma}\)：预测不确定性。
+* (\hat{\mu}): predicted utility mean;
+* (\hat{\sigma}): predicted uncertainty.
 
-部署时使用风险惩罚分数：
+During deployment, use the risk-penalized score:
 
-\[
+[
 q(x,p,t)
-=
-\hat{\mu}(x,p,t)
--
+========
+
+## \hat{\mu}(x,p,t)
+
 \lambda \hat{\sigma}(x,p,t)
-\]
+]
 
 ---
 
-### 8.4 训练目标
+### 8.4 Training Objective
 
-推荐训练目标：
+The recommended training objective is:
 
-\[
+[
 \mathcal{L}
-=
-\lambda_1 \mathcal{L}_{rank}^{hi}
-+
-\lambda_2 \mathcal{L}_{reg}^{hi}
-+
-\lambda_3 \mathcal{L}_{proxy}^{lo}
-+
-\lambda_4 \mathcal{L}_{unc}
-\]
+===========
 
-#### 1. 高保真排序损失
+\lambda_1 \mathcal{L}*{rank}^{hi}
++
+\lambda_2 \mathcal{L}*{reg}^{hi}
++
+\lambda_3 \mathcal{L}*{proxy}^{lo}
++
+\lambda_4 \mathcal{L}*{unc}
+]
 
-在同一个 task-PEFT bucket 内做 pairwise ranking：
+#### 1. High-Fidelity Ranking Loss
 
-\[
+Perform pairwise ranking within the same task-PEFT bucket:
+
+[
 \mathcal{L}_{rank}^{hi}
-=
+=======================
+
 -\log \sigma
 (
 (\hat{\mu}_i-\hat{\mu}_j)
 \cdot
 \text{sign}(u_i^{hi}-u_j^{hi})
 )
-\]
+]
 
-作用：
+Purpose:
 
-- 直接优化最终选择所关心的排序；
-- 避免跨 PEFT 绝对效用量纲不一致的问题。
+* Directly optimize the ranking that final selection cares about;
+* Avoid the problem of inconsistent absolute utility scales across PEFT methods.
 
-#### 2. 高保真回归损失
+#### 2. High-Fidelity Regression Loss
 
-\[
+[
 \mathcal{L}_{reg}^{hi}
-=
+======================
+
 \text{Huber}(\hat{\mu},u^{hi})
-\]
+]
 
-作用：
+Purpose:
 
-- 保留效用强弱的绝对趋势。
+* Preserve the absolute trend of utility strength.
 
-#### 3. 低保真蒸馏损失
+#### 3. Low-Fidelity Distillation Loss
 
-\[
+[
 \mathcal{L}_{proxy}^{lo}
-=
+========================
+
 \text{Huber}(\hat{\mu},u^{lo})
-\]
+]
 
-作用：
+Purpose:
 
-- 利用大量低保真标签提供密集监督；
-- 提高 scorer 在未覆盖区域的泛化能力。
+* Use a large number of low-fidelity labels to provide dense supervision;
+* Improve scorer generalization in uncovered regions.
 
-#### 4. 不确定性建模损失
+#### 4. Uncertainty Modeling Loss
 
-假设高保真效用服从：
+Assume the high-fidelity utility follows:
 
-\[
+[
 u^{hi} \sim \mathcal{N}(\hat{\mu},\hat{\sigma}^2)
-\]
+]
 
-使用 heteroscedastic NLL：
+Use heteroscedastic NLL:
 
-\[
+[
 \mathcal{L}_{unc}
-=
+=================
+
 \frac{(u^{hi}-\hat{\mu})^2}{2\hat{\sigma}^2}
 +
 \frac{1}{2}\log \hat{\sigma}^2
-\]
+]
 
-作用：
+Purpose:
 
-- 让模型知道哪些区域预测不可靠；
-- 部署时用不确定性惩罚避免过度冒险。
+* Let the model know which regions are unreliable;
+* Use uncertainty penalties during deployment to avoid excessive risk-taking.
 
 ---
 
-## 9. 数据选择策略
+## 9. Data Selection Strategy
 
-### 9.1 不推荐：global top-k
+### 9.1 Not Recommended: Global Top-k
 
-直接按分数取 top-k：
+Directly take top-k by score:
 
-\[
+[
 S = \text{TopK}_{x\in D}(q(x,p,t))
-\]
+]
 
-问题：
+Problems:
 
-- 可能选出高度相似样本；
-- 对长尾任务覆盖不足；
-- 容易牺牲数据多样性。
+* May select highly similar samples;
+* Insufficient coverage of long-tail tasks;
+* Easily sacrifices data diversity.
 
 ---
 
-### 9.2 推荐：自适应聚类配额
+### 9.2 Recommended: Adaptive Cluster Quota
 
-#### 步骤
+#### Steps
 
-1. 在样本 embedding 空间对候选数据池聚类；
-2. 对每个样本计算风险惩罚分数：
+1. Cluster the candidate data pool in the sample embedding space;
+2. Compute the risk-penalized score for each sample:
 
-\[
+[
 q_i = \hat{\mu}_i - \lambda\hat{\sigma}_i
-\]
+]
 
-3. 对每个簇 \(C_k\) 计算簇级价值：
+3. Compute the cluster-level value for each cluster (C_k):
 
-\[
-v_k = \text{MeanTopM}(\{q_i: x_i\in C_k\})
-\]
+[
+v_k = \text{MeanTopM}({q_i: x_i\in C_k})
+]
 
-4. 分配簇预算：
+4. Allocate the cluster budget:
 
-\[
+[
 b_k
-=
+===
+
 B
 \cdot
 \frac{(v_k^+)^\alpha |C_k|^{1-\alpha}}
 {\sum_j (v_j^+)^\alpha |C_j|^{1-\alpha}}
-\]
+]
 
-其中：
+where:
 
-- \(v_k^+=\max(v_k,0)\)；
-- \(\alpha\) 控制“效用优先”与“覆盖优先”的平衡；
-- \(\alpha=1\)：更偏向高分簇；
-- \(\alpha=0\)：更偏向按簇大小覆盖。
+* (v_k^+=\max(v_k,0));
+* (\alpha) controls the balance between “utility priority” and “coverage priority”;
+* (\alpha=1): more biased toward high-score clusters;
+* (\alpha=0): more biased toward coverage according to cluster size.
 
-5. 每个簇内选 top-\(b_k\) 样本；
-6. 合并得到最终子集。
+5. Select top-(b_k) samples within each cluster;
+6. Merge them to obtain the final subset.
 
-#### 优点
+#### Advantages
 
-- 比 global top-k 更有覆盖性；
-- 比复杂 DPP / submodular 方法更可扩展；
-- 可解释性强；
-- 易于做消融。
-
----
-
-## 10. 训练与应用流程
-
-### 10.1 离线训练流程
-
-#### Step 0：定义支持空间
-
-确定：
-
-- backbone family；
-- 任务集合；
-- 候选数据池；
-- PEFT 配置空间；
-- validation sketch 构造方式；
-- 预算比例。
-
-#### Step 1：样本特征缓存
-
-对 meta-pool 中样本进行一次前向，缓存：
-
-- 语义 embedding；
-- loss / perplexity / entropy；
-- 层级激活签名；
-- source/domain 元信息。
-
-#### Step 2：PEFT 条件编码
-
-对每个 PEFT 配置生成：
-
-- site mask；
-- capacity vector；
-- recipe vector；
-- optional functional fingerprint。
-
-#### Step 3：低保真代理构造
-
-在小 selector model 上计算：
-
-- 样本 site-wise 梯度签名；
-- 任务草图 site-wise 梯度签名；
-- 根据 PEFT mask 聚合得到 \(u^{lo}\)。
-
-#### Step 4：高保真标签生成
-
-对采样出的少量 \((x,p,t)\)：
-
-- 从共享 anchor checkpoint 出发；
-- 进行 PEFT-only 短程更新；
-- 在 validation sketch 上计算损失下降；
-- 归一化并聚合得到 \(u^{hi}\)。
-
-#### Step 5：训练 scorer
-
-先用低保真标签预训练，再用高保真标签联合训练：
-
-- ranking；
-- regression；
-- proxy distillation；
-- uncertainty modeling。
-
-#### Step 6：主动补点
-
-根据 scorer 不确定性和低保真效用，选择部分三元组补充高保真标签，再继续训练。
+* Better coverage than global top-k;
+* More scalable than complex DPP / submodular methods;
+* Highly interpretable;
+* Easy to ablate.
 
 ---
 
-### 10.2 应用流程
+## 10. Training and Application Pipeline
 
-用户使用本方法时，只需要提供：
+### 10.1 Offline Training Pipeline
 
-- 候选数据池；
-- 目标 PEFT 配置；
-- 目标任务 validation sketch；
-- 数据预算。
+#### Step 0: Define the Support Space
 
-具体步骤：
+Determine:
 
-1. 系统检查目标 PEFT 是否在支持分布内；
-2. 编码目标 PEFT 得到 \(z_{p^\*}\)；
-3. 编码 validation sketch 得到 \(z_{t^\*}\)；
-4. 对候选数据读取或提取样本特征 \(z_x\)；
-5. scorer 输出 \(\hat{\mu}\) 与 \(\hat{\sigma}\)；
-6. 计算风险惩罚分数；
-7. 通过自适应聚类配额选择子集；
-8. 用户使用该子集训练目标 PEFT；
-9. 可将真实训练结果反馈给 scorer 做后续增量更新。
+* backbone family;
+* task set;
+* candidate data pool;
+* PEFT configuration space;
+* validation sketch construction method;
+* budget ratio.
+
+#### Step 1: Sample Feature Caching
+
+Run one forward pass over samples in the meta-pool and cache:
+
+* semantic embeddings;
+* loss / perplexity / entropy;
+* hierarchical activation signatures;
+* source/domain metadata.
+
+#### Step 2: PEFT Condition Encoding
+
+For each PEFT configuration, generate:
+
+* site mask;
+* capacity vector;
+* recipe vector;
+* optional functional fingerprint.
+
+#### Step 3: Low-Fidelity Proxy Construction
+
+On a small selector model, compute:
+
+* sample site-wise gradient signatures;
+* task sketch site-wise gradient signatures;
+* aggregate according to the PEFT mask to obtain (u^{lo}).
+
+#### Step 4: High-Fidelity Label Generation
+
+For a small number of sampled ((x,p,t)):
+
+* start from a shared anchor checkpoint;
+* perform PEFT-only short-horizon updates;
+* compute validation loss decrease on the validation sketch;
+* normalize and aggregate to obtain (u^{hi}).
+
+#### Step 5: Train the Scorer
+
+First pretrain with low-fidelity labels, then jointly train with high-fidelity labels:
+
+* ranking;
+* regression;
+* proxy distillation;
+* uncertainty modeling.
+
+#### Step 6: Active Supplementation
+
+Based on scorer uncertainty and low-fidelity utility, select some triples to supplement high-fidelity labels and continue training.
 
 ---
 
-### 10.3 OOD 校准模式
+### 10.2 Application Pipeline
 
-如果目标 PEFT 不在训练支持分布内，例如：
+When using this method, the user only needs to provide:
 
-- 新 PEFT family；
-- 极端 rank；
-- 极端 placement；
-- 完全不同 recipe；
-- 不同 backbone family；
+* candidate data pool;
+* target PEFT configuration;
+* target task validation sketch;
+* data budget.
 
-则不建议直接 zero-shot 使用。
+Specific steps:
 
-推荐启用校准模式：
-
-1. 抽取 200–500 个样本；
-2. 对目标 PEFT 计算少量高保真效用；
-3. 冻结主 scorer，仅训练一个 calibration head；
-4. 再对全量数据打分。
-
-这使方法更现实，也更容易防御审稿质疑。
+1. The system checks whether the target PEFT is within the support distribution;
+2. Encode the target PEFT to obtain (z_{p^*});
+3. Encode the validation sketch to obtain (z_{t^*});
+4. Read or extract sample features (z_x) for the candidate data;
+5. The scorer outputs (\hat{\mu}) and (\hat{\sigma});
+6. Compute the risk-penalized score;
+7. Select a subset through adaptive cluster quotas;
+8. The user trains the target PEFT using this subset;
+9. The true training result can be fed back to the scorer for subsequent incremental updates.
 
 ---
 
-## 11. 成本与复杂度分析
+### 10.3 OOD Calibration Mode
 
-### 11.1 成本分解
+If the target PEFT is not within the training support distribution, such as:
 
-总成本分为离线成本和应用成本。
+* new PEFT family;
+* extreme rank;
+* extreme placement;
+* completely different recipe;
+* different backbone family;
 
-#### 离线成本
+then direct zero-shot use is not recommended.
 
-\[
+Calibration mode is recommended:
+
+1. Sample 200–500 samples;
+2. Compute a small number of high-fidelity utilities for the target PEFT;
+3. Freeze the main scorer and train only a calibration head;
+4. Then score the full data.
+
+This makes the method more realistic and easier to defend against reviewer criticism.
+
+---
+
+## 11. Cost and Complexity Analysis
+
+### 11.1 Cost Decomposition
+
+The total cost is divided into offline cost and application cost.
+
+#### Offline Cost
+
+[
 C_{\text{offline}}
-=
+==================
+
 C_{\text{feat}}
 +
 C_{\text{lo}}
@@ -968,20 +983,21 @@ C_{\text{lo}}
 C_{\text{hi}}
 +
 C_{\text{scorer}}
-\]
+]
 
-其中：
+where:
 
-- \(C_{\text{feat}}\)：样本特征提取；
-- \(C_{\text{lo}}\)：低保真代理构造；
-- \(C_{\text{hi}}\)：高保真短程更新标签；
-- \(C_{\text{scorer}}\)：scorer 训练。
+* (C_{\text{feat}}): sample feature extraction;
+* (C_{\text{lo}}): low-fidelity proxy construction;
+* (C_{\text{hi}}): high-fidelity short-horizon update labels;
+* (C_{\text{scorer}}): scorer training.
 
-#### 应用成本
+#### Application Cost
 
-\[
+[
 C_{\text{apply}}
-=
+================
+
 C_{\text{feat-new}}
 +
 C_{\text{score}}
@@ -989,683 +1005,685 @@ C_{\text{score}}
 C_{\text{select}}
 +
 C_{\text{target-train}}
-\]
+]
 
-其中：
+where:
 
-- \(C_{\text{feat-new}}\)：目标数据池特征提取，可缓存；
-- \(C_{\text{score}}\)：scorer 前向打分；
-- \(C_{\text{select}}\)：聚类与选择；
-- \(C_{\text{target-train}}\)：目标 PEFT 在子集上的训练成本。
+* (C_{\text{feat-new}}): feature extraction for the target data pool, cacheable;
+* (C_{\text{score}}): scorer forward scoring;
+* (C_{\text{select}}): clustering and selection;
+* (C_{\text{target-train}}): training cost of target PEFT on the subset.
 
 ---
 
-### 11.2 离线成本估计
+### 11.2 Offline Cost Estimation
 
-#### 样本特征提取
+#### Sample Feature Extraction
 
-\[
+[
 C_{\text{feat}} = O(N_{\text{meta}}F_{\text{fwd}})
-\]
+]
 
-其中 \(F_{\text{fwd}}\) 是一次前向代价。
+where (F_{\text{fwd}}) is the cost of one forward pass.
 
-#### 低保真代理
+#### Low-Fidelity Proxy
 
-如果每个样本的 site-wise 梯度签名只计算一次：
+If the site-wise gradient signature of each sample is computed only once:
 
-\[
+[
 C_{\text{lo}} = O(N_{\text{meta}}G_{\text{small}})
-\]
+]
 
-重点是：该项不应随 PEFT 数量 \(P\) 线性放大。  
-不同 PEFT 通过 mask 和权重复用缓存的 site-wise 签名。
+The key point is: this term should not grow linearly with the number of PEFT methods (P).
+Different PEFT methods reuse cached site-wise signatures through masks and weights.
 
-#### 高保真标签
+#### High-Fidelity Labels
 
-\[
+[
 C_{\text{hi}}
-=
+=============
+
 O(Q_H \cdot A \cdot K_{\max} \cdot C_{\text{peft-step}})
-\]
+]
 
-其中：
+where:
 
-- \(Q_H\)：高保真三元组数量；
-- \(A\)：anchor 数；
-- \(K_{\max}\)：最大短程更新步数；
-- \(C_{\text{peft-step}}\)：一次 PEFT-only 训练 step 成本。
+* (Q_H): number of high-fidelity triples;
+* (A): number of anchors;
+* (K_{\max}): maximum number of short-horizon update steps;
+* (C_{\text{peft-step}}): cost of one PEFT-only training step.
 
-推荐控制：
+Recommended control:
 
-- \(Q_H = 5k\sim 10k\)；
-- \(A=2\)；
-- \(K_{\max}=4\)；
-- validation sketch = 32–64。
+* (Q_H = 5k\sim 10k);
+* (A=2);
+* (K_{\max}=4);
+* validation sketch = 32–64.
 
-#### Scorer 训练
+#### Scorer Training
 
-一般远低于高保真标签成本。
-
----
-
-### 11.3 应用成本估计
-
-对于一个新目标 PEFT：
-
-1. PEFT 编码：近似常数成本；
-2. validation sketch 编码：很低；
-3. 样本前向特征：\(O(NF_{\text{fwd}})\)，可缓存；
-4. scorer 打分：\(O(NC_{\phi})\)，其中 \(C_{\phi}\ll F_{\text{fwd}}\)；
-5. 聚类选择：\(O(N\log N)\) 或近似线性；
-6. 目标训练：约为全量训练的 \(\alpha\) 倍，其中 \(\alpha=B/N\)。
+Generally much lower than the cost of high-fidelity labels.
 
 ---
 
-### 11.4 Break-even 分析
+### 11.3 Application Cost Estimation
 
-本方法成立的关键是多次复用。
+For a new target PEFT:
 
-设：
+1. PEFT encoding: approximately constant cost;
+2. validation sketch encoding: very low;
+3. sample forward features: (O(NF_{\text{fwd}})), cacheable;
+4. scorer scoring: (O(NC_{\phi})), where (C_{\phi}\ll F_{\text{fwd}});
+5. clustering selection: (O(N\log N)) or approximately linear;
+6. target training: approximately (\alpha) times full-data training, where (\alpha=B/N).
 
-- \(T\)：未来需要服务的目标 PEFT 数；
-- \(C_{\text{specific}}\)：每个目标 PEFT 使用传统 PEFT-specific selector 的成本；
-- \(C_{\text{apply}}\)：本方法每个目标 PEFT 的应用成本；
-- \(C_{\text{offline}}\)：本方法离线元训练成本。
+---
 
-当满足：
+### 11.4 Break-even Analysis
 
-\[
+The key to this method is reuse across multiple applications.
+
+Let:
+
+* (T): number of target PEFT methods to be served in the future;
+* (C_{\text{specific}}): cost of using a traditional PEFT-specific selector for each target PEFT;
+* (C_{\text{apply}}): application cost of this method for each target PEFT;
+* (C_{\text{offline}}): offline meta-training cost of this method.
+
+When:
+
+[
 C_{\text{offline}} + T C_{\text{apply}}
 <
 T C_{\text{specific}}
-\]
+]
 
-时，本方法在总成本上更划算。
+this method is more cost-effective in total cost.
 
-等价地，break-even 使用次数为：
+Equivalently, the break-even usage count is:
 
-\[
+[
 T >
 \frac{C_{\text{offline}}}
 {C_{\text{specific}}-C_{\text{apply}}}
-\]
+]
 
-论文中必须报告该曲线，否则容易被质疑离线成本无法摊薄。
-
----
-
-## 12. 实验设计
-
-### 12.1 主实验问题
-
-主实验需要回答四个问题：
-
-1. 本方法是否在目标 PEFT 上选出更有效的数据？
-2. 本方法是否能跨 PEFT 配置复用？
-3. 本方法是否比 PEFT-specific 方法更省总成本？
-4. 每个关键模块是否真的有贡献？
+The paper must report this curve; otherwise, it is easy to be questioned that the offline cost cannot be amortized.
 
 ---
 
-### 12.2 数据集与任务建议
+## 12. Experimental Design
 
-建议选择多个任务类型：
+### 12.1 Main Experimental Questions
 
-| 类型 | 示例任务 | 目的 |
-|---|---|---|
-| 通用指令 | AlpacaEval / MT-Bench 风格 | 测试 instruction following |
-| 数学推理 | GSM8K / MATH 子集 | 测试推理样本选择 |
-| 代码 | HumanEval / MBPP | 测试代码数据选择 |
-| 知识问答 | MMLU / ARC / CommonsenseQA | 测试知识与常识 |
-| 多语言 | TyDiQA / XNLI 子集 | 测试跨语言覆盖 |
-| 安全对齐 | safety preference 子集 | 测试安全相关样本是否被保留 |
+The main experiments need to answer four questions:
+
+1. Does this method select more effective data for the target PEFT?
+2. Can this method be reused across PEFT configurations?
+3. Is this method more cost-efficient in total cost than PEFT-specific methods?
+4. Does each key module truly contribute?
 
 ---
 
-### 12.3 PEFT 配置空间
+### 12.2 Dataset and Task Suggestions
 
-主实验建议使用稳定 PEFT 子空间：
+It is recommended to choose multiple task types:
 
-- LoRA；
-- IA3；
-- Bottleneck Adapter。
-
-LoRA 内部变化：
-
-- rank：4 / 8 / 16 / 32；
-- target modules：qv / qkvo / all linear；
-- layer range：low / mid / high / all；
-- learning rate：low / medium / high；
-- alpha scaling。
-
-Adapter 内部变化：
-
-- bottleneck width；
-- layer placement；
-- residual scaling。
-
-IA3 内部变化：
-
-- attention-only；
-- MLP-only；
-- attention + MLP。
-
-Prompt/Prefix/P-Tuning：
-
-- 不建议作为主结论；
-- 可作为 OOD 扩展实验或失败案例分析。
+| Type                   | Example Tasks               | Purpose                                          |
+| ---------------------- | --------------------------- | ------------------------------------------------ |
+| General instruction    | AlpacaEval / MT-Bench style | Test instruction following                       |
+| Mathematical reasoning | GSM8K / MATH subset         | Test reasoning sample selection                  |
+| Code                   | HumanEval / MBPP            | Test code data selection                         |
+| Knowledge QA           | MMLU / ARC / CommonsenseQA  | Test knowledge and commonsense                   |
+| Multilingual           | TyDiQA / XNLI subset        | Test cross-lingual coverage                      |
+| Safety alignment       | safety preference subset    | Test whether safety-related samples are retained |
 
 ---
 
-### 12.4 对比基线
+### 12.3 PEFT Configuration Space
 
-必须包含以下基线。
+The main experiments are recommended to use a stable PEFT subspace:
 
-#### 基础基线
+* LoRA;
+* IA3;
+* Bottleneck Adapter.
 
-- Random；
-- Balanced Random；
-- Length-based；
-- Loss-based；
-- Perplexity-based；
-- IFD。
+Internal LoRA variations:
 
-#### 表示类选择
+* rank: 4 / 8 / 16 / 32;
+* target modules: qv / qkvo / all linear;
+* layer range: low / mid / high / all;
+* learning rate: low / medium / high;
+* alpha scaling.
 
-- Embedding nearest to validation；
-- RDS+；
-- Diversity-only clustering。
+Internal Adapter variations:
 
-#### 训练动态类选择
+* bottleneck width;
+* layer placement;
+* residual scaling.
 
-- LESS；
-- Influence-style gradient similarity；
-- S2L；
-- 其他可运行的 PEFT-specific selector。
+Internal IA3 variations:
 
-#### 本方法变体
+* attention-only;
+* MLP-only;
+* attention + MLP.
 
-- Low-fidelity only；
-- High-fidelity only；
-- 无 PEFT condition；
-- 无 task condition；
-- 无 uncertainty；
-- global top-k；
-- adaptive cluster selection。
+Prompt/Prefix/P-Tuning:
+
+* not recommended as main conclusions;
+* can be used as OOD extension experiments or failure case analysis.
 
 ---
 
-### 12.5 评价指标
+### 12.4 Comparison Baselines
 
-#### 性能指标
+The following baselines must be included.
 
-- Accuracy；
-- Exact Match；
-- F1；
-- Pass@k；
-- Win rate；
-- Reward model score；
-- Human / GPT-based evaluation。
+#### Basic Baselines
 
-#### 数据选择指标
+* Random;
+* Balanced Random;
+* Length-based;
+* Loss-based;
+* Perplexity-based;
+* IFD.
 
-在 held-out \((x,p,t)\) 对上评估：
+#### Representation-Based Selection
 
-- Spearman correlation；
-- Kendall tau；
-- NDCG@K；
-- Top-K hit rate；
-- Pairwise ranking accuracy。
+* Embedding nearest to validation;
+* RDS+;
+* Diversity-only clustering.
 
-#### 成本指标
+#### Training-Dynamics-Based Selection
 
-必须报告：
+* LESS;
+* Influence-style gradient similarity;
+* S2L;
+* other runnable PEFT-specific selectors.
 
-- 离线 GPU-hours；
-- 每个目标 PEFT 的应用 GPU-hours；
-- 总 GPU-hours；
-- 峰值显存；
-- 持久化存储；
-- 目标训练节省；
-- break-even 使用次数。
+#### Variants of This Method
 
-#### 稳定性指标
-
-- 不同 seed 方差；
-- 不同 validation sketch 方差；
-- 不同数据预算方差；
-- 不同 PEFT 配置方差。
+* Low-fidelity only;
+* High-fidelity only;
+* without PEFT condition;
+* without task condition;
+* without uncertainty;
+* global top-k;
+* adaptive cluster selection.
 
 ---
 
-### 12.6 核心实验
+### 12.5 Evaluation Metrics
 
-#### 实验 1：单 PEFT 下的数据选择效果
+#### Performance Metrics
 
-设置：
+* Accuracy;
+* Exact Match;
+* F1;
+* Pass@k;
+* Win rate;
+* Reward model score;
+* Human / GPT-based evaluation.
 
-- 固定任务；
-- 固定目标 PEFT；
-- 比较不同选择方法；
-- 数据预算：5% / 10% / 30%。
+#### Data Selection Metrics
 
-目的：
+Evaluate on held-out ((x,p,t)) pairs:
 
-- 验证本方法不是只在跨 PEFT 时有效，在单个 PEFT 下也有竞争力。
+* Spearman correlation;
+* Kendall tau;
+* NDCG@K;
+* Top-K hit rate;
+* Pairwise ranking accuracy.
 
-若结果不理想：
+#### Cost Metrics
 
-- 分析是否被简单 embedding baseline 超越；
-- 检查 scorer 是否过度依赖语义相似；
-- 检查高保真标签是否噪声过大。
+Must report:
 
----
+* offline GPU-hours;
+* application GPU-hours for each target PEFT;
+* total GPU-hours;
+* peak memory;
+* persistent storage;
+* target training savings;
+* break-even usage count.
 
-#### 实验 2：跨 PEFT 复用效果
+#### Stability Metrics
 
-设置：
-
-- 用部分 PEFT 配置训练 scorer；
-- 在未见过的 PEFT 配置上测试；
-- 包括 seen family unseen configuration，以及 unseen family。
-
-目的：
-
-- 验证 PEFT 条件化建模是否真的带来泛化。
-
-若结果不理想：
-
-- 区分 ID 配置失败还是 OOD family 失败；
-- 若 OOD 失败，可把 zero-shot 改为 calibration mode；
-- 若 ID 失败，说明 PEFT 表示或训练标签不足。
-
----
-
-#### 实验 3：多 PEFT 总成本对比
-
-设置：
-
-- 模拟未来要服务 \(T=1,3,5,10\) 个目标 PEFT；
-- 比较传统 per-PEFT selector 与本方法；
-- 画总 GPU-hours 曲线。
-
-目的：
-
-- 证明本方法的 amortization 逻辑成立。
-
-若结果不理想：
-
-- 说明离线成本过高；
-- 需要减少 \(Q_H\)、anchor 数或高保真 horizon；
-- 或将主张改为“性能优先”而非“成本优先”。
+* variance across different seeds;
+* variance across different validation sketches;
+* variance across different data budgets;
+* variance across different PEFT configurations.
 
 ---
 
-#### 实验 4：多保真标签有效性
+### 12.6 Core Experiments
 
-比较：
+#### Experiment 1: Data Selection Effect under a Single PEFT
 
-- 仅低保真；
-- 仅高保真；
-- 低保真 + 高保真；
-- 不同高保真预算。
+Setup:
 
-目的：
+* fixed task;
+* fixed target PEFT;
+* compare different selection methods;
+* data budget: 5% / 10% / 30%.
 
-- 证明多保真设计不是多余复杂度。
+Purpose:
 
-若结果不理想：
+* Verify that this method is not only effective in cross-PEFT settings, but also competitive under a single PEFT.
 
-- 如果 low-only 已足够，说明高保真可改为可选；
-- 如果 high-only 更好但成本大，需强调性能/成本 trade-off；
-- 如果二者结合无提升，说明融合损失或标签定义需要调整。
+If the result is not ideal:
 
----
-
-#### 实验 5：条件表示消融
-
-比较：
-
-- family one-hot；
-- + site mask；
-- + capacity；
-- + recipe；
-- + functional fingerprint。
-
-目的：
-
-- 证明 PEFT 表示不是简单 one-hot 拼接。
-
-若结果不理想：
-
-- 如果 recipe 不提升，可能训练配置控制得过窄；
-- 如果 fingerprint 不提升，可将其降级为可选模块；
-- 如果 site mask 不提升，说明样本层级表示不足。
+* Analyze whether it is surpassed by a simple embedding baseline;
+* Check whether the scorer overly relies on semantic similarity;
+* Check whether high-fidelity labels are too noisy.
 
 ---
 
-#### 实验 6：任务草图消融
+#### Experiment 2: Cross-PEFT Reuse Effect
 
-比较：
+Setup:
 
-- 无 task condition；
-- 8 条 sketch；
-- 16 条 sketch；
-- 32 条 sketch；
-- 64 条 sketch。
+* Train the scorer with some PEFT configurations;
+* Test on unseen PEFT configurations;
+* Include seen-family unseen-configuration and unseen-family settings.
 
-目的：
+Purpose:
 
-- 证明任务条件对数据价值定义是必要的；
-- 找到成本与稳定性的平衡点。
+* Verify whether PEFT-conditioned modeling truly brings generalization.
 
----
+If the result is not ideal:
 
-#### 实验 7：选择策略消融
-
-比较：
-
-- global top-k；
-- uniform cluster top-k；
-- adaptive cluster budget；
-- DPP / submodular greedy 可选。
-
-目的：
-
-- 验证多样性约束是否有必要；
-- 证明 adaptive cluster 在性能与成本之间更平衡。
+* Distinguish whether the failure is on ID configurations or OOD families;
+* If OOD fails, change zero-shot to calibration mode;
+* If ID fails, it indicates that PEFT representation or training labels are insufficient.
 
 ---
 
-## 13. 预期贡献点
+#### Experiment 3: Total Cost Comparison across Multiple PEFT Methods
 
-建议将论文贡献写成三个独立贡献。
+Setup:
 
-### 贡献 1：PEFT 条件化数据效用建模
+* Simulate future service for (T=1,3,5,10) target PEFT methods;
+* Compare traditional per-PEFT selectors with this method;
+* Plot the total GPU-hours curve.
 
-提出将数据选择从 task-only 或 model-only 扩展到 PEFT-conditional setting：
+Purpose:
 
-\[
+* Prove that the amortization logic of this method holds.
+
+If the result is not ideal:
+
+* It indicates that the offline cost is too high;
+* Need to reduce (Q_H), the number of anchors, or the high-fidelity horizon;
+* Or change the claim to “performance-first” rather than “cost-first.”
+
+---
+
+#### Experiment 4: Effectiveness of Multi-Fidelity Labels
+
+Compare:
+
+* low-fidelity only;
+* high-fidelity only;
+* low-fidelity + high-fidelity;
+* different high-fidelity budgets.
+
+Purpose:
+
+* Prove that the multi-fidelity design is not unnecessary complexity.
+
+If the result is not ideal:
+
+* If low-only is already sufficient, high-fidelity can be made optional;
+* If high-only is better but costly, emphasize the performance/cost trade-off;
+* If combining the two brings no improvement, the fusion loss or label definition needs adjustment.
+
+---
+
+#### Experiment 5: Conditional Representation Ablation
+
+Compare:
+
+* family one-hot;
+* * site mask;
+* * capacity;
+* * recipe;
+* * functional fingerprint.
+
+Purpose:
+
+* Prove that PEFT representation is not simple one-hot concatenation.
+
+If the result is not ideal:
+
+* If recipe does not improve, the training configuration may be controlled too narrowly;
+* If fingerprint does not improve, it can be downgraded to an optional module;
+* If site mask does not improve, sample-level layer representation is insufficient.
+
+---
+
+#### Experiment 6: Task Sketch Ablation
+
+Compare:
+
+* no task condition;
+* 8 sketch samples;
+* 16 sketch samples;
+* 32 sketch samples;
+* 64 sketch samples.
+
+Purpose:
+
+* Prove that task conditioning is necessary for defining data value;
+* Find the balance point between cost and stability.
+
+---
+
+#### Experiment 7: Selection Strategy Ablation
+
+Compare:
+
+* global top-k;
+* uniform cluster top-k;
+* adaptive cluster budget;
+* optional DPP / submodular greedy.
+
+Purpose:
+
+* Verify whether diversity constraints are necessary;
+* Prove that adaptive clustering is more balanced between performance and cost.
+
+---
+
+## 13. Expected Contributions
+
+It is recommended to write the paper contributions as three independent contributions.
+
+### Contribution 1: PEFT-Conditioned Data Utility Modeling
+
+Propose extending data selection from a task-only or model-only setting to a PEFT-conditional setting:
+
+[
 s_\phi(x,p,t)
-\]
+]
 
-显式建模样本价值如何随 PEFT 子空间变化。
+Explicitly model how sample value changes with the PEFT subspace.
 
-### 贡献 2：统一隐藏状态干预空间下的多保真效用学习
+### Contribution 2: Multi-Fidelity Utility Learning under a Unified Hidden-State Intervention Space
 
-提出：
+Propose:
 
-- 低保真 site-wise proxy；
-- 少量高保真真实短程 PEFT 更新；
-- 两者联合训练 scorer。
+* low-fidelity site-wise proxy;
+* a small number of high-fidelity true short-horizon PEFT updates;
+* joint training of the scorer using both.
 
-解决跨 PEFT 场景中重复计算昂贵信号的问题。
+This solves the problem of repeatedly computing expensive signals in cross-PEFT scenarios.
 
-### 贡献 3：可部署的低成本跨 PEFT 数据筛选流程
+### Contribution 3: A Deployable Low-Cost Cross-PEFT Data Selection Pipeline
 
-训练完成后，对新 PEFT 的应用成本接近 forward-only selection，并支持：
+After training, the application cost for a new PEFT is close to forward-only selection, while supporting:
 
-- 全量打分；
-- 不确定性惩罚；
-- 多样性约束；
-- OOD 校准。
-
----
-
-## 14. 与已有方法的区别
-
-### 14.1 相比普通 embedding / RDS+ 方法
-
-普通表示类方法主要衡量样本与目标任务的语义相似性。  
-本方法额外考虑：
-
-- PEFT 修改的子空间；
-- 样本对不同层/模块的作用；
-- 目标 PEFT 的训练配方与容量。
-
-### 14.2 相比 LESS / influence-style 方法
-
-LESS 等方法通常针对特定训练配置计算梯度或影响信号。  
-本方法尝试将这类信号蒸馏到 PEFT-conditioned scorer 中，使其在多个 PEFT 配置间复用。
-
-### 14.3 相比 NN-CIFT 类 learned proxy
-
-NN-CIFT 证明小网络可学习昂贵 influence proxy。  
-本方法的区别是：
-
-- 引入 PEFT 条件；
-- 引入任务草图；
-- 引入多保真标签；
-- 目标是跨 PEFT 复用，而非单一配置加速。
+* full-data scoring;
+* uncertainty penalty;
+* diversity constraints;
+* OOD calibration.
 
 ---
 
-## 15. 审稿人可能质疑与应对
+## 14. Differences from Existing Methods
 
-### 15.1 质疑：这是不是只是 LESS 加 PEFT 向量？
+### 14.1 Compared with Ordinary Embedding / RDS+ Methods
 
-应对：
+Ordinary representation-based methods mainly measure semantic similarity between samples and the target task.
+This method additionally considers:
 
-- 强调统一隐藏状态干预空间；
-- 强调低保真代理可以跨 PEFT 复用；
-- 强调少量高保真短程更新用于校正；
-- 做去掉 PEFT condition 的消融。
+* the subspace modified by PEFT;
+* the effect of samples on different layers/modules;
+* the training recipe and capacity of the target PEFT.
 
----
+### 14.2 Compared with LESS / Influence-Style Methods
 
-### 15.2 质疑：离线成本是否过高？
+Methods such as LESS usually compute gradient or influence signals for a specific training configuration.
+This method attempts to distill such signals into a PEFT-conditioned scorer so that they can be reused across multiple PEFT configurations.
 
-应对：
+### 14.3 Compared with NN-CIFT-Like Learned Proxies
 
-- 报告完整 GPU-hours；
-- 给出 break-even 曲线；
-- 限制高保真预算；
-- 展示多个目标 PEFT 下的摊薄优势；
-- 与 per-PEFT selector 做总成本对比。
+NN-CIFT shows that a small network can learn an expensive influence proxy.
+The differences of this method are:
 
----
-
-### 15.3 质疑：为什么不直接用简单 RDS+？
-
-应对：
-
-- 做 compute-controlled 对比；
-- 展示在多 PEFT 复用场景中，本方法总成本更低或性能更强；
-- 分析哪些任务/PEFT 下简单方法足够，主动给出边界。
+* introducing PEFT conditions;
+* introducing task sketches;
+* introducing multi-fidelity labels;
+* aiming for cross-PEFT reuse rather than acceleration for a single configuration.
 
 ---
 
-### 15.4 质疑：PEFT 比较是否公平？
+## 15. Possible Reviewer Concerns and Responses
 
-应对：
+### 15.1 Concern: Is this just LESS plus a PEFT vector?
 
-- 对各 PEFT 做合理超参搜索；
-- 报告每个 PEFT 的最终 recipe；
-- 在 PEFT 表示中纳入 recipe；
-- 避免声称“某个 PEFT 方法绝对更好”。
+Response:
 
----
-
-### 15.5 质疑：泛化边界不清楚
-
-应对：
-
-- 主结论限定在 fixed backbone family；
-- OOD family 只作为附加实验；
-- 对未见 PEFT 提供 calibration mode；
-- 明确列出失败案例。
+* Emphasize the unified hidden-state intervention space;
+* Emphasize that the low-fidelity proxy can be reused across PEFT methods;
+* Emphasize that a small number of high-fidelity short-horizon updates are used for correction;
+* Conduct an ablation removing the PEFT condition.
 
 ---
 
-### 15.6 质疑：任务草图是否数据泄漏？
+### 15.2 Concern: Is the offline cost too high?
 
-应对：
+Response:
 
-- validation sketch 与 test set 严格隔离；
-- 明确 sketch 构造协议；
-- 对 sketch size 和随机抽样做稳定性实验。
-
----
-
-### 15.7 质疑：方法模块太多，贡献不清晰
-
-应对：
-
-- 贡献只聚焦三点：PEFT-conditioned utility、多保真效用学习、可部署低成本选择；
-- 其他模块作为必要工程组件；
-- 每个模块都做消融，证明不是随意堆叠。
+* Report complete GPU-hours;
+* Provide break-even curves;
+* Limit the high-fidelity budget;
+* Show amortization advantages under multiple target PEFT methods;
+* Compare total cost with per-PEFT selectors.
 
 ---
 
-## 16. 适用场景与边界
+### 15.3 Concern: Why not directly use simple RDS+?
 
-### 16.1 适用场景
+Response:
 
-本方法适用于：
-
-1. 同一数据池下需要比较多个 PEFT 配置；
-2. AutoPEFT / PEFT search；
-3. 工业微调平台；
-4. 多任务或任务族微调；
-5. 预算有限但需要多轮实验的场景；
-6. 希望复用数据选择信号的研究或工程系统。
-
-### 16.2 不适用场景
-
-本方法不适合：
-
-1. 只训练一次单一 PEFT；
-2. 数据池很小且冗余低；
-3. 没有 validation sketch；
-4. 目标 PEFT 与训练支持空间差异极大且不愿校准；
-5. 无法承担离线元训练成本；
-6. 对安全、偏见、隐私要求极高但没有单独约束的数据选择场景。
+* Conduct compute-controlled comparisons;
+* Show that in multi-PEFT reuse scenarios, this method has lower total cost or stronger performance;
+* Analyze under which tasks/PEFT methods simple methods are sufficient, and proactively state the boundaries.
 
 ---
 
-## 17. 当前最推荐的默认配置
+### 15.4 Concern: Is the PEFT comparison fair?
 
-| 项目 | 推荐设置 |
-|---|---|
-| Backbone 范围 | 固定 family，同 family 不同尺寸 |
-| 主 PEFT 空间 | LoRA / IA3 / Bottleneck Adapter |
-| Prompt/Prefix | 作为 OOD 或附加实验 |
-| Validation sketch | 每任务 32–64 条 |
-| 样本表示 | 语义 + 难度统计 + 分层激活 |
-| PEFT 表示 | site mask + capacity + recipe + optional fingerprint |
-| Anchor 数 | 2 |
-| Horizon | \(\{1,4\}\) |
-| 高保真 pair 数 | 5k–10k 起步 |
-| 低保真代理 | site-wise gradient / response proxy |
-| Scorer 目标 | ranking + regression + proxy distillation + uncertainty |
-| 选择策略 | adaptive cluster budget |
-| OOD 策略 | 200–500 pair calibration |
+Response:
+
+* Perform reasonable hyperparameter search for each PEFT;
+* Report the final recipe for each PEFT;
+* Include the recipe in the PEFT representation;
+* Avoid claiming that “one PEFT method is absolutely better.”
 
 ---
 
-## 18. 建议保留、修改、删除与重构
+### 15.5 Concern: The generalization boundary is unclear
 
-### 18.1 建议保留
+Response:
 
-- 跨 PEFT 数据选择的核心动机；
-- PEFT 条件化效用建模；
-- PEFT 作为隐藏状态扰动的视角；
-- 第二阶段低成本全量打分；
-- 多样性约束筛选。
-
-### 18.2 建议修改
-
-- 将“跨所有 PEFT”改为“稳定 PEFT 子空间”；
-- 将“样本 + PEFT”改为“样本 + PEFT + 任务草图”；
-- 将 PEFT one-hot 改为结构化配置编码；
-- 将单次真实效用改为多保真效用；
-- 将纯回归改为排序为主、回归为辅；
-- 将 global top-k 改为自适应聚类配额。
-
-### 18.3 建议删除
-
-- 单 checkpoint、单 horizon、单 seed 的效用真值；
-- 对全量 \(N\times P\) 做真实短程更新；
-- 直接承诺跨 backbone family zero-shot；
-- 主实验覆盖不稳定 prompt 类 PEFT 的强主张。
-
-### 18.4 建议大幅重构
-
-最需要重构的是第一阶段效用建模。
-
-原始方案：
-
-> 对样本和 PEFT 做真实短程更新，得到效用标签，再训练 scorer。
-
-推荐方案：
-
-> 统一隐藏状态干预空间低保真代理  
-> + 少量真实 PEFT 短程更新高保真校正  
-> + 任务条件化 scorer 蒸馏。
-
-这样可以显著降低成本风险，并增强方法逻辑闭环。
+* Restrict the main conclusions to a fixed backbone family;
+* Treat OOD families only as additional experiments;
+* Provide calibration mode for unseen PEFT methods;
+* Clearly list failure cases.
 
 ---
 
-## 19. 后续待完成工作清单
+### 15.6 Concern: Does the task sketch cause data leakage?
 
-### 19.1 方法实现层面
+Response:
 
-- [ ] 定义 PEFT 配置 schema；
-- [ ] 实现 PEFT site mask 生成；
-- [ ] 实现样本 forward 特征缓存；
-- [ ] 实现 validation sketch 编码；
-- [ ] 实现低保真 site-wise proxy；
-- [ ] 实现高保真短程 PEFT 更新脚本；
-- [ ] 实现 scorer 模型；
-- [ ] 实现 adaptive cluster selection；
-- [ ] 实现 OOD calibration head。
-
-### 19.2 实验层面
-
-- [ ] 确定任务集合；
-- [ ] 确定候选数据池；
-- [ ] 确定主 PEFT 配置集合；
-- [ ] 跑 random / RDS+ / PPL / IFD / LESS 基线；
-- [ ] 跑单 PEFT 数据选择实验；
-- [ ] 跑跨 PEFT 泛化实验；
-- [ ] 跑成本曲线实验；
-- [ ] 跑模块消融；
-- [ ] 跑失败案例分析。
-
-### 19.3 写作层面
-
-- [ ] 明确主问题定义；
-- [ ] 明确适用边界；
-- [ ] 写出方法图；
-- [ ] 写出复杂度分析；
-- [ ] 写出 break-even 分析；
-- [ ] 写出审稿质疑应对；
-- [ ] 准备 ablation 表格模板；
-- [ ] 准备 cost-performance 图模板。
+* Strictly separate the validation sketch from the test set;
+* Clearly describe the sketch construction protocol;
+* Conduct stability experiments on sketch size and random sampling.
 
 ---
 
-## 20. 最终结论
+### 15.7 Concern: The method has too many modules and unclear contributions
 
-当前课题方向有价值，但不能直接按“跨所有 PEFT 的万能数据选择器”来写。最稳妥、最能落地、也最容易通过审稿质疑的版本是：
+Response:
 
-> **面向固定 backbone family 和稳定 PEFT 子空间，学习一个任务条件化的 PEFT-aware 数据效用 scorer。通过统一隐藏状态干预空间构造低保真代理，用少量真实短程 PEFT 更新进行高保真校正，最终在部署阶段实现对目标 PEFT 的低成本全量打分与多样性约束筛选。**
+* Focus the contributions only on three points: PEFT-conditioned utility, multi-fidelity utility learning, and deployable low-cost selection;
+* Treat other modules as necessary engineering components;
+* Ablate each module to prove it is not arbitrary stacking.
 
-这版方案的优点是：
+---
 
-- 动机成立；
-- 问题定义更清晰；
-- 成本结构可解释；
-- 方法模块有独立贡献；
-- 实验可以直接验证；
-- 审稿人即使质疑，也有对应防御策略。
+## 16. Applicable Scenarios and Boundaries
 
-最关键的下一步不是继续扩展概念，而是尽快落地三个最小闭环实验：
+### 16.1 Applicable Scenarios
 
-1. **low-fidelity proxy 是否与真实短程 PEFT 效用相关**；
-2. **加入 PEFT condition 是否优于不加 PEFT condition**；
-3. **同等成本下，本方法是否优于 RDS+ / PPL / LESS 等基线**。
+This method applies to:
 
-只要这三个实验成立，课题的主线就基本站住了。
+1. scenarios where multiple PEFT configurations need to be compared under the same data pool;
+2. AutoPEFT / PEFT search;
+3. industrial fine-tuning platforms;
+4. multi-task or task-family fine-tuning;
+5. scenarios with limited budgets but requiring multiple experimental rounds;
+6. research or engineering systems that aim to reuse data selection signals.
+
+### 16.2 Inapplicable Scenarios
+
+This method is not suitable for:
+
+1. training only a single PEFT once;
+2. very small data pools with low redundancy;
+3. no validation sketch;
+4. target PEFT that differs greatly from the training support space and no willingness to calibrate;
+5. inability to afford offline meta-training cost;
+6. data selection scenarios with extremely high requirements for safety, bias, or privacy but without separate constraints.
+
+---
+
+## 17. Current Most Recommended Default Configuration
+
+| Item                          | Recommended Setting                                          |
+| ----------------------------- | ------------------------------------------------------------ |
+| Backbone scope                | Fixed family, different sizes within the same family         |
+| Main PEFT space               | LoRA / IA3 / Bottleneck Adapter                              |
+| Prompt/Prefix                 | As OOD or additional experiments                             |
+| Validation sketch             | 32–64 samples per task                                       |
+| Sample representation         | Semantics + difficulty statistics + hierarchical activations |
+| PEFT representation           | site mask + capacity + recipe + optional fingerprint         |
+| Number of anchors             | 2                                                            |
+| Horizon                       | ({1,4})                                                      |
+| Number of high-fidelity pairs | Start with 5k–10k                                            |
+| Low-fidelity proxy            | site-wise gradient / response proxy                          |
+| Scorer objective              | ranking + regression + proxy distillation + uncertainty      |
+| Selection strategy            | adaptive cluster budget                                      |
+| OOD strategy                  | 200–500 pair calibration                                     |
+
+---
+
+## 18. Suggested Retention, Modification, Deletion, and Restructuring
+
+### 18.1 Suggested Retention
+
+* Core motivation of cross-PEFT data selection;
+* PEFT-conditioned utility modeling;
+* The perspective of PEFT as hidden-state perturbation;
+* Low-cost full-data scoring in the second stage;
+* Diversity-constrained selection.
+
+### 18.2 Suggested Modification
+
+* Change “across all PEFT methods” to “stable PEFT subspace”;
+* Change “sample + PEFT” to “sample + PEFT + task sketch”;
+* Change PEFT one-hot to structured configuration encoding;
+* Change single true utility to multi-fidelity utility;
+* Change pure regression to ranking as the primary objective and regression as secondary;
+* Change global top-k to adaptive cluster quotas.
+
+### 18.3 Suggested Deletion
+
+* Utility ground truth from a single checkpoint, single horizon, and single seed;
+* True short-horizon updates over the full (N\times P);
+* Directly promising zero-shot transfer across backbone families;
+* Strong main-experiment claims covering unstable prompt-style PEFT methods.
+
+### 18.4 Suggested Major Restructuring
+
+The part most in need of restructuring is first-stage utility modeling.
+
+Original proposal:
+
+> Perform true short-horizon updates for samples and PEFT methods, obtain utility labels, and then train a scorer.
+
+Recommended proposal:
+
+> Low-fidelity proxy in a unified hidden-state intervention space
+>
+> * high-fidelity correction with a small number of true PEFT short-horizon updates
+> * task-conditioned scorer distillation.
+
+This can significantly reduce cost risk and strengthen the logical closure of the method.
+
+---
+
+## 19. Follow-up Work Checklist
+
+### 19.1 Method Implementation
+
+* [ ] Define PEFT configuration schema;
+* [ ] Implement PEFT site mask generation;
+* [ ] Implement sample forward feature caching;
+* [ ] Implement validation sketch encoding;
+* [ ] Implement low-fidelity site-wise proxy;
+* [ ] Implement high-fidelity short-horizon PEFT update script;
+* [ ] Implement scorer model;
+* [ ] Implement adaptive cluster selection;
+* [ ] Implement OOD calibration head.
+
+### 19.2 Experiments
+
+* [ ] Determine task set;
+* [ ] Determine candidate data pool;
+* [ ] Determine main PEFT configuration set;
+* [ ] Run random / RDS+ / PPL / IFD / LESS baselines;
+* [ ] Run single-PEFT data selection experiments;
+* [ ] Run cross-PEFT generalization experiments;
+* [ ] Run cost-curve experiments;
+* [ ] Run module ablations;
+* [ ] Run failure case analysis.
+
+### 19.3 Writing
+
+* [ ] Clarify the main problem definition;
+* [ ] Clarify applicable boundaries;
+* [ ] Create the method figure;
+* [ ] Write the complexity analysis;
+* [ ] Write the break-even analysis;
+* [ ] Write responses to reviewer concerns;
+* [ ] Prepare ablation table templates;
+* [ ] Prepare cost-performance figure templates.
+
+---
+
+## 20. Final Conclusion
+
+The current research direction is valuable, but it should not be written directly as a “universal data selector across all PEFT methods.” The most robust, practical, and review-defensible version is:
+
+> **For a fixed backbone family and stable PEFT subspace, learn a task-conditioned PEFT-aware data utility scorer. Construct a low-fidelity proxy through a unified hidden-state intervention space, use a small number of true short-horizon PEFT updates for high-fidelity correction, and finally enable low-cost full-data scoring and diversity-constrained selection for the target PEFT during deployment.**
+
+The advantages of this version are:
+
+* the motivation is valid;
+* the problem definition is clearer;
+* the cost structure is explainable;
+* the method modules have independent contributions;
+* the experiments can directly verify the claims;
+* even if reviewers raise concerns, there are corresponding defense strategies.
+
+The most critical next step is not to further expand the concept, but to quickly implement three minimal closed-loop experiments:
+
+1. **whether the low-fidelity proxy correlates with true short-horizon PEFT utility**;
+2. **whether adding the PEFT condition is better than not adding the PEFT condition**;
+3. **under the same cost, whether this method outperforms baselines such as RDS+ / PPL / LESS**.
+
+As long as these three experiments hold, the main line of the project will basically stand.

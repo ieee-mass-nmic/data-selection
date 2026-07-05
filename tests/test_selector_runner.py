@@ -2,7 +2,7 @@
 
 No network / no checkpoint download: we build a small LlamaForCausalLM from a
 config and inject it (plus a trivial char tokenizer) into the runner. Skipped
-when transformers is unavailable.
+when transformers is not installed.
 """
 
 from __future__ import annotations
@@ -70,6 +70,15 @@ def test_encode_response_lm_masks_instruction():
     assert sum(enc["response_mask"]) == 3  # "d", "e", EOS
 
 
+def test_encode_response_lm_truncates_instruction_before_response():
+    tok = _CharTokenizer()
+    enc = encode_response_lm(tok, "abcdefghijklmnopqrstuvwxyz", "xy", max_len=6)
+    assert len(enc["input_ids"]) == 6
+    # The response chars plus EOS must remain supervised after truncation.
+    assert enc["response_mask"][-3:] == [1, 1, 1]
+    assert sum(enc["response_mask"]) == 3
+
+
 def test_runner_process_full_pass():
     runner, sites, hidden = _tiny_runner()
     sample = Sample(sample_id="x", instruction="what is two plus two", response="four")
@@ -95,6 +104,15 @@ def test_runner_stats_only_skips_hooks():
     res = runner.process(sample, want_grads=False, want_activations=False)
     assert res.model_stats.shape == (7,)
     assert res.activation is None
+    assert res.site_grads is None
+
+
+def test_runner_activation_only_skips_grad_hooks():
+    runner, sites, _ = _tiny_runner()
+    sample = Sample(sample_id="z", instruction="hello", response="world")
+    res = runner.process(sample, want_grads=False, want_activations=True)
+    assert res.activation is not None
+    assert res.activation.shape == (len(sites.layer_indices) * 8,)
     assert res.site_grads is None
 
 

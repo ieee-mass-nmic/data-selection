@@ -1,4 +1,4 @@
-"""Experiment harness for PCU-Select (see docs/pcu_select_experiment_design.md).
+"""Experiment harness for PCU-Select (see docs/experiment_design.md).
 
 This sub-package contains the *reusable* pieces shared by the E1–E5 runner
 scripts under `scripts/experiments/`:

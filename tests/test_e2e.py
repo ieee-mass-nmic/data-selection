@@ -1,7 +1,7 @@
 """End-to-end closure: cached features + labels → scorer training → apply/select.
 
 Exercises the real P3 wiring (`run_scorer_training` → `ScorerInference` →
-`select`) on synthetic disk artifacts, so no model download is needed. This is
+`select`) on generated disk artifacts, so no model download is needed. This is
 the closure the offline pipeline performs at its `scorer_train` + apply stages.
 """
 
@@ -110,6 +110,16 @@ def test_train_then_apply_select(tmp_path):
     assert 0 < len(selected) <= 10
     assert set(selected) <= set(ids)
     assert len(set(selected)) == len(selected)  # no duplicates
+
+    subset_ids = ids[:12]
+    subset_pool = JsonlPool([Sample(sample_id=sid, instruction="i", response="r")
+                             for sid in subset_ids])
+    subset_selected = run_apply(
+        candidate_pool=subset_pool, peft_target=pefts[0], task_target=task,
+        budget=5, scorer_ckpt=ckpt, cfg=ApplyConfig(), workdir=tmp_path,
+    )
+    assert 0 < len(subset_selected) <= 5
+    assert set(subset_selected) <= set(subset_ids)
 
 
 def test_training_infers_scorer_dims(tmp_path):

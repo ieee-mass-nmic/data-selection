@@ -27,12 +27,15 @@ def main() -> None:
     parser.add_argument("--workdir", type=Path, required=True)
     parser.add_argument("--peft-configs", type=Path, nargs="+", required=True)
     parser.add_argument("--task-sketches", type=Path, nargs="+", required=True)
+    parser.add_argument("--n-layers-total", type=int, default=32,
+                        help="backbone depth used to materialize Ω; must match build_features")
+    parser.add_argument("--n-layers-sig", type=int, default=8)
     args = parser.parse_args()
 
     log = get_logger("compute_lo_fidelity")
     layout = WorkDirLayout(args.workdir)
     cache = FeatureCache(layout.features)
-    sites = SiteSpace.uniform(n_layers_total=32, k=8)
+    sites = SiteSpace.uniform(n_layers_total=args.n_layers_total, k=args.n_layers_sig)
     scorer = LoFidelityScorer(sites, cache)
 
     rows = []

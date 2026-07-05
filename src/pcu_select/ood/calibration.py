@@ -85,3 +85,43 @@ def fit_calibration(
         opt.step()
     head.eval()
     return None
+
+
+def save_calibration(head: CalibrationHead, path: Path | str) -> Path:
+    """Persist a fitted calibration head so it can be reused at apply-time."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    in_dim = head.linear.in_features
+    torch.save({"in_dim": int(in_dim), "state_dict": head.state_dict()}, path)
+    return path
+
+
+def load_calibration(path: Path | str, device: str = "cpu") -> CalibrationHead:
+    """Load a calibration head saved by `save_calibration`."""
+    blob = torch.load(Path(path), map_location=device)
+    head = CalibrationHead(in_dim=int(blob["in_dim"]))
+    head.load_state_dict(blob["state_dict"])
+    head.to(device).eval()
+    return head
+
+
+def apply_calibration(
+    head: CalibrationHead,
+    *,
+    mu: np.ndarray,
+    z_x: np.ndarray,
+    z_p: np.ndarray,
+    z_t: np.ndarray,
+    device: str = "cpu",
+) -> np.ndarray:
+    """Return calibrated μ for a full candidate batch (numpy in, numpy out)."""
+    device_t = torch.device(device if (device == "cpu" or torch.cuda.is_available()) else "cpu")
+    head.to(device_t).eval()
+    with torch.no_grad():
+        out = head(
+            torch.as_tensor(mu, device=device_t),
+            torch.as_tensor(z_x, device=device_t),
+            torch.as_tensor(z_p, device=device_t),
+            torch.as_tensor(z_t, device=device_t),
+        )
+    return out.detach().cpu().numpy()

@@ -1,10 +1,11 @@
 """E5 — unseen PEFT, with OOD detection + calibration (design §6).
 
-Stratifies unseen targets into three levels and reports zero-shot vs calibrated
-behaviour for each, plus the Mahalanobis d² that the OOD detector uses:
+Stratifies unseen targets into three levels and reports uncalibrated vs
+calibrated behaviour for each, plus the Mahalanobis d² that the OOD detector
+uses:
 
-  L0 ID-interpolation : unseen config inside the SEEN convex hull → zero-shot
-  L1 ID-extrapolation : extreme config            → zero-shot + cal-200/500
+  L0 ID-interpolation : unseen config inside the SEEN convex hull
+  L1 ID-extrapolation : extreme config with optional cal-200/500
   L2 OOD-family       : prefix / ptuning / bitfit → must calibrate
 
 Calibration consumes a SMALL pre-computed high-fidelity label set for the target
@@ -12,12 +13,11 @@ PEFT (`--calib-labels <parquet>` with columns sample_id, peft_id, task_id,
 u_hi). Generate it with scripts/experiments/build_calib_labels.py on 200/500
 sampled samples (design §13.2).
 
-IMPORTANT (implementation boundary): the native short-update backend cannot
-train prefix/ptuning, so calibration labels can only be produced for native
-families (lora / ia3 / adapter / bitfit). The L2 prefix/ptuning targets
-therefore run zero-shot only and are reported as the generalization failure
-boundary (design §6.5); bitfit (also L2) *can* be calibrated. If labels for a
-(peft, task) are missing, only zero-shot is run and a note is logged.
+Native short-update labels are produced for lora / ia3 / adapter / bitfit.
+Prompt families are evaluated through the common target-training path and can
+use externally supplied calibration labels with the same parquet schema. If
+labels for a (peft, task) are absent, E5 reports the uncalibrated PCU mode and
+logs the missing calibration source.
 
 Per design §1.7 each cell repeats over `--seeds` (default 0 1 2). OOD stats and
 the per-sample features are task/seed-independent and computed once.
@@ -91,7 +91,7 @@ def main() -> None:
                     "is_ood": bool(d2 > ood.threshold)}
             mu, sigma = ctx.scorer().score(z_x, z_p, z_t)
 
-            # zero-shot: deterministic selection, repeated target-train per seed
+            # Uncalibrated PCU selection, repeated target-train per seed.
             res = cluster_select(sample_ids=ids, mu=mu, sigma=sigma,
                                  joint_embeddings=tc.inp.joint, budget=_k(budget, len(ids)),
                                  cfg=SelectorConfig())
@@ -105,7 +105,7 @@ def main() -> None:
                 if calib is not None else None
             if sub is None or sub.empty:
                 why = "no calib labels" if calib is not None else "no --calib-labels"
-                print(f"  {task}/{name}: {why}; zero-shot only")
+                print(f"  {task}/{name}: {why}; continuing with uncalibrated mode")
             else:
                 for n_cal in args.calib_sizes:
                     mu_cal = _calibrate(z_x, z_p, z_t, mu, sub, ids, n_cal, args.device)
@@ -118,7 +118,8 @@ def main() -> None:
                                            method_tag=f"pcu_cal{n_cal}", dense=mu_cal,
                                            extra={**meta, "mode": f"cal{n_cal}"})
 
-            # reference baselines (influence skips prefix/ptuning — can't recompute its signal)
+            # Reference baselines are attempted for every target; unsupported
+            # signal combinations are reported once per method.
             for m in REFERENCE_METHODS:
                 for seed in args.seeds:
                     try:

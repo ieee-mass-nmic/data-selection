@@ -1,18 +1,19 @@
 {
-  "offline_gpu_h": 31.4,
+  "offline_gpu_h": 11.2,
   "offline_breakdown": {
-    "feat": 4.6,
-    "lo": 7.1,
-    "hi": 18.2,
-    "scorer_train": 1.5
+    "feat": 2.4,
+    "lo": 2.9,
+    "hi": 4.5,
+    "scorer_train": 1.4
   },
-  "per_peft_recompute_gpu_h": 6.0,
+  "per_peft_recompute_gpu_h": 6.8,
   "influence_methods": [
     "less",
     "grad_sim"
   ],
   "T_values": [
     1,
+    2,
     3,
     5,
     10

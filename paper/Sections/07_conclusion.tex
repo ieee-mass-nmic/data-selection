@@ -1,9 +1,3 @@
 \section{Conclusion}
 
-In this paper, we study cross-PEFT data-efficient fine-tuning, where the goal is to select useful training samples for a target PEFT method under a limited data budget. We show that sample utility can vary across PEFT methods, motivating the need for PEFT-aware data selection.
-
-We propose a PEFT-conditioned utility scoring framework that predicts sample usefulness based on sample, task, and PEFT representations. The learned scorer can be reused across target PEFT configurations and enables efficient subset selection without recomputing utility from scratch for every PEFT method.
-
-Experiments across multiple PEFT configurations demonstrate that the proposed method improves over random selection and provides better cross-PEFT transferability. Further analyses highlight the role of PEFT conditioning, the behavior under unseen PEFT settings, and the computational benefits of reusable utility modeling.
-
-Future work includes extending the framework to larger model families, more diverse PEFT configurations, and online data selection settings where the selected subset is updated dynamically during fine-tuning.
+Data-efficient and parameter-efficient fine-tuning interact through the trainable subspace. PCU-Select makes that interaction explicit by conditioning data utility on the target task and PEFT configuration. Its intervention-site representation lets one scorer reuse cached sample and task signatures while still changing the selected subset when the PEFT method, rank, placement, or recipe changes. The experiments show that this conditioning improves over PEFT-agnostic selection, matches per-PEFT LESS on average, and amortizes the expensive utility construction across multiple target configurations. The strongest boundary is also clear: far OOD PEFT families need calibration before the offline scorer can be trusted.

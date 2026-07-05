@@ -14,11 +14,12 @@ Backends:
     loaded backbone (these need prompt/KV injection the native backend defers).
 
 Downstream metric:
-  - `eval_loss`: always-available mean response-LM loss on a held-out eval set.
-  - `metric`: by default `-eval_loss` (higher = better). For real task metrics
-    (EM / pass@k / F1), pass a `task_metric(model, tokenizer) -> float` callable
-    — e.g. a thin wrapper around lm-eval-harness. This is the documented hook;
-    inline eval stays dependency-free.
+  - `eval_loss`: mean response-LM loss on a held-out eval set, logged as an
+    auxiliary diagnostic.
+  - `metric`: the task-native score (EM / pass@k / F1 / accuracy / judge score).
+    Callers must pass a `task_metric(model, tokenizer)` callback, typically a
+    thin wrapper around the task's evaluator. `eval_loss` is never used as a
+    replacement for the primary metric.
 """
 
 from __future__ import annotations
@@ -36,7 +37,8 @@ from pcu_select.hi_fidelity.native_peft import SUPPORTED_FAMILIES, attach_peft
 from pcu_select.types import PEFTConfig, PEFTRecipe, Sample, ValidationSketch
 from pcu_select.utils import get_logger
 
-TaskMetric = Callable[[Any, Any], float]
+TaskMetricValue = float | tuple[str, float]
+TaskMetric = Callable[[Any, Any], TaskMetricValue]
 
 
 @dataclass
@@ -70,15 +72,25 @@ class TargetTrainResult:
 def load_backbone(model_id: str, *, device: str = "cuda", dtype: str = "bfloat16"):
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
+    resolved_device = _resolve_device(device)
     tokenizer_cls = cast(Any, AutoTokenizer)
     model_cls = cast(Any, AutoModelForCausalLM)
     tok = tokenizer_cls.from_pretrained(model_id)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
-    torch_dtype = getattr(torch, dtype) if device == "cuda" else torch.float32
+    torch_dtype = getattr(torch, dtype) if resolved_device.startswith("cuda") else torch.float32
     model = model_cls.from_pretrained(model_id, torch_dtype=torch_dtype)
-    model.to(device if torch.cuda.is_available() else "cpu")
+    model.to(resolved_device)
     return model, tok
+
+
+def _resolve_device(device: str) -> str:
+    if device.startswith("cuda") and not torch.cuda.is_available():
+        raise RuntimeError(
+            f"target training requested device={device!r}, but CUDA is not available. "
+            "Pass --device cpu for a CPU run."
+        )
+    return device
 
 
 # ---------------------------------------------------------------------------
@@ -98,7 +110,7 @@ def _collate(tok: Any, batch: list[Sample], max_len: int, device: str):
         ids[i, :n] = torch.tensor(e["input_ids"])
         attn[i, :n] = torch.tensor(e["attention_mask"])
         rmasks.append(torch.tensor(e["response_mask"]))
-    dev = device if torch.cuda.is_available() else "cpu"
+    dev = _resolve_device(device)
     return ids.to(dev), attn.to(dev), rmasks
 
 
@@ -163,7 +175,7 @@ def _attach_peft_library(peft: PEFTConfig, cfg: TargetTrainConfig) -> _Trainable
 @torch.no_grad()
 def _eval_loss(model: Any, tok: Any, sketch: ValidationSketch, cfg: TargetTrainConfig) -> float:
     if not sketch.samples:
-        return float("nan")
+        raise ValueError("target evaluation requires a non-empty held-out eval set")
     model.eval()
     total = 0.0
     for s in sketch.samples:
@@ -193,6 +205,16 @@ def train_and_eval(
     adapter is detached in `finally`, restoring the backbone). prefix/ptuning
     always load a fresh backbone internally.
     """
+    if not samples:
+        raise ValueError("target training requires at least one selected sample")
+    if not eval_set.samples:
+        raise ValueError("target evaluation requires a non-empty held-out eval set")
+    if task_metric is None:
+        raise ValueError(
+            "target training requires task_metric; eval_loss is logged as an auxiliary "
+            "diagnostic and is not used as the primary downstream metric"
+        )
+
     log = get_logger("eval.target_train")
     torch.manual_seed(cfg.seed)
     rng = np.random.default_rng(cfg.seed)
@@ -217,11 +239,12 @@ def train_and_eval(
         step = 0
         cursor = 0
         while step < cfg.max_steps and len(samples) > 0:
-            if cursor + cfg.batch_size > len(order):
+            batch_size = max(1, min(cfg.batch_size, len(samples)))
+            if cursor + batch_size > len(order):
                 order = rng.permutation(len(samples))
                 cursor = 0
-            batch = [samples[order[cursor + j]] for j in range(cfg.batch_size)]
-            cursor += cfg.batch_size
+            batch = [samples[order[cursor + j]] for j in range(batch_size)]
+            cursor += batch_size
             ids, attn, rmasks = _collate(tok, batch, cfg.max_len, cfg.device)
             loss = _batch_loss(model, ids, attn, rmasks)
             opt.zero_grad(set_to_none=True)
@@ -236,12 +259,13 @@ def train_and_eval(
         train_wall = time.time() - t0
 
         eval_loss = _eval_loss(model, tok, eval_set, cfg)
-        if task_metric is not None:
-            metric = float(task_metric(model, tok))
-            metric_name = "task_metric"
+        metric_value = task_metric(model, tok)
+        if isinstance(metric_value, tuple):
+            metric_name, raw_metric = metric_value
+            metric = float(raw_metric)
         else:
-            metric = -eval_loss
-            metric_name = "neg_eval_loss"
+            metric_name = str(getattr(task_metric, "metric_name", "task_metric"))
+            metric = float(metric_value)
     finally:
         trainable.detach()
 

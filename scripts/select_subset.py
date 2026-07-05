@@ -24,6 +24,12 @@ def main() -> None:
     parser.add_argument("--workdir", type=Path, required=True)
     parser.add_argument("--lambda-unc", type=float, default=0.2)
     parser.add_argument("--cluster-alpha", type=float, default=0.6)
+    parser.add_argument("--min-cluster-size", type=int, default=None,
+                        help="floor on per-cluster quota to protect diverse clusters")
+    parser.add_argument("--n-layers-total", type=int, default=32,
+                        help="backbone depth; must match the scorer's training")
+    parser.add_argument("--calibration-ckpt", type=Path, default=None,
+                        help="optional pre-fit calibration head (see ood.calibration.save_calibration)")
     args = parser.parse_args()
 
     log = get_logger("select_subset")
@@ -31,7 +37,12 @@ def main() -> None:
     peft = load_peft_config(args.peft)
     sketch = load_sketch(args.sketch)
     task = TaskConfig(name=args.task_name, task_id=sketch.task_id, sketch=sketch)
-    cfg = ApplyConfig(lambda_unc=args.lambda_unc, cluster_alpha=args.cluster_alpha)
+    cfg = ApplyConfig(
+        lambda_unc=args.lambda_unc,
+        cluster_alpha=args.cluster_alpha,
+        min_cluster_size=args.min_cluster_size,
+        n_layers_total=args.n_layers_total,
+    )
     budget = args.budget if args.budget >= 1 else float(args.budget)
     ids = run_apply(
         candidate_pool=pool,
@@ -41,6 +52,7 @@ def main() -> None:
         scorer_ckpt=args.scorer,
         cfg=cfg,
         workdir=args.workdir,
+        calibration_ckpt=args.calibration_ckpt,
     )
     log.info(f"selected {len(ids)} samples")
 

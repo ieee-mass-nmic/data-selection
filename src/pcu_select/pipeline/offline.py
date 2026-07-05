@@ -278,11 +278,14 @@ def _build_hi_labels(*, meta_pool: DatasetLike, pefts: Sequence[PEFTConfig],
 
     # --- anchors θ_base, θ_warm (design §10.1) -----------------------------
     anchors.register(AnchorSpec(anchor_id="base", checkpoint_path=Path(backbone), note="pretrained"))
-    slice_samples = []
-    for i, s in enumerate(meta_pool):
-        if i >= cfg.anchor_warm_slice:
-            break
-        slice_samples.append(s)
+    # Design §10.1: warm anchor trains on a RANDOM slice of the meta-pool (not the
+    # first N, which biases θ_warm toward whatever sits at the head of the pool).
+    # Sampling is seeded for reproducibility.
+    n_total = len(meta_pool)
+    k_slice = min(cfg.anchor_warm_slice, n_total)
+    rng = np.random.default_rng(cfg.global_seed)
+    chosen = set(int(i) for i in rng.choice(n_total, size=k_slice, replace=False))
+    slice_samples = [s for i, s in enumerate(meta_pool) if i in chosen]
     slice_path = anchors.root / "warm_slice.jsonl"
     JsonlPool(slice_samples).to_jsonl(slice_path)
     warm = build_warm_anchor(

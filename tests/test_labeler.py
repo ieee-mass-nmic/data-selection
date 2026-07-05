@@ -1,8 +1,4 @@
-"""HiFidelityLabeler orchestration + RankNorm aggregation (design §10.3).
-
-No model: a fake updater returns deterministic deltas so we can assert the
-rank-normalization and horizon/anchor aggregation are correct.
-"""
+"""HiFidelityLabeler orchestration + RankNorm aggregation (design §10.3)."""
 
 from __future__ import annotations
 
@@ -10,11 +6,11 @@ from pathlib import Path
 
 from pcu_select.hi_fidelity.anchors import AnchorRegistry, AnchorSpec
 from pcu_select.hi_fidelity.labeler import HiFidelityLabeler, LabelerConfig
-from pcu_select.hi_fidelity.sampler import TripleSample
-from pcu_select.types import PEFTConfig, PEFTRecipe, Sample, ValidationSketch
+from pcu_select.hi_fidelity.sampler import TripleSample, phase1_stratified
+from pcu_select.types import PEFTConfig, PEFTRecipe, Sample, TaskConfig, ValidationSketch
 
 
-class _FakeUpdater:
+class _DeterministicUpdater:
     """delta depends only on sample_id → deterministic, rank-able."""
 
     def __init__(self, scale: float = 1.0):
@@ -38,7 +34,7 @@ def _make_labeler(n_samples=4, anchors=2, scale_per_anchor=(1.0, 2.0)):
     scales = iter(scale_per_anchor)
 
     def factory(spec):
-        return _FakeUpdater(scale=next(scales))
+        return _DeterministicUpdater(scale=next(scales))
 
     labeler = HiFidelityLabeler(
         anchors=reg, samples_by_id=samples, pefts_by_id={"p0": peft},
@@ -81,3 +77,24 @@ def test_sigma_est_zero_when_anchors_agree_in_rank():
 def test_empty_triples_returns_empty():
     labeler, _, _ = _make_labeler()
     assert labeler.run([]) == []
+
+
+def test_phase1_stratified_fills_budget_across_many_strata():
+    samples = [f"s{i}" for i in range(8)]
+    clusters = {sid: i % 4 for i, sid in enumerate(samples)}
+    pefts = [
+        PEFTConfig(peft_id="p0", family="lora", target_modules=["q_proj"],
+                   target_layers=[0], rank=4),
+        PEFTConfig(peft_id="p1", family="ia3", target_modules=["v_proj"],
+                   target_layers=[0]),
+    ]
+    sketch = ValidationSketch(task_id="t0", samples=[], sketch_seed=0)
+    tasks = [TaskConfig(name="t0", task_id="t0", sketch=sketch)]
+
+    triples = phase1_stratified(
+        sample_ids=samples, sample_cluster=clusters, pefts=pefts,
+        tasks=tasks, budget=5, seed=0,
+    )
+
+    assert len(triples) == 5
+    assert all(t.phase == 1 for t in triples)

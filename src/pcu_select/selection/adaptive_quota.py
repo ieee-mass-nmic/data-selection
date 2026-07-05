@@ -41,17 +41,55 @@ def allocate_cluster_budgets(
     cluster_sizes: dict[int, int],
     total_budget: int,
     alpha: float,
+    min_cluster_size: int | None = None,
 ) -> dict[int, int]:
-    """b_k = round(B · (v_k^+)^α · |C_k|^{1-α} / Z) with overflow redistribution."""
+    """b_k = round(B · (v_k^+)^α · |C_k|^{1-α} / Z) with overflow redistribution.
+
+    If `min_cluster_size` is set (design §12.2/§12.3), every cluster is first
+    guaranteed a floor of `min(min_cluster_size, |C_k|)` so diverse-but-low-value
+    clusters are not starved; the weighted allocation then distributes whatever
+    budget remains. Floors are never trimmed below by the overflow logic. If the
+    floors alone exceed the budget, they are reduced greedily from the
+    lowest-weight clusters so the total still equals `total_budget`.
+    """
     keys = list(cluster_values.keys())
-    weights = np.array([
-        max(cluster_values[k], 0.0) ** alpha * (cluster_sizes[k]) ** (1 - alpha)
-        for k in keys
-    ], dtype=np.float64)
+    raw_values = np.array([cluster_values[k] for k in keys], dtype=np.float64)
+    if raw_values.size:
+        # Scores can be globally negative because q = mu - lambda*sigma is not
+        # calibrated to be positive. Shift values before exponentiating so only
+        # relative cluster quality matters; if all clusters tie, fall back to
+        # size-only allocation.
+        shifted = raw_values - min(float(raw_values.min()), 0.0)
+        if np.all(shifted <= 1e-12):
+            value_term = np.ones_like(shifted)
+        elif alpha == 0:
+            value_term = np.ones_like(shifted)
+        else:
+            value_term = np.maximum(shifted, 0.0) ** alpha
+    else:
+        value_term = np.zeros((0,), dtype=np.float64)
+    sizes_arr = np.array([cluster_sizes[k] for k in keys], dtype=np.float64)
+    weights = value_term * np.maximum(sizes_arr, 0.0) ** (1 - alpha)
+
+    floor = {k: 0 for k in keys}
+    if min_cluster_size:
+        floor = {k: min(int(min_cluster_size), cluster_sizes[k]) for k in keys}
+        over_floor = sum(floor.values()) - total_budget
+        if over_floor > 0:
+            # too many floors to fit the budget; shed from least-valuable clusters
+            for i in np.argsort(weights):
+                if over_floor <= 0:
+                    break
+                k = keys[i]
+                cut = min(floor[k], over_floor)
+                floor[k] -= cut
+                over_floor -= cut
+
     z = max(weights.sum(), 1e-12)
-    raw = total_budget * weights / z
+    remaining_budget = max(total_budget - sum(floor.values()), 0)
+    raw = remaining_budget * weights / z
     # round + cap by cluster size; redistribute leftover greedily by weight
-    b = {k: min(int(round(raw[i])), cluster_sizes[k]) for i, k in enumerate(keys)}
+    b = {k: min(floor[k] + int(round(raw[i])), cluster_sizes[k]) for i, k in enumerate(keys)}
     remaining = total_budget - sum(b.values())
     if remaining > 0:
         order = np.argsort(-weights)
@@ -64,13 +102,13 @@ def allocate_cluster_budgets(
             b[k] += take
             remaining -= take
     elif remaining < 0:
-        # over-allocated; trim from clusters with smallest weight
+        # over-allocated; trim from clusters with smallest weight, never below floor
         order = np.argsort(weights)
         for i in order:
             if remaining >= 0:
                 break
             k = keys[i]
-            cut = min(b[k], -remaining)
+            cut = min(b[k] - floor[k], -remaining)
             b[k] -= cut
             remaining += cut
     return b

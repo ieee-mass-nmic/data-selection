@@ -69,10 +69,13 @@ class SiteHookManager:
         def hook(_m, _inp, out):
             t = out if isinstance(out, torch.Tensor) else out[0]
             buf = self.buffers.setdefault(site, SiteCapture())
-            t.retain_grad()
             buf.activation = t
-            # capture the gradient when it becomes available
-            t.register_hook(lambda g, _site=site: self._on_grad(_site, g))
+            # Activation-only callers run under torch.no_grad(); in that mode
+            # tensors do not require grad and retain_grad/register_hook would fail.
+            if t.requires_grad:
+                t.retain_grad()
+                # capture the gradient when it becomes available
+                t.register_hook(lambda g, _site=site: self._on_grad(_site, g))
             return out
         return hook
 

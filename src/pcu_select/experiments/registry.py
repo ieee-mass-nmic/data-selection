@@ -1,8 +1,8 @@
 """The experiment matrix: PEFT registry, task set, model set, budgets.
 
 This is the single source of truth for the configurations referenced by
-docs/pcu_select_experiment_design.md §1.4 (PEFT registry), §1.3 (tasks),
-§1.1 (models) and §1.5 (budgets). The E1–E5 runner scripts import from here so
+docs/experiment_design.md §1.4 (PEFT registry), §1.3 (tasks), §1.1 (models)
+and §1.5 (budgets). The E1–E5 runner scripts import from here so
 that every experiment draws from the *same* registry and nothing drifts.
 
 `PeftSpec` is backbone-agnostic (it stores a `layer_range` like "all"/"low"

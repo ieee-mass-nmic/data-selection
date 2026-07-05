@@ -1,0 +1,6 @@
+PWD /Users/bytedance/code/data-selection/paper
+INPUT /usr/local/texlive/2026/texmf.cnf
+INPUT /usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf
+INPUT /usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt
+INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/tools/.tex
+OUTPUT .log

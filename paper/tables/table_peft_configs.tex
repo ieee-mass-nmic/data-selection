@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Representative PEFT configurations. Parameter counts come from the registry counter for the Llama2-7B backbone.}
+\label{tab:peft-configs}
+\begin{tabular}{llrrl}
+\toprule
+Config & Family & Params & \% bb & Sites \\
+\midrule
+L-r8-qv & lora & 4.19M & 0.062 & 8/24 \\
+L-r8-mlp & lora & 4.19M & 0.062 & 8/24 \\
+IA3-attnmlp & ia3 & 0.39M & 0.006 & 16/24 \\
+AD-b64 & adapter & 16.78M & 0.249 & 24/24 \\
+L-r4-qv & lora & 2.10M & 0.031 & 8/24 \\
+L-r32-qkvo & lora & 33.55M & 0.498 & 8/24 \\
+\bottomrule
+\end{tabular}
+\end{table}

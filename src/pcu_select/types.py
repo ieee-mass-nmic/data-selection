@@ -208,6 +208,10 @@ class ApplyConfig:
     min_cluster_size: int | None = None
     enable_calibration: bool = True
     ood_quantile: float = 0.95
+    # Selector-model / backbone depth used to materialize the site set Ω.
+    # Must match the backbone whose z_p target_layers are being scored.
+    n_layers_total: int = 32
+    n_layers_signature: int = 8
 
 
 # ---------------------------------------------------------------------------

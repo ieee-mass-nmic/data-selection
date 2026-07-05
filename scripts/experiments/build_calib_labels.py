@@ -10,10 +10,10 @@ Output columns match `labels/hi_fidelity.parquet`
 (sample_id, peft_id, task_id, u_hi, ...) — exactly what `run_e5._calibrate`
 reads back.
 
-Implementation boundary: the native short-update backend supports only
-lora / ia3 / adapter / bitfit (hi_fidelity.native_peft.SUPPORTED_FAMILIES).
-prefix / ptuning targets cannot be labelled and are skipped with a warning, so
-E5's L2 prefix/ptuning run zero-shot only (design §6.5).
+This builder uses the native short-update backend, which labels
+lora / ia3 / adapter / bitfit families (hi_fidelity.native_peft.SUPPORTED_FAMILIES).
+Prompt-family calibration can be supplied to `run_e5.py` through an external
+parquet with the same schema.
 
 Example:
     python scripts/experiments/build_calib_labels.py \
@@ -44,8 +44,8 @@ from pcu_select.hi_fidelity.native_peft import SUPPORTED_FAMILIES
 from pcu_select.types import WorkDirLayout
 from pcu_select.utils import get_logger
 
-# E5 calibration targets the native backend can actually label (design §6.2:
-# L1 extrapolation + L2 bitfit). prefix/ptuning are excluded by SUPPORTED_FAMILIES.
+# E5 calibration targets covered by the native label builder (design §6.2:
+# L1 extrapolation + L2 bitfit).
 DEFAULT_PEFTS = ["L-r64-all", "AD-b256", "L-r8-highlayers", "BF"]
 
 
@@ -90,12 +90,12 @@ def main() -> None:
     for name in args.pefts:
         peft = resolve_peft(name, args.model)
         if peft.family not in SUPPORTED_FAMILIES:
-            log.warning(f"skip {name}: family {peft.family!r} has no native short-update "
-                        f"backend (prefix/ptuning) — E5 runs it zero-shot only.")
+            log.warning(f"skip {name}: family {peft.family!r} is outside the native "
+                        f"short-update label builder; provide external labels for calibration.")
             continue
         pefts_by_id[peft.peft_id] = peft
     if not pefts_by_id:
-        raise SystemExit("no labelable target PEFTs (all prefix/ptuning?); nothing to do.")
+        raise SystemExit("no target PEFTs selected for native calibration label generation.")
 
     # ---- per-task selection sketches act as the validation set L_V ----
     sketches_by_id = {}

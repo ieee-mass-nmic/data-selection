@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python -c \"import numpy,pandas,sklearn; print\\('core ok'\\)\")",
+      "Bash(.venv/bin/python -c \"import torch;print\\('torch ok'\\)\")",
+      "Bash(.venv/bin/python -m pytest tests/test_selection.py tests/test_stats.py -q)",
+      "Bash(.venv/bin/python -m pytest tests/ -q)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(.venv/bin/python -c \"import pcu_select.pipeline.apply, pcu_select.ood.calibration, pcu_select.selection.adaptive_quota; print\\('imports OK'\\)\")",
+      "Bash(latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex)",
+      "Bash(awk -F'[\\(]' '{print $2}')"
+    ]
+  }
+}

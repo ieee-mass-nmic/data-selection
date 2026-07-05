@@ -16,10 +16,11 @@ ranking metrics + set stats, skips target training).
 from __future__ import annotations
 
 import argparse
+from importlib import import_module
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -28,7 +29,7 @@ from pcu_select.baselines import BaselineInputs, score_baseline, select_baseline
 from pcu_select.data import JsonlPool, load_sketch
 from pcu_select.eval import metrics
 from pcu_select.eval.target_train import TargetTrainConfig, load_backbone, train_and_eval
-from pcu_select.experiments import MODELS, ResultRow, resolve_peft, write_result
+from pcu_select.experiments import MODELS, TASKS, ResultRow, resolve_peft, write_result
 from pcu_select.features.cache import FeatureCache
 from pcu_select.peft_space.encoder import encode_peft
 from pcu_select.peft_space.site_mask import SiteSpace
@@ -47,6 +48,7 @@ from pcu_select.utils import get_logger
 log = get_logger("experiments")
 NDCG_K = 100
 TOPK = 100
+MetricFactory = Callable[..., Callable[[Any, Any], float | tuple[str, float]]]
 
 
 # ---------------------------------------------------------------------------
@@ -62,6 +64,11 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
                         help="Scorer ckpt for the `pcu` method (default: <workdir>/scorer/ckpt_b.pt).")
     parser.add_argument("--eval-dir", type=Path, required=True,
                         help="Dir with held-out eval sets <task>.jsonl for target eval.")
+    parser.add_argument("--task-metric-factory", type=str, default=None,
+                        help=("Python callable module:function. It is called once per task as "
+                              "factory(task_name=..., task_id=..., metric_name=..., "
+                              "eval_set=..., args=...) and must return "
+                              "task_metric(model, tokenizer). Required unless --selection-only."))
     parser.add_argument("--model", type=str, default="llama2-7b",
                         help="Backbone tag from experiments.registry.MODELS.")
     parser.add_argument("--tasks", type=str, nargs="+", default=["gsm8k", "humaneval", "mmlu", "tydiqa"])
@@ -75,8 +82,24 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--eval-cap", type=int, default=200, help="Max held-out eval samples.")
     parser.add_argument("--selection-only", action="store_true",
                         help="Skip target training; record selection + ranking metrics only.")
+    parser.add_argument("--allow-missing-hi-labels", action="store_true",
+                        help=("Allow runs without <workdir>/labels/hi_fidelity.parquet; ranking "
+                              "metrics are recorded as NaN. Omit for final experiments."))
     parser.add_argument("--results", type=Path, default=None,
                         help="Results JSONL (default: <workdir>/results/<EXP>.jsonl).")
+
+
+def _load_callable(spec: str) -> Callable[..., Any]:
+    module_name, sep, attr = spec.partition(":")
+    if not sep or not module_name or not attr:
+        raise ValueError(f"expected callable spec 'module:function', got {spec!r}")
+    module = import_module(module_name)
+    obj: Any = module
+    for part in attr.split("."):
+        obj = getattr(obj, part)
+    if not callable(obj):
+        raise TypeError(f"{spec!r} resolved to a non-callable object")
+    return obj
 
 
 # ---------------------------------------------------------------------------
@@ -88,6 +111,7 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
 class TaskCtx:
     name: str
     task_id: str
+    metric_name: str
     sketch: ValidationSketch  # selection query
     eval_set: ValidationSketch  # held-out target eval
     inp: BaselineInputs
@@ -101,6 +125,14 @@ class RunContext:
         self.experiment = experiment
         self.layout = WorkDirLayout(args.workdir)
         self.cache = FeatureCache(self.layout.features)
+        self._metric_factory = (
+            _load_callable(args.task_metric_factory) if args.task_metric_factory else None
+        )
+        if not args.selection_only and self._metric_factory is None:
+            raise ValueError(
+                "full target evaluation requires --task-metric-factory. "
+                "Use --selection-only for selection/ranking smoke tests without target training."
+            )
         n_layers = MODELS[args.model].n_layers
         self.sites = SiteSpace.uniform(n_layers_total=n_layers, k=8)
         self.pool = JsonlPool.from_jsonl(args.pool)
@@ -110,6 +142,7 @@ class RunContext:
         self._scorer: ScorerInference | None = None
         self._hi: pd.DataFrame | None = self._load_hi_labels()
         self._tasks: dict[str, TaskCtx] = {}
+        self._task_metrics: dict[str, Callable[[Any, Any], float | tuple[str, float]]] = {}
 
     # ---- lazy heavy resources ----
     def backbone(self) -> tuple[Any, Any]:
@@ -126,12 +159,43 @@ class RunContext:
 
     def _load_hi_labels(self) -> pd.DataFrame | None:
         p = self.layout.labels / "hi_fidelity.parquet"
-        return pd.read_parquet(p) if p.exists() else None
+        if p.exists():
+            return pd.read_parquet(p)
+        if self.args.allow_missing_hi_labels:
+            return None
+        raise FileNotFoundError(
+            f"missing high-fidelity labels at {p}. Run build_hi_fidelity.py first, or pass "
+            "--allow-missing-hi-labels for a selection-only plumbing check."
+        )
+
+    def task_metric(self, tc: TaskCtx) -> Callable[[Any, Any], float | tuple[str, float]] | None:
+        if self._metric_factory is None:
+            return None
+        if tc.task_id not in self._task_metrics:
+            metric = self._metric_factory(
+                task_name=tc.name,
+                task_id=tc.task_id,
+                metric_name=tc.metric_name,
+                eval_set=tc.eval_set,
+                args=self.args,
+            )
+            if not callable(metric):
+                raise TypeError("--task-metric-factory must return a callable task metric")
+            if not hasattr(metric, "metric_name"):
+                try:
+                    setattr(metric, "metric_name", tc.metric_name)
+                except Exception:
+                    pass
+            self._task_metrics[tc.task_id] = metric
+        return self._task_metrics[tc.task_id]
 
     # ---- per-task artifacts ----
     def task(self, name: str) -> TaskCtx:
         if name in self._tasks:
             return self._tasks[name]
+        if name not in TASKS:
+            raise KeyError(f"unknown task {name!r}; known registry tasks: {sorted(TASKS)}")
+        metric_name = TASKS[name].metric
         sketch_path = self.layout.task / "sketches" / f"{name}_{self.args.sketch_seed}.json"
         sketch = load_sketch(sketch_path)
         tid = sketch.task_id
@@ -148,7 +212,8 @@ class RunContext:
         hi = None
         if self._hi is not None:
             hi = self._hi[self._hi["task_id"] == tid]
-        ctx = TaskCtx(name=name, task_id=tid, sketch=sketch, eval_set=eval_set,
+        ctx = TaskCtx(name=name, task_id=tid, metric_name=metric_name,
+                      sketch=sketch, eval_set=eval_set,
                       inp=inp, z_t=z_t, hi_labels=hi)
         self._tasks[name] = ctx
         return ctx
@@ -157,6 +222,8 @@ class RunContext:
         path = self.args.eval_dir / f"{name}.jsonl"
         pool = JsonlPool.from_jsonl(path)
         samples: list[Sample] = list(pool)[: self.args.eval_cap]
+        if not samples:
+            raise ValueError(f"held-out eval set is empty after --eval-cap for task {name!r}: {path}")
         return ValidationSketch(task_id=task_id, samples=samples, sketch_seed=0)
 
 
@@ -281,12 +348,15 @@ def evaluate_selection(
     if do_train:
         model, tok = ctx.backbone()
         samples = ctx.pool.take(ids)
+        task_metric = ctx.task_metric(tc)
+        if task_metric is None:
+            raise ValueError("target training requested but no task metric factory is configured")
         cfg = TargetTrainConfig(
             backbone_model=MODELS[ctx.args.model].hf_id, device=ctx.args.device,
             max_steps=ctx.args.max_steps, batch_size=ctx.args.target_batch_size, seed=seed,
         )
         res = train_and_eval(samples=samples, peft=peft, eval_set=tc.eval_set, cfg=cfg,
-                             model=model, tokenizer=tok)
+                             model=model, tokenizer=tok, task_metric=task_metric)
         row.metric_name, row.metric, row.eval_loss = res.metric_name, res.metric, res.eval_loss
         row.target_train_gpu_h = res.train_wall_sec / 3600.0
         row.extra.update(res.extra)

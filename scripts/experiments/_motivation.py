@@ -3,7 +3,7 @@
 These precede E1–E5: they establish the *premise* of the project (data value is
 PEFT-dependent) with signals that are deliberately **independent of PCU's own
 scorer** — real short-update Δ (truth) and LESS-style per-PEFT influence — so the
-argument is not circular. See docs/pcu_select_motivation_design.md.
+argument is not circular. See docs/motivation_experiment_design.md.
 
 The PEFT subsets are drawn from `experiments.registry.PEFT_REGISTRY`. F1 spans
 three structural axes (family/operator, capacity, placement) so the figure can

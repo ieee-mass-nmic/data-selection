@@ -91,6 +91,21 @@ def test_state_dict_round_trip():
     handle2.remove()
 
 
+def test_fresh_peft_can_stack_on_warm_adapter():
+    model = _tiny_model(n_layers=2)
+    warm = attach_peft(model, _peft("lora", rank=2, target_layers=[]), seed=0)
+    fresh = attach_peft(model, _peft("lora", rank=2, target_layers=[]), seed=1)
+    try:
+        assert len(fresh._sites) == 4
+        warm_param_ids = {id(p) for p in warm.parameters()}
+        fresh_param_ids = {id(p) for p in fresh.parameters()}
+        assert fresh_param_ids
+        assert fresh_param_ids.isdisjoint(warm_param_ids)
+    finally:
+        fresh.remove()
+        warm.remove()
+
+
 def test_unsupported_family_raises():
     model = _tiny_model()
     with pytest.raises(NotImplementedError):

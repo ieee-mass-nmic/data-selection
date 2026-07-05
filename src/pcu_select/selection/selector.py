@@ -53,6 +53,7 @@ def select(
         cluster_sizes=sizes,
         total_budget=budget,
         alpha=cfg.quota.alpha,
+        min_cluster_size=cfg.quota.min_cluster_size,
     )
     picked = pick_top_in_clusters(
         sample_ids=sample_ids,

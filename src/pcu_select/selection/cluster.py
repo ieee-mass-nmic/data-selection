@@ -37,7 +37,19 @@ def cluster_samples(
 ) -> ClusterAssignment:
     cfg = cfg or ClusterConfig()
     n = joint_embeddings.shape[0]
+    if n != len(sample_ids):
+        raise ValueError(
+            f"sample_ids length ({len(sample_ids)}) must match joint_embeddings rows ({n})"
+        )
+    if n == 0:
+        d = joint_embeddings.shape[1] if joint_embeddings.ndim == 2 else 0
+        return ClusterAssignment(
+            sample_ids=list(sample_ids),
+            cluster_ids=np.zeros((0,), dtype=np.int32),
+            centers=np.zeros((0, d), dtype=np.float32),
+        )
     k = cfg.k if cfg.k is not None else max(50, int(math.sqrt(n)))
+    k = min(k, n)
     km = MiniBatchKMeans(
         n_clusters=k,
         batch_size=cfg.batch_size,

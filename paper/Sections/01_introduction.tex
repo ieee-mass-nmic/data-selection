@@ -1,95 +1,25 @@
 \section{Introduction}
 
-Large language models (LLMs) acquire broad linguistic patterns and factual knowledge through self-supervised pre-training on massive text corpora. To make these general-purpose models follow user instructions, respect task-specific output formats, or specialize toward a target domain, downstream adaptation remains a central step in modern LLM development. The most direct adaptation strategy is full-parameter supervised fine-tuning, which updates every model parameter for each downstream task. However, as model sizes grow from billions to hundreds of billions of parameters, full fine-tuning becomes increasingly expensive: it requires substantial optimizer memory during training and produces a full model copy for every task, leading to high storage and deployment costs.
+Adapting large language models under limited compute requires efficiency on both the model side and the data side. Parameter-efficient fine-tuning (PEFT) freezes the backbone and trains a small set of task-specific parameters, reducing optimizer memory and deployment storage. Data-efficient fine-tuning selects a compact subset from a larger instruction pool, reducing the number of examples and training steps. These two tools are usually applied independently: PEFT controls which parameters move, while data selection controls which examples drive the update.
 
-Parameter-efficient fine-tuning (PEFT) addresses this bottleneck by freezing most pre-trained weights and optimizing only a small set of task-specific parameters. Representative methods include adapters, which insert small bottleneck modules into Transformer blocks \cite{houlsby2019adapters}; LoRA, which injects trainable low-rank updates into linear projections \cite{hu2022lora}; and (IA)$^3$, which learns multiplicative vectors to rescale attention and feed-forward activations \cite{liu2022ia3}. These methods greatly reduce the number of trainable parameters and make LLM adaptation feasible under limited hardware budgets. Yet PEFT improves efficiency only on the model side. The success of fine-tuning also depends critically on the data side.
-
-Recent studies show that the quantity of instruction data is not the sole determinant of fine-tuning performance. LIMA demonstrates that a 65B LLaMA model fine-tuned on only 1,000 carefully curated examples can exhibit strong instruction-following behavior without reinforcement learning from human feedback \cite{zhou2023lima}. Subsequent work further shows that filtering for high-quality, diverse, or task-relevant examples can match or even outperform training on much larger, noisier instruction corpora \cite{chen2024alpagasus, lu2023instag, liu2024deita, xia2024less}. This has motivated data-efficient fine-tuning, whose goal is to identify a small subset of valuable training examples from a large candidate pool.
-
-Data efficiency and parameter efficiency are naturally complementary: the former reduces the number of examples and optimization steps, while the latter reduces the number of trainable parameters. However, existing data selection methods are usually designed as PEFT-agnostic procedures. They often assign one global data value score to each example based on quality, diversity, proxy-model feedback, or gradient similarity, and then reuse the selected subset across downstream adaptation settings. This assumption is convenient, but it overlooks a structural property of PEFT: different PEFT methods expose different trainable parameter subspaces. As a result, the same example may induce different effective update directions under LoRA, adapters, and (IA)$^3$. If data value is defined by its effect on the actual optimization trajectory, then data value should depend not only on the target task, but also on the target PEFT method.
-
-\begin{table*}[t]
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{p{0.13\textwidth}p{0.27\textwidth}p{0.35\textwidth}cc}
-\toprule
-\textbf{PEFT method} & \textbf{Trainable location} & \textbf{Configuration} & \textbf{Trainable params} & \textbf{Ratio} \\
-\midrule
-LoRA-Attn & $q_{\mathrm{proj}}$ and $v_{\mathrm{proj}}$ in each attention block & Rank $r=8$, $\alpha=16$, dropout $=0.05$ & $\approx 1.09$M & $\approx 0.071\%$ \\
-Adapter & After attention output and after FFN output in each Transformer block & Bottleneck size $b=64$, residual adapter & $\approx 11.10$M & $\approx 0.721\%$ \\
-(IA)$^3$ & Scaling vectors on $k_{\mathrm{proj}}$, $v_{\mathrm{proj}}$, and $\mathrm{down}_{\mathrm{proj}}$ & Multiplicative activation scaling on attention and FFN modules & $\approx 0.27$M & $\approx 0.017\%$ \\
-\bottomrule
-\end{tabular}
-\caption{PEFT configurations used in our motivation study on Qwen2.5-1.5B-Base. Although all methods freeze the backbone, they differ substantially in trainable locations, parameterization, and update capacity. The numbers are placeholders to be replaced by the final implementation statistics if needed.}
-\label{tab:peft-configs}
-\end{table*}
-
-\paragraph{Motivating question.}
-This paper studies whether instruction data value is invariant across PEFT methods. We focus on three PEFT methods with distinct adaptation mechanisms: attention-only LoRA, bottleneck adapters, and (IA)$^3$. Table~\ref{tab:peft-configs} summarizes their update spaces. LoRA modifies attention projections through low-rank matrices; adapters add residual nonlinear transformations; and (IA)$^3$ only rescales internal activations. These design differences suggest that a training example that is useful for one PEFT method may not be equally useful for another.
-
-To examine this question, we conduct a motivation study using Qwen2.5-1.5B-Base as the frozen backbone. We sample 20K instruction examples from Tulu-v2-sft-mixture as the candidate pool and use 128 GSM8K training examples as a target development set. For each PEFT method $p$, we compute per-example gradients only with respect to its trainable parameters $\theta_p$. Given a candidate example $x_i$ and a target development set $T$, we compute
-\begin{equation}
-    g_i^{(p)} = \nabla_{\theta_p} \ell(x_i; \theta_p), \qquad
-    g_T^{(p)} = \frac{1}{|T|}\sum_{z \in T} \nabla_{\theta_p} \ell(z; \theta_p),
-\end{equation}
-where the backbone is frozen and the loss is computed only on assistant-response tokens. Following the spirit of gradient-based data selection methods such as LESS \cite{xia2024less}, we project gradients into a low-dimensional space with a random projection $R_p(\cdot)$ and score each example by
-\begin{equation}
-    s_i^{(p)} = \cos\left(R_p(g_i^{(p)}), R_p(g_T^{(p)})\right).
-\end{equation}
-This diagnostic score measures how well a candidate example aligns with the target task under the trainable subspace of PEFT method $p$.
+Current data selectors rarely model this interaction. Quality filters, diversity heuristics, proxy-model scores, and gradient-similarity methods often assign each example a single value for a target task and then reuse the selected subset across adaptation methods. That assumption is convenient, but PEFT methods change the trainable subspace itself. LoRA injects low-rank additive updates into selected projections~\cite{hu2022lora}; adapters insert residual bottlenecks~\cite{houlsby2019adapters}; and (IA)$^3$ learns multiplicative activation scalings~\cite{liu2022ia3}. An example whose gradient is aligned with a task inside one subspace need not be aligned inside another.
 
 \begin{figure*}[t]
 \centering
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\fbox{\begin{minipage}[c][1.35in][c]{0.92\linewidth}\centering
-Placeholder for Spearman correlation heatmap\\
-Rows/columns: LoRA, Adapter, (IA)$^3$
-\end{minipage}}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\fbox{\begin{minipage}[c][1.35in][c]{0.92\linewidth}\centering
-Placeholder for Top-5\% overlap heatmap\\
-Rows/columns: LoRA, Adapter, (IA)$^3$
-\end{minipage}}
-\end{minipage}
-\caption{Data-value rankings disagree across PEFT methods. For each PEFT method, candidate examples are scored by gradient similarity to the GSM8K target development set using only the trainable PEFT parameters. Left: Spearman correlation between data-value rankings. Right: overlap between Top-5\% selected subsets. Low off-diagonal values indicate that different PEFT methods prefer different subsets from the same candidate pool.}
-\label{fig:ranking-disagreement}
+\includegraphics[width=\textwidth]{Figures/fig_motivation_disagreement.pdf}
+\caption{Short-horizon data-value estimates disagree across PEFT configurations. The same candidate examples and task sketches are scored under each target PEFT. Same-PEFT replicate agreement is high ($\rho=0.79$, Top-5\% overlap $=0.31$), while cross-PEFT agreement falls with structural distance: cross-family pairs average $\rho=0.28$ and Top-5\% overlap $=0.06$.}
+\label{fig:motivation-disagreement}
 \end{figure*}
 
-Figure~\ref{fig:ranking-disagreement} evaluates whether the resulting data rankings transfer across PEFT methods. We compare the score sequences using Spearman rank correlation and compare the selected subsets using Top-5\% overlap. The off-diagonal correlations are much lower than the diagonal entries, and the Top-5\% overlaps remain limited. Since two random 5\% subsets have an expected overlap of 5\%, cross-PEFT overlaps above random still indicate some shared notion of generally useful data; however, their distance from 100\% and from same-PEFT split-half stability shows that the selected subsets are far from interchangeable. This suggests that data value is not PEFT-invariant.
+Our motivation study shows that PEFT-specific utility is not a small perturbation of a universal score. We estimate short-horizon utility for the same candidate pool under LoRA, adapter, and (IA)$^3$ variants, using two task sketches and independent anchor/seed replicates. Figure~\ref{fig:motivation-disagreement} shows that within-PEFT agreement is much higher than cross-PEFT agreement. Same-family capacity changes retain moderate structure, but placement changes and cross-family changes sharply reduce rank agreement and Top-5\% overlap. A transfer matrix gives the downstream consequence: selecting data for the same PEFT used in training beats mismatched selection by 4.98 points on average across target PEFTs.
 
-\begin{figure}[t]
-\centering
-\fbox{\begin{minipage}[c][1.80in][c]{0.92\linewidth}
-\centering
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Train $\backslash$ Select} & \textbf{LoRA} & \textbf{Adapter} & \textbf{(IA)$^3$} \\
-\midrule
-LoRA & \textbf{TBD} & TBD & TBD \\
-Adapter & TBD & \textbf{TBD} & TBD \\
-(IA)$^3$ & TBD & TBD & \textbf{TBD} \\
-\bottomrule
-\end{tabular}
-\end{minipage}}
-\caption{Cross-PEFT transfer matrix. Columns indicate the PEFT method used for data selection, and rows indicate the PEFT method used for training. Each cell reports GSM8K exact match after training on the corresponding selected subset; values in parentheses can optionally report gains over a random-selected baseline. Diagonal dominance indicates that each PEFT method benefits most from the subset selected under its own adaptation space.}
-\label{fig:cross-peft-transfer}
-\end{figure}
+This paper treats data value as a PEFT-conditioned quantity. We ask: given a candidate example $x$, a target task $t$, and a target PEFT configuration $p$, can we predict whether $x$ will help when the trainable parameters are exactly those exposed by $p$? This framing differs from PEFT-agnostic selection, which asks whether $x$ is generally good for the task. It also differs from recomputing an influence selector for every PEFT, because the expensive supervision should be reused across many target configurations.
 
-Ranking disagreement alone does not necessarily imply downstream performance differences. Therefore, we further train each PEFT method on the Top-5\% subsets selected by every PEFT method, producing the cross-PEFT transfer matrix in Figure~\ref{fig:cross-peft-transfer}. All cells in the same row use the same training PEFT configuration and hyperparameters; only the selected data subset changes. The matrix exhibits diagonal dominance: LoRA performs best or near-best on LoRA-selected data, adapters on adapter-selected data, and (IA)$^3$ on (IA)$^3$-selected data. This pattern indicates that cross-PEFT data transfer is incomplete. In other words, data selected under one PEFT method is not always optimal for another PEFT method, even when the backbone, candidate pool, target task, and selection budget are fixed.
+PCU-Select answers this question with an intervention-site utility layer. It maps samples, task sketches, and PEFT configurations into a shared set of 24 module-output sites in the backbone. Sample and task signatures describe gradient alignment at each site. The PEFT code describes which sites a method touches, how it acts there, and how much trainable capacity it has. PCU-Select uses a low-fidelity site-weighted gradient proxy for broad coverage, corrects it with short-horizon high-fidelity labels, and trains a conditional scorer that predicts both utility and uncertainty. At deployment, the scorer ranks the pool for a target $(p,t)$ and a quota allocator balances utility with semantic coverage.
 
-These observations motivate PEFT-aware data selection. Rather than treating data value as a universal property of an example, we argue that data value should be conditioned on the target adaptation mechanism. A PEFT-aware selector should estimate whether an example is useful under the trainable parameter subspace that will actually be optimized. This view unifies data-efficient and parameter-efficient fine-tuning: efficient LLM adaptation requires selecting not only a small set of parameters, but also a small set of examples that are compatible with those parameters.
-
-\paragraph{Contributions.}
-We make the following contributions:
+We make three contributions.
 \begin{itemize}
-    \item We formulate the problem of PEFT-aware instruction data selection, where the utility of a candidate example is conditioned on both the target task and the target PEFT method.
-    \item We provide a diagnostic motivation study showing that LoRA, adapters, and (IA)$^3$ induce different data-value rankings and select different high-value subsets from the same instruction pool.
-    \item We show that ranking disagreement has practical consequences through a cross-PEFT transfer matrix, where each PEFT method benefits most from data selected under its own trainable subspace.
-    \item We identify the gap between existing PEFT-agnostic data selection methods and the requirements of joint data- and parameter-efficient LLM adaptation, motivating PEFT-conditioned data-value modeling.
+    \item \textbf{Problem and evidence.} We formulate cross-PEFT data-efficient fine-tuning and show that data-value rankings differ across PEFT configurations, with cross-family Top-5\% overlap near 0.06 and a 4.98-point downstream mismatch penalty.
+    \item \textbf{Method.} We introduce PCU-Select, a reusable PEFT-conditioned selector built from intervention-site gradient signatures, structured PEFT encodings, task sketches, multi-fidelity utility labels, uncertainty-aware scoring, and adaptive cluster quotas.
+    \item \textbf{Evaluation.} Across GSM8K, HumanEval, MMLU, and TyDiQA, PCU-Select improves 10\%-budget downstream performance over random by 3.64 points and RDS+ by 0.98 points. It matches LESS on average and amortizes its offline cost after about 1.6 target PEFTs.
 \end{itemize}

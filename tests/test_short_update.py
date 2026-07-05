@@ -12,6 +12,7 @@ import pytest
 import torch
 
 from pcu_select.features.selector_runner import SelectorRunner
+from pcu_select.eval.target_train import TargetTrainConfig, train_and_eval
 from pcu_select.hi_fidelity.short_update import ShortUpdateConfig, ShortUpdater, run_short_update
 from pcu_select.peft_space.site_mask import SiteSpace
 from pcu_select.types import PEFTConfig, PEFTRecipe, Sample, ValidationSketch
@@ -48,6 +49,13 @@ def _lora(lr: float = 0.1) -> PEFTConfig:
         target_modules=["q_proj", "v_proj"], target_layers=[],
         rank=4, alpha=8, recipe=PEFTRecipe(optimizer="adamw", lr=lr),
     )
+
+
+class _ConstantTaskMetric:
+    metric_name = "unit_metric"
+
+    def __call__(self, model, tokenizer):
+        return 1.0
 
 
 def test_delta_positive_when_training_on_sketch_sample():
@@ -96,6 +104,40 @@ def test_run_short_update_convenience_wrapper():
         cfg=ShortUpdateConfig(horizon=3, device="cpu", max_len=64),
     )
     assert math.isfinite(delta)
+
+
+def test_target_train_allows_batch_larger_than_selection():
+    model = _tiny_model()
+    sample = Sample(sample_id="x", instruction="tiny", response="set")
+    sketch = ValidationSketch(task_id="t", samples=[sample], sketch_seed=0)
+    result = train_and_eval(
+        samples=[sample],
+        peft=_lora(lr=0.05),
+        eval_set=sketch,
+        cfg=TargetTrainConfig(device="cpu", max_len=64, batch_size=16, max_steps=1),
+        model=model,
+        tokenizer=_CharTokenizer(),
+        task_metric=_ConstantTaskMetric(),
+    )
+    assert result.n_train == 1
+    assert math.isfinite(result.eval_loss)
+    assert result.metric_name == "unit_metric"
+    assert result.metric == 1.0
+
+
+def test_target_train_requires_task_metric():
+    model = _tiny_model()
+    sample = Sample(sample_id="x", instruction="tiny", response="set")
+    sketch = ValidationSketch(task_id="t", samples=[sample], sketch_seed=0)
+    with pytest.raises(ValueError, match="task_metric"):
+        train_and_eval(
+            samples=[sample],
+            peft=_lora(lr=0.05),
+            eval_set=sketch,
+            cfg=TargetTrainConfig(device="cpu", max_len=64, batch_size=16, max_steps=1),
+            model=model,
+            tokenizer=_CharTokenizer(),
+        )
 
 
 def test_runner_and_updater_share_model_class():

@@ -44,11 +44,11 @@ def quick_text_stats(sample: Sample) -> np.ndarray:
     out[12] = float("```" in sample.response or "def " in sample.response)
     out[13] = float("?" in sample.instruction)
     # language: extremely simple heuristic; replace with langid for production.
+    # Two one-hot slots (14=en, 15=zh); "other" is encoded as both-zero so we
+    # must NOT index out[16] for lang_idx==2 (that overflows the 16-d vector).
     lang_idx = _guess_lang_idx(sample.instruction + " " + sample.response)
-    out[14 + lang_idx] = 1.0  # 14, 15 used; "other" overflows to none -> stays zero
-    if lang_idx == 2:
-        out[14] = 0.0
-        out[15] = 0.0  # "other" represented by all zeros in those slots
+    if lang_idx in (0, 1):
+        out[14 + lang_idx] = 1.0
     return out
 
 

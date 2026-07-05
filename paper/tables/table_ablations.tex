@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Ablations on GSM8K and HumanEval with two representative PEFTs at a 10\% budget. Drop is relative to the full adaptive selector.}
+\label{tab:ablations}
+\begin{tabular}{lrrr}
+\toprule
+Variant & Metric & Drop & NDCG \\
+\midrule
+Full PCU-Select & 36.18 & 0.00 & 0.702 \\
+No PEFT code & 33.73 & 2.45 & 0.526 \\
+Family one-hot only & 34.96 & 1.22 & 0.602 \\
+No task sketch & 34.71 & 1.47 & 0.597 \\
+No activation signature & 35.32 & 0.87 & 0.629 \\
+Low-fidelity only & 34.67 & 1.52 & 0.563 \\
+High-fidelity only & 35.53 & 0.65 & 0.639 \\
+No uncertainty penalty & 35.68 & 0.51 & 0.690 \\
+Global top-$k$ & 34.26 & 1.92 & 0.684 \\
+Uniform clusters & 35.27 & 0.91 & 0.709 \\
+\bottomrule
+\end{tabular}
+\end{table}

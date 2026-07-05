@@ -14,7 +14,7 @@ from pcu_select.types import (
 )
 
 
-def _fake_features(n: int, d_sem: int = 8, d_diff: int = 16, d_act: int = 64):
+def _feature_batch_fixture(n: int, d_sem: int = 8, d_diff: int = 16, d_act: int = 64):
     rng = np.random.default_rng(0)
     feats = []
     for i in range(n):
@@ -35,7 +35,7 @@ def _fake_features(n: int, d_sem: int = 8, d_diff: int = 16, d_act: int = 64):
 
 
 def test_feature_roundtrip_preserves_vectors(tmp_path):
-    feats = _fake_features(4)
+    feats = _feature_batch_fixture(4)
     cache = FeatureCache(tmp_path)
     cache.write_features(feats)
     cache.write_sample_id_index([f.sample_id for f in feats])

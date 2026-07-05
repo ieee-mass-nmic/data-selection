@@ -47,7 +47,7 @@ from pcu_select.peft_space.site_mask import SiteSpace
 from pcu_select.types import WorkDirLayout
 from pcu_select.utils import get_logger
 
-AGNOSTIC = "<agnostic>"  # peft_name placeholder for the PEFT-independent RDS+ signal
+AGNOSTIC = "<agnostic>"  # peft_name sentinel for the PEFT-independent RDS+ signal
 
 
 def _load_task(layout: WorkDirLayout, task: str, sketch_seed: int):
@@ -99,7 +99,6 @@ def main() -> None:
     all_ids = list(cache.read_sample_id_index())
     n = min(args.n_val, len(all_ids))
     val_ids = random.Random(args.sample_seed).sample(all_ids, n)
-    val_id_set = set(val_ids)
     log.info(f"estimation pool: {n} samples (requested {args.n_val})")
 
     tasks = {t: _load_task(layout, t, args.sketch_seed) for t in args.tasks}
@@ -119,7 +118,7 @@ def main() -> None:
             if "u_rds" in args.signals:
                 s = score_baseline("rds_plus", inp)
                 if s is None:
-                    log.warning(f"u_rds unavailable for {task} (no task_query_joint); skip")
+                    log.warning(f"u_rds missing for {task} (no task_query_joint); skip")
                 else:
                     for sid, i in keep:
                         rows.append(dict(signal="u_rds", peft_name=AGNOSTIC, peft_id=AGNOSTIC,
@@ -129,7 +128,7 @@ def main() -> None:
                 for name, cfg in pefts.items():
                     s = score_baseline("less", inp, cfg)
                     if s is None:
-                        log.warning(f"u_grad unavailable for {task} (no task_grad); skip")
+                        log.warning(f"u_grad missing for {task} (no task_grad); skip")
                         break
                     for sid, i in keep:
                         rows.append(dict(signal="u_grad", peft_name=name, peft_id=cfg.peft_id,

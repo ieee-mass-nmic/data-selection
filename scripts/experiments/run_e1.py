@@ -19,9 +19,11 @@ from _common import RunContext, add_common_args, run_cell
 from pcu_select.experiments import peft_specs_by_group
 
 # Baselines (design §2.3) + our method. `less` is the strongest per-PEFT rival.
+# IFD/S2L remain available when their exported scores are present in the cache,
+# but they are not part of the default matrix unless those signals are produced.
 METHODS = [
-    "random", "balanced_random", "length", "loss", "perplexity", "ifd", "s2l",
-    "embedding_nn", "rds_plus", "diversity", "grad_sim", "less", "pcu",
+    "random", "balanced_random", "length", "loss", "perplexity", "embedding_nn",
+    "rds_plus", "diversity", "grad_sim", "less", "pcu",
 ]
 
 

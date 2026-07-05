@@ -1,43 +1,34 @@
 \section{Analysis}
+\label{sec:analysis}
 
-\subsection{How Consistent Is Sample Utility across PEFT Methods?}
+\subsection{PEFT Conditioning Changes the Selected Subset}
 
-We first analyze whether sample utility is consistent across different PEFT methods. For each pair of PEFT configurations, we compute the correlation between their sample-level utility scores. A high correlation would indicate that a PEFT-agnostic selector is sufficient, while a moderate or low correlation would suggest that PEFT-specific conditioning is necessary.
-
-\begin{table}[t]
+\begin{figure*}[t]
 \centering
-\begin{tabular}{lcc}
-\toprule
-PEFT Pair & Pearson & Spearman \\
-\midrule
-LoRA vs. Prefix & -- & -- \\
-LoRA vs. IA3 & -- & -- \\
-Prefix vs. IA3 & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{Correlation of sample utility across PEFT methods.}
-\label{tab:utility_correlation}
-\end{table}
+\includegraphics[width=\textwidth]{Figures/fig_config_sensitivity.pdf}
+\caption{PCU-Select reacts to configuration changes. Left: subsets selected for one LoRA configuration degrade when used to train another, with an average 2.42-point diagonal-off-diagonal gap. Right: PCU-Select's selection difference grows with configuration distance, while PEFT-agnostic RDS+ stays nearly flat.}
+\label{fig:config-sensitivity}
+\end{figure*}
 
-\subsection{Effect of PEFT Conditioning}
+Figure~\ref{fig:config-sensitivity} tests whether the PEFT code changes behavior inside the same LoRA family. PCU-Select achieves 35.41 average performance across the E4 configuration scan, compared with 34.50 for LESS, 33.79 for RDS+, and 31.37 for random. The mismatch matrix shows that using the subset selected for the correct target configuration is better than reusing a subset selected for a different configuration by 2.42 points on average. The selection-overlap plot provides the mechanism: PCU-Select's mean Jaccard overlap across configuration pairs is 0.427, while RDS+ remains 0.981 because it is PEFT-agnostic.
 
-We further investigate whether PEFT conditioning helps the scorer distinguish utility patterns across adaptation methods. Compared with a sample-only scorer, the PEFT-conditioned scorer can adjust the ranking of samples according to the target PEFT method.
+\subsection{Ablations Identify the Useful Components}
 
-This analysis supports the hypothesis that sample utility is not solely determined by the sample itself, but also depends on the adaptation mechanism.
+\input{tables/table_ablations}
 
-\subsection{Generalization to Unseen PEFT Configurations}
+Table~\ref{tab:ablations} shows that the largest drop comes from removing the PEFT code: performance falls by 2.45 points and NDCG falls from 0.702 to 0.526. Replacing the structured PEFT code with a family one-hot vector loses 1.22 points, which confirms that rank, placement, capacity, and recipe matter beyond the family name. Removing the task sketch loses 1.47 points, showing that PCU-Select is not only a PEFT-dependent quality filter. Multi-fidelity supervision also matters: low-fidelity-only training loses 1.52 points, while high-fidelity-only training loses 0.65 points because it lacks broad coverage. The adaptive cluster selector beats global top-$k$ by 1.92 points and uniform cluster quotas by 0.91 points.
 
-We evaluate whether the scorer can generalize to PEFT configurations that are not observed during scorer training. This setting is important because training a separate utility estimator for every possible PEFT configuration is expensive.
+\subsection{Unseen PEFTs Need Calibration}
 
-The results show whether the proposed scorer learns transferable signals from source PEFT methods or merely memorizes configuration-specific rankings.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{Figures/fig_ood_calibration.pdf}
+\caption{Zero-shot PCU-Select transfers to interpolated configurations, degrades on extrapolated and unseen-family PEFTs, and recovers with calibration labels. L0: interpolation; L1: extrapolated capacity or placement; L2: unseen family.}
+\label{fig:ood-calibration}
+\end{figure}
 
-\subsection{Cost Analysis}
+The Mahalanobis OOD check predicts when the offline scorer needs target-specific calibration. On L0 interpolation targets, zero-shot PCU-Select is within 0.34 points of LESS and calibration adds 0.61 points. On L1 extrapolated configurations, zero-shot PCU-Select trails LESS by 2.08 points and 500 calibration labels recover 1.78 points. On L2 unseen families, zero-shot transfer fails more sharply: it trails LESS by 5.76 points, while 500 calibration labels recover 5.53 points. These results bound the main claim. PCU-Select is reliable for configurations near the training support and can be repaired with small calibration sets for farther targets; it is not a free zero-shot selector for arbitrary PEFT families.
 
-Finally, we compare the computational cost of different data selection strategies. Methods that require repeated fine-tuning or gradient computation for every target PEFT method can become expensive. In contrast, our scorer can reuse sample representations and only changes the PEFT condition vector when the target PEFT method changes.
+\subsection{Limitations}
 
-Let $C_{rep}$ denote the cost of extracting sample representations, $C_{score}$ denote the cost of scorer inference, and $C_{tune}$ denote the cost of target PEFT fine-tuning. The total selection cost of our method can be approximated as:
-\begin{equation}
-C_{\mathrm{ours}} = C_{rep} + C_{score}.
-\end{equation}
-
-When the same candidate pool is reused across multiple target PEFT methods, $C_{rep}$ can be amortized, making the method more efficient than repeatedly estimating utility from scratch.
+The current evidence covers one backbone family, four tasks, and a finite PEFT registry. The result bundle includes Qwen-style motivation assets, but the main E1--E5 quantitative claims are centered on the Llama2-7B registry. PCU-Select also uses short-horizon utility labels rather than full-training marginal contribution as supervision, so the scorer inherits the bias of that proxy. The cost claim is comparative. PCU-Select amortizes against per-PEFT influence recomputation, but cheap PEFT-agnostic selectors remain preferable when raw selection cost dominates and a small performance loss is acceptable.

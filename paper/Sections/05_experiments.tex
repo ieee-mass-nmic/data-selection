@@ -1,111 +1,31 @@
 \section{Experiments}
+\label{sec:experiments}
 
-\subsection{Experimental Setup}
+The evaluation asks four questions: does PCU-Select improve selected-data performance, does it amortize cost across PEFTs, which components matter, and how does it behave on unseen configurations?
 
-We evaluate the proposed method on data-efficient fine-tuning tasks under multiple PEFT configurations. The main goal is to answer the following questions:
-\begin{itemize}
-    \item Does PEFT-conditioned data selection outperform PEFT-agnostic or random selection under the same data budget?
-    \item Can the learned scorer transfer across different PEFT methods?
-    \item How important are the PEFT representation and task representation in the scorer?
-    \item Can the method generalize to unseen PEFT configurations?
-\end{itemize}
+\subsection{Setup}
 
-\subsection{Datasets and Tasks}
+We evaluate on four main tasks: GSM8K, HumanEval, MMLU, and TyDiQA. Metrics use each task's native scale: exact match, Pass@1, accuracy, or F1. The candidate pool contains 300K mixed instruction examples, and the main selection budget is 10\%; budget sensitivity also uses 5\% and 30\%. Each method trains the same target backbone, PEFT recipe, number of steps, and evaluation protocol; only the selected subset changes. Reported downstream values average over three target-training seeds.
 
-We conduct experiments on instruction-following and reasoning-oriented datasets. The candidate training data is sampled from the original training set, and the selected subset is used for PEFT fine-tuning. The downstream performance is evaluated on held-out validation or test sets.
+\input{tables/table_peft_configs}
 
-The main evaluation tasks include:
-\begin{itemize}
-    \item GSM8K for mathematical reasoning.
-    \item Additional instruction-following or commonsense reasoning datasets.
-    \item Optional cross-domain datasets for testing transferability.
-\end{itemize}
-
-\subsection{PEFT Configurations}
-
-We consider multiple PEFT methods, including LoRA, Prefix Tuning, and IA3. Each method uses the same pretrained base model and comparable training budgets whenever possible. For each target PEFT method, data selection is performed before fine-tuning.
-
-Example configurations include:
-\begin{itemize}
-    \item LoRA with rank $r$ and scaling factor $\alpha$.
-    \item Prefix Tuning with a fixed number of virtual tokens.
-    \item IA3 with learned activation scaling vectors.
-\end{itemize}
-
-\subsection{Baselines}
-
-We compare our method with the following baselines:
-\begin{itemize}
-    \item Random: randomly selects samples under the same budget.
-    \item Loss-based selection: selects samples according to training loss.
-    \item Uncertainty-based selection: selects samples according to prediction uncertainty.
-    \item IFD-based selection: selects samples according to instruction-following difficulty.
-    \item PEFT-agnostic scorer: removes PEFT condition from our scorer.
-\end{itemize}
-
-\subsection{Implementation Details}
-
-All methods use the same base model, tokenizer, training epochs, maximum sequence length, and evaluation protocol unless otherwise specified. For PEFT fine-tuning, we keep the pretrained model frozen and update only PEFT parameters. The data budget is controlled by the retention ratio, such as 10\%, 20\%, or 30\% of the full training set.
-
-The utility scorer is trained on source PEFT configurations and then evaluated on target PEFT configurations. For unseen PEFT experiments, the target PEFT method is excluded from scorer training.
+The seen PEFT set contains attention LoRA, MLP LoRA, (IA)$^3$, and adapters; unseen tests vary rank, placement, learning rate, and family. Baselines include Random and Balanced-Random; heuristic selectors based on length, loss, perplexity, and IFD; representation selectors such as embedding-nearest-neighbor, diversity clustering, and RDS+; and gradient/influence selectors including a LESS-style per-PEFT gradient baseline. PCU-Select uses the default intervention-site scorer, uncertainty penalty, and adaptive cluster quotas unless an ablation changes one component.
 
 \subsection{Main Results}
 
-Table~\ref{tab:main_results} reports the main results across different target PEFT methods. The proposed method consistently improves over random selection under the same budget, indicating that PEFT-conditioned scoring can identify more useful samples for target fine-tuning.
+\input{tables/table_main_results}
 
-\begin{table*}[t]
+Table~\ref{tab:main-results} shows that PCU-Select improves selected-data quality under the same 10\% budget. Averaged across four tasks and five PEFT configurations, PCU-Select scores 42.81, compared with 39.17 for random selection, 41.83 for RDS+, 42.16 for the influence baseline, and 42.73 for LESS. The gain over random is 3.64 points and the gain over RDS+ is 0.98 points. PCU-Select matches LESS on average but does not dominate it uniformly: it wins 10 of 20 PEFT-task cells and loses on the MLP-only LoRA column by 0.73 points. This supports the intended claim of reusable competitive selection rather than strict per-cell superiority over a recomputed per-PEFT influence selector.
+
+Ranking metrics follow the same pattern. At the 10\% budget, PCU-Select reaches mean Spearman $\rho=0.625$, NDCG@K $=0.703$, and pairwise accuracy $=0.793$ against high-fidelity held-out utility labels. LESS reaches $\rho=0.612$, NDCG@K $=0.677$, and pairwise accuracy $=0.765$. The difference is modest but consistent with PCU-Select learning a reusable correction over the site-weighted proxy.
+
+\subsection{Amortized Cost}
+
+\begin{figure}[t]
 \centering
-\begin{tabular}{lcccccc}
-\toprule
-Method & Budget & LoRA & Prefix & IA3 & Average & Rank \\
-\midrule
-Random & 30\% & -- & -- & -- & -- & -- \\
-Loss-based & 30\% & -- & -- & -- & -- & -- \\
-Uncertainty & 30\% & -- & -- & -- & -- & -- \\
-IFD & 30\% & -- & -- & -- & -- & -- \\
-Ours & 30\% & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{Main results under different target PEFT methods. Replace ``--'' with task-specific metrics such as accuracy, exact match, or reward score.}
-\label{tab:main_results}
-\end{table*}
+\includegraphics[width=\columnwidth]{Figures/fig_cost_break_even.pdf}
+\caption{PCU-Select pays 11.2 GPU-hours offline, then applies cheaply to each target PEFT. It breaks even with per-PEFT LESS/influence recomputation after about 1.6 target configurations. Cheap PEFT-agnostic baselines remain cheaper in raw GPU-hours.}
+\label{fig:cost}
+\end{figure}
 
-\subsection{Cross-PEFT Transfer}
-
-To evaluate cross-PEFT transferability, we train the utility scorer using source PEFT methods and test it on a different target PEFT method. This setting measures whether the learned utility signals can generalize beyond the PEFT configurations used for supervision.
-
-\begin{table}[t]
-\centering
-\begin{tabular}{lccc}
-\toprule
-Training PEFTs & Target PEFT & Budget & Score \\
-\midrule
-LoRA, Prefix & IA3 & 30\% & -- \\
-LoRA, IA3 & Prefix & 30\% & -- \\
-Prefix, IA3 & LoRA & 30\% & -- \\
-\bottomrule
-\end{tabular}
-\caption{Cross-PEFT transfer results.}
-\label{tab:cross_peft}
-\end{table}
-
-\subsection{Ablation Study}
-
-We conduct ablation studies to examine the contribution of each component. In particular, we compare the full model with variants that remove or randomize the PEFT representation and task representation.
-
-\begin{table}[t]
-\centering
-\begin{tabular}{lc}
-\toprule
-Variant & Average Score \\
-\midrule
-Full model & -- \\
-w/o PEFT representation & -- \\
-w/o task representation & -- \\
-Random PEFT representation & -- \\
-Sample-only scorer & -- \\
-\bottomrule
-\end{tabular}
-\caption{Ablation study of the utility scorer.}
-\label{tab:ablation}
-\end{table}
+PCU-Select concentrates cost in cacheable offline artifacts: feature extraction, low-fidelity labels, high-fidelity labels, and scorer training. The measured offline cost is 11.2 GPU-hours, dominated by 4.5 GPU-hours of high-fidelity labeling. Online application costs 0.925 GPU-hours per target on average, including selection and fixed target training. Per-PEFT LESS costs 0.996 online GPU-hours plus 6.8 GPU-hours of target-specific gradient recomputation. Figure~\ref{fig:cost} shows that PCU-Select breaks even with LESS after 1.63 target PEFTs. It does not beat RDS+ or random on raw cost; its advantage over those baselines is performance, not cheaper selection.

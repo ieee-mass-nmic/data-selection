@@ -62,10 +62,11 @@ class ScorerInference:
         n = z_x.shape[0]
         mus = np.empty(n, dtype=np.float32)
         sigmas = np.empty(n, dtype=np.float32)
-        zp_t = torch.as_tensor(z_p, device=self.device)
-        zt_t = torch.as_tensor(z_t, device=self.device)
+        model_dtype = next(self.model.parameters()).dtype
+        zp_t = torch.as_tensor(z_p, device=self.device, dtype=model_dtype)
+        zt_t = torch.as_tensor(z_t, device=self.device, dtype=model_dtype)
         for s, e in self._batches(n):
-            zx_t = torch.as_tensor(z_x[s:e], device=self.device)
+            zx_t = torch.as_tensor(z_x[s:e], device=self.device, dtype=model_dtype)
             mu, sigma = self.model(zx_t, zp_t, zt_t)
             mus[s:e] = mu.float().cpu().numpy()
             sigmas[s:e] = sigma.float().cpu().numpy()

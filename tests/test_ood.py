@@ -5,7 +5,15 @@ from __future__ import annotations
 import numpy as np
 import torch
 
-from pcu_select.ood.calibration import CalibrationHead, fit_calibration, fit_ood_stats, is_ood
+from pcu_select.ood.calibration import (
+    CalibrationHead,
+    apply_calibration,
+    fit_calibration,
+    fit_ood_stats,
+    is_ood,
+    load_calibration,
+    save_calibration,
+)
 
 
 def test_ood_threshold_quantile():
@@ -42,3 +50,28 @@ def test_calibration_head_runs_one_step():
     # head shouldn't have exploded
     for p in head.parameters():
         assert torch.isfinite(p).all()
+
+
+def test_calibration_save_load_roundtrip_and_apply(tmp_path):
+    rng = np.random.default_rng(0)
+    n = 6
+    head = CalibrationHead(in_dim=4)
+    # give it non-trivial weights so the roundtrip is meaningful
+    with torch.no_grad():
+        head.linear.weight.copy_(torch.randn_like(head.linear.weight))
+        head.linear.bias.copy_(torch.randn_like(head.linear.bias))
+
+    mu = rng.normal(size=n).astype(np.float32)
+    z_x = rng.normal(size=(n, 2)).astype(np.float32)
+    z_p = rng.normal(size=(1, 1)).astype(np.float32)  # broadcast over batch
+    z_t = rng.normal(size=(1, 1)).astype(np.float32)
+
+    expected = apply_calibration(head, mu=mu, z_x=z_x, z_p=z_p, z_t=z_t, device="cpu")
+
+    path = save_calibration(head, tmp_path / "calib.pt")
+    assert path.exists()
+    reloaded = load_calibration(path, device="cpu")
+    got = apply_calibration(reloaded, mu=mu, z_x=z_x, z_p=z_p, z_t=z_t, device="cpu")
+
+    assert got.shape == (n,)
+    assert np.allclose(expected, got, atol=1e-6)

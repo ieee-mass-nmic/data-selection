@@ -11,17 +11,17 @@ Difficulty-vector layout (design §7.2, see `features/difficulty.py`):
     8 avg_logprob     9 entropy_mean  10 entropy_max    11 is_cot
    12 is_code        13 is_qa         14,15 language one-hot
 
-Approximation notes are called out where a baseline's textbook form would need a
-signal we did not cache (IFD's instruction-free forward, S2L's loss trajectory);
-those are clearly marked so the paper can either accept the proxy or wire the
-exact signal through the documented hook.
+Methods that require task-specific signals beyond the core cache read them from
+`features/baseline_scores.parquet`, aligned by `sample_id`. If a required signal
+is absent, the selector fails instead of substituting an unrelated feature.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
+import pandas as pd
 
 from pcu_select.features.cache import FeatureCache
 from pcu_select.peft_space.site_mask import SiteSpace, alpha_vector
@@ -47,6 +47,7 @@ class BaselineInputs:
     joint: np.ndarray  # (N, d_sem) joint semantic embeddings
     task_query_joint: np.ndarray | None = None  # (d_sem,) sketch mean embedding
     task_grad: np.ndarray | None = None  # (|Ω|, d_proj) task grad signature
+    external_scores: dict[str, np.ndarray] = field(default_factory=dict)
     _grads: np.ndarray | None = None  # (N, |Ω|, d_proj), lazily stacked
 
     @classmethod
@@ -62,8 +63,10 @@ class BaselineInputs:
         ids = cache.read_sample_id_index()
         d_x = np.stack([feats[i].d_x.vector for i in ids], axis=0).astype(np.float32)
         joint = np.stack([feats[i].e_x.joint for i in ids], axis=0).astype(np.float32)
+        external_scores = _load_external_scores(cache, ids)
         return cls(cache=cache, sites=sites, sample_ids=ids, d_x=d_x, joint=joint,
-                   task_query_joint=task_query_joint, task_grad=task_grad)
+                   task_query_joint=task_query_joint, task_grad=task_grad,
+                   external_scores=external_scores)
 
     def grads(self) -> np.ndarray:
         if self._grads is None:
@@ -85,6 +88,35 @@ def _standardize(x: np.ndarray) -> np.ndarray:
     mu = x.mean(axis=0, keepdims=True)
     sd = x.std(axis=0, keepdims=True) + 1e-6
     return (x - mu) / sd
+
+
+def _load_external_scores(cache: FeatureCache, ids: list[str]) -> dict[str, np.ndarray]:
+    path = cache.paths.root / "baseline_scores.parquet"
+    if not path.exists():
+        return {}
+    df = pd.read_parquet(path)
+    if "sample_id" not in df.columns:
+        raise ValueError(f"{path} must contain a sample_id column")
+    if df["sample_id"].duplicated().any():
+        raise ValueError(f"{path} contains duplicate sample_id values")
+    indexed = df.set_index("sample_id")
+    missing = [sid for sid in ids if sid not in indexed.index]
+    if missing:
+        preview = ", ".join(missing[:5])
+        raise ValueError(f"{path} is missing baseline scores for sample ids: {preview}")
+    out: dict[str, np.ndarray] = {}
+    for name in ("ifd", "s2l"):
+        if name in indexed.columns:
+            out[name] = indexed.loc[ids, name].to_numpy(dtype=np.float32)
+    return out
+
+
+def _required_external_score(inp: BaselineInputs, name: str) -> np.ndarray:
+    if name not in inp.external_scores:
+        raise ValueError(
+            f"baseline {name!r} requires features/baseline_scores.parquet with a {name!r} column"
+        )
+    return inp.external_scores[name]
 
 
 # ---------------------------------------------------------------------------
@@ -130,25 +162,13 @@ def _perplexity(inp: BaselineInputs, k: int, peft, seed: int) -> list[str]:
 
 
 def _ifd(inp: BaselineInputs, k: int, peft, seed: int) -> list[str]:
-    """IFD proxy: length-normalized conditional loss.
-
-    Exact IFD = ppl(response | instruction) / ppl(response alone), needing a
-    second instruction-free forward we did not cache. Proxy = loss_mean with a
-    mild length penalty, which preserves IFD's "hard but not just long" intent.
-    Wire the exact ratio here if the instruction-free forward is added.
-    """
-    score = inp.d_x[:, _LOSS] - 0.15 * inp.d_x[:, _LEN]
-    return _top_ids(inp.sample_ids, score, k)
+    """IFD selection from an exported instruction-free difficulty score."""
+    return _top_ids(inp.sample_ids, _required_external_score(inp, "ifd"), k)
 
 
 def _s2l(inp: BaselineInputs, k: int, peft, seed: int) -> list[str]:
-    """S2L proxy: learnability ~ within-sample loss dispersion (loss_std).
-
-    Exact S2L clusters per-sample *loss trajectories* over training; we did not
-    log trajectories, so loss_std is used as a single-checkpoint learnability
-    proxy. Documented approximation.
-    """
-    return _top_ids(inp.sample_ids, inp.d_x[:, _LOSS_STD], k)
+    """S2L selection from an exported per-sample learnability score."""
+    return _top_ids(inp.sample_ids, _required_external_score(inp, "s2l"), k)
 
 
 def _rds_plus(inp: BaselineInputs, k: int, peft, seed: int) -> list[str]:
@@ -273,10 +293,18 @@ def score_baseline(name: str, inp: BaselineInputs, peft: PEFTConfig | None = Non
     if name == "perplexity":
         return inp.d_x[:, _PPL]
     if name == "ifd":
-        return inp.d_x[:, _LOSS] - 0.15 * inp.d_x[:, _LEN]
+        return _required_external_score(inp, "ifd")
     if name == "s2l":
-        return inp.d_x[:, _LOSS_STD]
-    if name in ("rds_plus", "embedding_nn"):
+        return _required_external_score(inp, "s2l")
+    if name == "rds_plus":
+        if inp.task_query_joint is None:
+            return None
+        z = _standardize(inp.joint)
+        q = (inp.task_query_joint - inp.joint.mean(0)) / (inp.joint.std(0) + 1e-6)
+        q = q / (np.linalg.norm(q) + 1e-8)
+        zn = z / (np.linalg.norm(z, axis=1, keepdims=True) + 1e-8)
+        return zn @ q
+    if name == "embedding_nn":
         if inp.task_query_joint is None:
             return None
         q = inp.task_query_joint / (np.linalg.norm(inp.task_query_joint) + 1e-8)
