@@ -1,0 +1,301 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  6 JUL 2026 02:29
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**ReproducibilityChecklist.tex
+(./ReproducibilityChecklist.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count275
+\c@section=\count276
+\c@subsection=\count277
+\c@subsubsection=\count278
+\c@paragraph=\count279
+\c@subparagraph=\count280
+\c@figure=\count281
+\c@table=\count282
+\abovecaptionskip=\skip49
+\belowcaptionskip=\skip50
+\bibindent=\dimen148
+) (./aaai2027.sty
+Package: aaai2027 2027/05/04 AAAI 2027 Submission format
+Conference Style for AAAI for LaTeX 2e
+(/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2024/12/12 v1.0g TeX engine tests
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/newtxtext.sty
+Package: newtxtext 2024/04/01 v1.744(Michael Sharpe) latex and unicode latex su
+pport for TeXGyreTermesX
+
+`newtxtext' v1.744, 2024/04/01 Text macros taking advantage of TeXGyre Termes a
+nd its extensions (msharpe)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/xpatch/xpatch.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3kernel/expl3.sty
+Package: expl3 2026-01-19 L3 programming layer (loader) 
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2025-10-09 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count283
+))
+Package: xpatch 2020/03/25 v0.3a Extending etoolbox patching commands
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+Package: xparse 2025-10-09 L3 Experimental document command parser
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count284
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 274.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2025/09/29 v1.2d Graphics/color driver for pdftex
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1353.
+Package xcolor Info: Model `RGB' extended on input line 1365.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1370.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1371.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2025/11/04 v2.10 package option processing (HA)
+
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks17
+\XKV@tempa@toks=\toks18
+\XKV@tempb@toks=\toks19
+
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/keyval.tex))
+\XKV@depth=\count285
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2024/04/24 v2.1b Standard LaTeX package
+)
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.sty
+(/usr/local/texlive/2026/texmf-dist/tex/generic/xstring/xstring.tex
+\xs_counta=\count286
+\xs_countb=\count287
+)
+Package: xstring 2023/08/22 v1.86 String manipulations (CT)
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/carlisle/scalefnt.sty)
+LaTeX Font Info:    Setting ntxLF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxTLF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxOsF sub-encoding to TS1/0 on input line 24.
+LaTeX Font Info:    Setting ntxTOsF sub-encoding to TS1/0 on input line 24.
+
+(/usr/local/texlive/2026/texmf-dist/tex/generic/kastrup/binhex.tex)
+\ntx@tmpcnta=\count288
+\ntx@cnt=\count289
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/fontaxes/fontaxes.sty
+Package: fontaxes 2026-01-02 v2.0.2 Font selection axes (deprecated)
+Applying: [2024-11-01] Use figureversions if present on input line 74.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/figureversions/figureversions.sty
+Package: figureversions 2025-04-29 v1.0.1 Figure versions
+)
+Already applied: [0000-00-00] Fall back to v1 on input line 76.
+)
+\tx@sixem=\dimen149
+\tx@y=\dimen150
+\tx@x=\dimen151
+\tx@tmpdima=\dimen152
+\tx@tmpdimb=\dimen153
+\tx@tmpdimc=\dimen154
+\tx@tmpdimd=\dimen155
+\tx@tmpdime=\dimen156
+\tx@tmpdimf=\dimen157
+\tx@dimA=\dimen158
+\tx@dimAA=\dimen159
+\tx@dimB=\dimen160
+\tx@dimBB=\dimen161
+\tx@dimC=\dimen162
+LaTeX Info: Redefining \oldstylenums on input line 902.
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/helvet.sty
+Package: helvet 2020/03/25 PSNFSS-v9.3 (WaS) 
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/courier.sty
+Package: courier 2020/03/25 PSNFSS-v9.3 (WaS) 
+)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/placeins/placeins.sty
+Package: placeins 2005/04/18  v 2.2
+)
+\titlebox=\skip51
+\aaai@thanksins=\insert252
+\aaai@copyrightins=\insert251
+)
+LaTeX Font Info:    Trying to load font information for T1+ntxtlf on input line
+ 20.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/t1ntxtlf.fd
+File: t1ntxtlf.fd 2021/05/24 v1.1 font definition file for T1/ntx/tlf
+)
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.0pt on input line 20.
+
+(./ReproducibilityChecklist.aux)
+\openout1 = `ReproducibilityChecklist.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+
+(/usr/local/texlive/2026/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count290
+\scratchdimen=\dimen163
+\scratchbox=\box53
+\nofMPsegments=\count291
+\nofMParguments=\count292
+\everyMPshowfont=\toks20
+\MPscratchCnt=\count293
+\MPscratchDim=\dimen164
+\MPnumerator=\count294
+\makeMPintoPDFobject=\count295
+\everyMPtoPDFconversion=\toks21
+)
+\c@mv@tabular=\count296
+\c@mv@boldtabular=\count297
+\c@checksubsection=\count298
+\c@checkitem=\count299
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 12.0pt on input line 47.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 12.0pt on input line 47.
+LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
+(Font)              scaled to size 10.0pt on input line 53.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 55
+.
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 69.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 69.
+LaTeX Font Info:    Trying to load font information for TS1+ntxtlf on input lin
+e 83.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/ts1ntxtlf.fd
+File: ts1ntxtlf.fd 2015/01/18 v1.0 fd file for TS1/ntxtlf
+)
+LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
+(Font)              scaled to size 10.0pt on input line 83.
+
+Underfull \hbox (badness 1264) in paragraph at lines 85--86
+[]\T1/ntxtlf/b/n/10 Not \T1/ntxtlf/m/n/10 mod-ify any other part of the \T1/pcr
+/m/n/10 \question
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
+
+ []
+
+
+Underfull \hbox (badness 7869) in paragraph at lines 88--89
+[]\T1/ntxtlf/m/n/10 You can \T1/pcr/m/n/10 \input \T1/ntxtlf/m/n/10 this .tex f
+ile right be-fore
+ []
+
+
+Underfull \hbox (badness 2334) in paragraph at lines 112--114
+[]\T1/ntxtlf/m/n/10 Does this pa-per make the-o-ret-i-cal con-tri-bu-tions?
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 124--126
+[]\T1/ntxtlf/m/n/10 Proofs of all novel claims are in-cluded
+ []
+
+
+Underfull \hbox (badness 3199) in paragraph at lines 151--153
+[]\T1/ntxtlf/m/n/10 A mo-ti-va-tion is given for why the ex-per-i-
+ []
+
+
+Underfull \hbox (badness 1735) in paragraph at lines 151--153
+\T1/ntxtlf/m/n/10 ments are con-ducted on the se-lected datasets
+ []
+
+[1
+
+
+{/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/loc
+al/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}{/usr/local/tex
+live/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}{/usr/local/texlive/2026/texmf
+-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc}]
+Underfull \hbox (badness 1082) in paragraph at lines 196--198
+\T1/ntxtlf/m/n/10 method used for set-ting seeds is de-scribed in
+ []
+
+
+Underfull \hbox (badness 2990) in paragraph at lines 208--210
+[]\T1/ntxtlf/m/n/10 Analysis of ex-per-i-ments goes be-yond single-
+ []
+
+[2
+
+] (./ReproducibilityChecklist.aux)
+ ***********
+LaTeX2e <2025-11-01>
+L3 programming layer <2020/03/25>
+ ***********
+ )
+(\end occurred when \iftrue on line 220 was incomplete) 
+Here is how much of TeX's memory you used:
+ 3662 strings out of 467525
+ 59007 string characters out of 5418982
+ 501525 words of memory out of 5000000
+ 32534 multiletter control sequences out of 15000+600000
+ 640957 words of font info for 48 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 89i,5n,91p,356b,278s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2026
+/texmf-dist/fonts/type1/public/tex-gyre/qtmr.pfb></usr/local/texlive/2026/texmf
+-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2026/texmf-dist/fo
+nts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1
+/public/newtx/ztmr.pfb>
+Output written on ReproducibilityChecklist.pdf (2 pages, 95692 bytes).
+PDF statistics:
+ 34 PDF objects out of 1000 (max. 8388607)
+ 21 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

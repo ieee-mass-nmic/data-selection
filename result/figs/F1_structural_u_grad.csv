@@ -1,5 +1,5 @@
 bucket,n_pairs,mean_spearman,mean_topk_overlap
-same-fam-capacity,2,0.6289,0.1616
-same-fam-placement,28,0.4357,0.1233
-cross-family,26,0.2813,0.0624
-intra-PEFT (noise floor),96,0.7082,0.2602
+same-fam-capacity,2,0.6111,0.2334
+same-fam-placement,28,0.4359,0.1358
+cross-family,26,0.2604,0.0511
+intra-PEFT (noise floor),96,0.7038,0.2740

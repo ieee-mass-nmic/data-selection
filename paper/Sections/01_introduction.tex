@@ -21,5 +21,5 @@ We make three contributions.
 \begin{itemize}
     \item \textbf{Problem and evidence.} We formulate cross-PEFT data-efficient fine-tuning and show that data-value rankings differ across PEFT configurations, with cross-family Top-5\% overlap near 0.06 and a 4.98-point downstream mismatch penalty.
     \item \textbf{Method.} We introduce PCU-Select, a reusable PEFT-conditioned selector built from intervention-site gradient signatures, structured PEFT encodings, task sketches, multi-fidelity utility labels, uncertainty-aware scoring, and adaptive cluster quotas.
-    \item \textbf{Evaluation.} Across GSM8K, HumanEval, MMLU, and TyDiQA, PCU-Select improves 10\%-budget downstream performance over random by 3.64 points and RDS+ by 0.98 points. It matches LESS on average and amortizes its offline cost after about 1.6 target PEFTs.
+    \item \textbf{Evaluation.} Across GSM8K, HumanEval, MMLU, and TyDiQA, PCU-Select improves 10\%-budget downstream performance over random by 3.64 points and RDS+ by 0.98 points. It attains downstream performance statistically indistinguishable from per-PEFT LESS while amortizing its offline selection cost after about 1.6 target PEFT configurations.
 \end{itemize}

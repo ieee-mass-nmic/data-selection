@@ -19,11 +19,14 @@ from _common import RunContext, add_common_args, run_cell
 from pcu_select.experiments import peft_specs_by_group
 
 # Baselines (design §2.3) + our method. `less` is the strongest per-PEFT rival.
+# `lo_proxy_quota` is the simple-scorer control (reviewer 3.3): the raw
+# site-weighted low-fidelity proxy fed through PCU-Select's cluster quota, so the
+# PCU−proxy gap isolates what the learned scorer buys over the cheap proxy.
 # IFD/S2L remain available when their exported scores are present in the cache,
 # but they are not part of the default matrix unless those signals are produced.
 METHODS = [
     "random", "balanced_random", "length", "loss", "perplexity", "embedding_nn",
-    "rds_plus", "diversity", "grad_sim", "less", "pcu",
+    "rds_plus", "diversity", "grad_sim", "less", "lo_proxy_quota", "pcu",
 ]
 
 

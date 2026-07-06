@@ -121,3 +121,62 @@ def test_rds_plus_dense_score_matches_selection_rule():
     assert scores is not None
     expected = [ids[i] for i in np.argsort(-scores)[:3]]
     assert selected == expected
+
+
+def _grad_inputs(n: int = 120, d_proj: int = 8, seed: int = 0) -> tuple:
+    """A BaselineInputs whose grads()/task_grad are pre-stacked in memory.
+
+    Mirrors the shapes the runner passes: unit-normalized per-site grad rows and
+    a per-site task-grad query, so the gradient/proxy baselines exercise their
+    real einsum without needing an on-disk feature cache.
+    """
+    rng = np.random.default_rng(seed)
+    sites = SiteSpace.uniform(n_layers_total=4, k=2)
+    n_sites = len(sites.all_sites)
+    ids = [f"s{i}" for i in range(n)]
+    g = rng.normal(size=(n, n_sites, d_proj)).astype(np.float32)
+    g /= np.linalg.norm(g, axis=-1, keepdims=True) + 1e-8
+    task_grad = rng.normal(size=(n_sites, d_proj)).astype(np.float32)
+    task_grad /= np.linalg.norm(task_grad, axis=-1, keepdims=True) + 1e-8
+    joint = rng.normal(size=(n, 6)).astype(np.float32)
+    inp = BaselineInputs(
+        cache=None,  # type: ignore[arg-type]
+        sites=sites,
+        sample_ids=ids,
+        d_x=np.zeros((n, 16), dtype=np.float32),
+        joint=joint,
+        task_grad=task_grad,
+        _grads=g,
+    )
+    return inp, ids
+
+
+def test_lo_proxy_quota_scores_match_less_proxy():
+    """`lo_proxy_quota` and `less` rank on the identical site-weighted proxy;
+    only the downstream selection rule differs (quota vs. global top-k)."""
+    from pcu_select.experiments import resolve_peft
+
+    inp, _ = _grad_inputs()
+    peft = resolve_peft("L-r8-qv", "llama2-7b")
+    s_proxy = score_baseline("lo_proxy_quota", inp, peft)
+    s_less = score_baseline("less", inp, peft)
+    assert s_proxy is not None and s_less is not None
+    assert np.allclose(s_proxy, s_less)
+
+
+def test_lo_proxy_quota_selects_within_budget_and_high_utility():
+    from pcu_select.experiments import resolve_peft
+
+    inp, ids = _grad_inputs()
+    peft = resolve_peft("L-r8-qv", "llama2-7b")
+    k = 24  # 20% of 120
+    picked = select_baseline("lo_proxy_quota", inp, budget=float(k) / len(ids), peft=peft)
+    assert len(picked) == k
+    assert len(set(picked)) == k
+    assert set(picked).issubset(set(ids))
+    # Quota keeps some structure, but the selected set should still be biased
+    # toward high-proxy samples relative to the pool mean.
+    u = score_baseline("lo_proxy_quota", inp, peft)
+    idx = {sid: i for i, sid in enumerate(ids)}
+    sel_mean = float(np.mean([u[idx[s]] for s in picked]))
+    assert sel_mean > float(np.mean(u))

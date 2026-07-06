@@ -245,6 +245,46 @@ def _less(inp: BaselineInputs, k: int, peft: PEFTConfig | None, seed: int) -> li
     return _top_ids(inp.sample_ids, (cos * alpha[None, :]).sum(axis=-1), k)
 
 
+def _lo_proxy_u(inp: BaselineInputs, peft: PEFTConfig | None) -> np.ndarray:
+    """Site-weighted low-fidelity proxy utility u^lo(x, p, t) (design §5.5).
+
+        u^lo = Σ_ω α̃_p^ω · cos(g_x^ω, g_t^ω)
+
+    Identical signal to the `less` score: a forward-only combination of the
+    once-cached projected gradient signatures with the PEFT-conditioned site
+    weights α̃_p^ω. No learned scorer, no per-PEFT backward pass.
+    """
+    if inp.task_grad is None or peft is None:
+        raise ValueError("lo_proxy_quota needs task_grad and a PEFT config")
+    cos = np.einsum("noi,oi->no", inp.grads(), inp.task_grad, optimize=True)  # (N, |Ω|)
+    alpha = alpha_vector(peft, inp.sites, normalize=True)  # (|Ω|,)
+    return (cos * alpha[None, :]).sum(axis=-1)
+
+
+def _lo_proxy_quota(inp: BaselineInputs, k: int, peft: PEFTConfig | None, seed: int) -> list[str]:
+    """Low-fidelity proxy + cluster quota: the simple-scorer control (reviewer 3.3).
+
+    Feeds the raw site-weighted proxy u^lo through the *same* semantic-cluster
+    adaptive-quota selection PCU-Select uses, with no learned correction and no
+    uncertainty penalty (σ≡0). Holding the structured selection fixed, the only
+    difference from PCU-Select is scorer vs. raw proxy, so the PCU−this gap
+    isolates what the learned conditional scorer buys over the cheap proxy.
+    """
+    from pcu_select.selection.selector import SelectorConfig
+    from pcu_select.selection.selector import select as cluster_select
+
+    u_lo = _lo_proxy_u(inp, peft)
+    res = cluster_select(
+        sample_ids=inp.sample_ids,
+        mu=u_lo,
+        sigma=np.zeros_like(u_lo),
+        joint_embeddings=inp.joint,
+        budget=k,
+        cfg=SelectorConfig(lambda_unc=0.0),  # raw proxy, no uncertainty
+    )
+    return res.selected_ids
+
+
 BASELINES = {
     "random": _random,
     "balanced_random": _balanced_random,
@@ -258,6 +298,7 @@ BASELINES = {
     "diversity": _diversity,
     "grad_sim": _grad_sim,  # influence (PEFT-agnostic)
     "less": _less,          # influence (PEFT-specific)
+    "lo_proxy_quota": _lo_proxy_quota,  # low-fid proxy + cluster quota (simple-scorer control)
 }
 
 
@@ -310,7 +351,7 @@ def score_baseline(name: str, inp: BaselineInputs, peft: PEFTConfig | None = Non
         q = inp.task_query_joint / (np.linalg.norm(inp.task_query_joint) + 1e-8)
         zn = inp.joint / (np.linalg.norm(inp.joint, axis=1, keepdims=True) + 1e-8)
         return zn @ q
-    if name in ("grad_sim", "less"):
+    if name in ("grad_sim", "less", "lo_proxy_quota"):
         if inp.task_grad is None:
             return None
         cos = np.einsum("noi,oi->no", inp.grads(), inp.task_grad, optimize=True)
@@ -319,5 +360,7 @@ def score_baseline(name: str, inp: BaselineInputs, peft: PEFTConfig | None = Non
         if peft is None:
             return None
         alpha = alpha_vector(peft, inp.sites, normalize=True)
+        # `less` and `lo_proxy_quota` rank on the same site-weighted proxy u^lo;
+        # they differ only in the downstream selection rule (top-k vs. quota).
         return (cos * alpha[None, :]).sum(axis=-1)
     return None

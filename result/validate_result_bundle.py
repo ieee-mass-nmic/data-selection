@@ -50,7 +50,6 @@ CSV_MIRRORS = [
     "T2_ablation.csv",
 ]
 
-
 def _load_jsonl(path: Path) -> list[dict]:
     rows: list[dict] = []
     with path.open() as fh:
@@ -104,6 +103,12 @@ def _check_rows(name: str, rows: list[dict], errors: list[str]) -> None:
         extra = row.get("extra") or {}
         if extra.get("n_selected") != expected:
             errors.append(f"{name}:{idx}: n_selected does not match budget")
+
+
+def _check_measured_rows(name: str, rows: list[dict], errors: list[str]) -> None:
+    for idx, row in enumerate(rows, 1):
+        if (row.get("extra") or {}).get("provenance"):
+            errors.append(f"{name}:{idx}: measured result rows must not carry generated provenance")
 
 
 def _check_e2(rows: list[dict], errors: list[str]) -> None:
@@ -225,6 +230,7 @@ def main() -> int:
             continue
         loaded[name] = rows
         _check_rows(name, rows, errors)
+        _check_measured_rows(name, rows, errors)
 
     if "E2.jsonl" in loaded:
         _check_e2(loaded["E2.jsonl"], errors)

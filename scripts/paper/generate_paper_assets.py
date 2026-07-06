@@ -44,8 +44,22 @@ METHOD_LABEL = {
     "rds_plus": "RDS+",
     "grad_sim": "Influence",
     "less": "LESS",
+    "lo_proxy_quota": "Low-fid proxy",
     "pcu": "PCU-Select",
 }
+
+# Method rows shown in the main / per-task tables, in display order. The
+# low-fidelity-proxy control (reviewer 3.3) is inserted just before PCU-Select
+# only when its rows are present in the export, so the manuscript compiles before
+# that grid is run and the row appears automatically once it is.
+MAIN_TABLE_METHODS = ["random", "rds_plus", "grad_sim", "less", "pcu"]
+
+
+def _table_methods(present: set[str]) -> list[str]:
+    rows = list(MAIN_TABLE_METHODS)
+    if "lo_proxy_quota" in present:
+        rows.insert(rows.index("pcu"), "lo_proxy_quota")
+    return rows
 
 
 def read_jsonl(path: Path) -> pd.DataFrame:
@@ -329,33 +343,249 @@ def fig_ood_calibration() -> None:
     save_pdf(fig, "fig_ood_calibration.pdf")
 
 
+def _wilcoxon_p(diffs: np.ndarray) -> float:
+    """Two-sided Wilcoxon signed-rank p-value.
+
+    Uses scipy when available for the exact test; otherwise falls back to a
+    normal approximation with continuity and tie corrections.
+    """
+    try:
+        from scipy.stats import wilcoxon
+
+        return float(wilcoxon(diffs).pvalue)
+    except Exception:
+        d = diffs[diffs != 0]
+        n = len(d)
+        if n == 0:
+            return float("nan")
+        ranks = rankdata(np.abs(d)) + 1.0  # 1-based ranks
+        w_plus = ranks[d > 0].sum()
+        mean_w = n * (n + 1) / 4.0
+        # tie correction on the shared magnitude ranks
+        _, counts = np.unique(np.abs(d), return_counts=True)
+        tie = (counts ** 3 - counts).sum()
+        var_w = n * (n + 1) * (2 * n + 1) / 24.0 - tie / 48.0
+        z = (abs(w_plus - mean_w) - 0.5) / math.sqrt(var_w)
+        # two-sided normal tail
+        return float(math.erfc(z / math.sqrt(2.0)))
+
+
+def paired_pcu_vs_less(main: pd.DataFrame) -> dict:
+    """Paired PCU-vs-LESS comparison across the 20 PEFT x task cells.
+
+    Each cell is the seed-averaged metric. Returns the mean paired difference,
+    a 95% paired-bootstrap CI on that mean, the Wilcoxon signed-rank p-value,
+    and the win count, so the reframed 'comparable' claim is reproducible.
+    """
+    cell = main.groupby(["method", "peft", "task"])["metric"].mean()
+    pcu = cell.loc["pcu"].reindex(MAIN_PEFTS, level="peft")
+    less = cell.loc["less"].reindex(MAIN_PEFTS, level="peft")
+    diffs = (pcu - less).to_numpy(float)
+    rng = np.random.default_rng(20260706)
+    boot = np.array([diffs[rng.integers(0, len(diffs), len(diffs))].mean() for _ in range(10000)])
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+    return {
+        "mean": float(diffs.mean()),
+        "ci_lo": float(lo),
+        "ci_hi": float(hi),
+        "p": _wilcoxon_p(diffs),
+        "wins": int((diffs > 0).sum()),
+        "n": int(len(diffs)),
+    }
+
+
+def _cell_dispersion(main: pd.DataFrame, rows: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Per (method, peft) seed-level mean and std.
+
+    Metrics are first averaged over the four tasks within each seed, then the
+    mean and sample std are taken over the three target-training seeds, so the
+    reported dispersion reflects seed noise at the PEFT-column level.
+    """
+    seed_col = main.groupby(["method", "peft", "seed"])["metric"].mean()
+    mean = seed_col.groupby(["method", "peft"]).mean().unstack().reindex(index=rows, columns=MAIN_PEFTS)
+    std = seed_col.groupby(["method", "peft"]).std(ddof=1).unstack().reindex(index=rows, columns=MAIN_PEFTS)
+    seed_all = main.groupby(["method", "seed"])["metric"].mean()
+    mean["Avg."] = seed_all.groupby("method").mean().reindex(rows)
+    std["Avg."] = seed_all.groupby("method").std(ddof=1).reindex(rows)
+    return mean, std
+
+
 def table_main_results() -> None:
     e1 = read_jsonl(DATA / "E1.jsonl")
     main = e1[e1["budget"].eq(0.10)]
-    rows = ["random", "rds_plus", "grad_sim", "less", "pcu"]
-    pivot = main.groupby(["method", "peft"])["metric"].mean().unstack().reindex(index=rows, columns=MAIN_PEFTS)
-    pivot["Avg."] = main.groupby("method")["metric"].mean().reindex(rows)
+    rows = _table_methods(set(main["method"]))
+    cols = MAIN_PEFTS + ["Avg."]
+    mean, std = _cell_dispersion(main, rows)
+    test = paired_pcu_vs_less(main)
+    caption = (
+        "Main downstream performance at a 10\\% selection budget, reported as "
+        "mean$\\pm$std over three target-training seeds (task-native metrics are "
+        "scaled as percentages, so larger is better). PCU-Select and per-PEFT "
+        "LESS are statistically indistinguishable: the paired difference over the "
+        f"{test['n']} PEFT$\\times$task cells is ${test['mean']:.2f}$ points "
+        f"(95\\% bootstrap CI $[{test['ci_lo']:.2f}, {test['ci_hi']:.2f}]$; "
+        f"Wilcoxon signed-rank $p={test['p']:.2f}$). Boldface marks the best mean "
+        "per column."
+    )
     lines = [
         "\\begin{table*}[t]",
         "\\centering",
         "\\small",
         "\\setlength{\\tabcolsep}{4pt}",
-        "\\caption{Main downstream performance at a 10\\% selection budget. Values average over four tasks and three target-training seeds; task-native metrics are scaled as percentages, so larger is better.}",
+        "\\caption{" + caption + "}",
         "\\label{tab:main-results}",
         "\\begin{tabular}{lrrrrrr}",
         "\\toprule",
         "Method & AD-b64 & IA3 & L-r16-qkvo & L-r8-mlp & L-r8-qv & Avg. \\\\",
         "\\midrule",
     ]
+    best = {c: mean[c].max() for c in cols}
     for method in rows:
-        vals = [f"{pivot.loc[method, c]:.2f}" for c in MAIN_PEFTS + ["Avg."]]
-        name = METHOD_LABEL[method]
-        if method == "pcu":
-            name = "\\textbf{" + name + "}"
-            vals = ["\\textbf{" + v + "}" for v in vals]
-        lines.append(f"{name} & " + " & ".join(vals) + " \\\\")
+        cells = []
+        for c in cols:
+            body = f"{mean.loc[method, c]:.2f}{{\\scriptsize$\\pm${std.loc[method, c]:.2f}}}"
+            if abs(mean.loc[method, c] - best[c]) < 1e-9:
+                body = "\\textbf{" + body + "}"
+            cells.append(body)
+        lines.append(f"{METHOD_LABEL[method]} & " + " & ".join(cells) + " \\\\")
     lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}", ""]
     write(TAB_DIR / "table_main_results.tex", "\n".join(lines))
+
+
+TASK_ORDER = ["gsm8k", "humaneval", "mmlu", "tydiqa"]
+TASK_LABEL = {
+    "gsm8k": "GSM8K",
+    "humaneval": "HumanEval",
+    "mmlu": "MMLU",
+    "tydiqa": "TyDiQA",
+}
+METRIC_LABEL = {
+    "exact_match": "EM",
+    "pass@1": "Pass@1",
+    "accuracy": "Acc",
+    "f1": "F1",
+}
+
+
+def _per_task_dispersion(sub: pd.DataFrame, rows: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """For a single task: per (method, peft) seed mean and std, plus a PEFT-averaged
+    ``Avg.`` column whose dispersion is the seed std of the PEFT-averaged score.
+
+    Kept separate from ``_cell_dispersion`` (which averages over tasks) so the
+    appendix surfaces every task's raw per-PEFT numbers rather than the collapsed
+    average the reviewer objected to."""
+    cell = sub.groupby(["method", "peft", "seed"])["metric"].mean()
+    mean = cell.groupby(["method", "peft"]).mean().unstack().reindex(index=rows, columns=MAIN_PEFTS)
+    std = cell.groupby(["method", "peft"]).std(ddof=1).unstack().reindex(index=rows, columns=MAIN_PEFTS)
+    seed_avg = sub.groupby(["method", "seed"])["metric"].mean()
+    mean["Avg."] = seed_avg.groupby("method").mean().reindex(rows)
+    std["Avg."] = seed_avg.groupby("method").std(ddof=1).reindex(rows)
+    return mean, std
+
+
+def table_per_task_peft() -> None:
+    """Full task x PEFT x method grid at the 10% budget (appendix), so the main
+    table's PEFT-and-task average is shown alongside its constituents, not instead
+    of them (reviewer 3.2)."""
+    e1 = read_jsonl(DATA / "E1.jsonl")
+    main = e1[e1["budget"].eq(0.10)]
+    rows = _table_methods(set(main["method"]))
+    cols = MAIN_PEFTS + ["Avg."]
+    lines = [
+        "\\begin{table*}[t]",
+        "\\centering",
+        "\\small",
+        "\\setlength{\\tabcolsep}{4pt}",
+        "\\caption{Full per-task $\\times$ PEFT $\\times$ method downstream results at a "
+        "10\\% selection budget (mean$\\pm$std over three target-training seeds, on each "
+        "task's native metric). This is the unaveraged source of Table~\\ref{tab:main-results}: "
+        "because the four metrics have different scales, ceilings, and seed variance, a point "
+        "on one task is not equivalent to a point on another, so we report every cell. "
+        "Boldface marks the best mean per column within each task. PCU-Select leads on GSM8K "
+        "and MMLU, is within seed noise of LESS on HumanEval, and trails LESS on TyDiQA; the "
+        "PEFT-and-task average in Table~\\ref{tab:main-results} smooths over this heterogeneity.}",
+        "\\label{tab:per-task-peft}",
+        "\\begin{tabular}{lrrrrrr}",
+        "\\toprule",
+        "Method & AD-b64 & IA3 & L-r16-qkvo & L-r8-mlp & L-r8-qv & Avg. \\\\",
+    ]
+    for task in TASK_ORDER:
+        sub = main[main["task"].eq(task)]
+        metric_name = str(sub["metric_name"].iloc[0])
+        mean, std = _per_task_dispersion(sub, rows)
+        best = {c: mean[c].max() for c in cols}
+        header = f"{TASK_LABEL[task]} ({METRIC_LABEL.get(metric_name, metric_name)})"
+        lines.append("\\midrule")
+        lines.append(f"\\multicolumn{{7}}{{l}}{{\\textit{{{header}}}}} \\\\")
+        for method in rows:
+            cells = []
+            for c in cols:
+                body = f"{mean.loc[method, c]:.2f}{{\\scriptsize$\\pm${std.loc[method, c]:.2f}}}"
+                if abs(mean.loc[method, c] - best[c]) < 1e-9:
+                    body = "\\textbf{" + body + "}"
+                cells.append(body)
+            lines.append(f"{METHOD_LABEL[method]} & " + " & ".join(cells) + " \\\\")
+    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}", ""]
+    write(TAB_DIR / "table_per_task_peft.tex", "\n".join(lines))
+
+
+def _paired_ci(diffs: np.ndarray, seed: int = 20260706) -> tuple[float, float, float]:
+    """Mean paired difference and 95% paired-bootstrap CI over the given cells."""
+    rng = np.random.default_rng(seed)
+    n = len(diffs)
+    boot = np.array([diffs[rng.integers(0, n, n)].mean() for _ in range(10000)])
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+    return float(diffs.mean()), float(lo), float(hi)
+
+
+def table_per_task_normalized() -> None:
+    """Per-task normalized improvement of PCU-Select over Random / RDS+ / LESS
+    (reviewer 3.2). Improvements over Random and RDS+ are given as scale-free
+    relative gains so cross-task point-differences are not treated as equivalent;
+    the head-to-head with LESS is shown as an absolute paired difference with a
+    95% bootstrap CI over the five PEFT cells (seed-averaged)."""
+    e1 = read_jsonl(DATA / "E1.jsonl")
+    main = e1[e1["budget"].eq(0.10)]
+    lines = [
+        "\\begin{table*}[t]",
+        "\\centering",
+        "\\small",
+        "\\setlength{\\tabcolsep}{5pt}",
+        "\\caption{Per-task normalized improvement of PCU-Select at the 10\\% budget. "
+        "Absolute scores (Random, RDS+, LESS, PCU) are seed- and PEFT-averaged on each "
+        "task's native metric. $\\Delta$Rand and $\\Delta$RDS+ are \\emph{relative} gains "
+        "($100\\cdot(\\mathrm{PCU}-b)/b$), which place the four heterogeneous metrics on a "
+        "common scale so that cross-task point-differences are not treated as equivalent. "
+        "$\\Delta$LESS is the absolute paired difference in native points against the "
+        "strongest baseline, with a 95\\% bootstrap CI over the five PEFT cells: a CI that "
+        "excludes zero marks a per-task win (GSM8K, MMLU) or loss (TyDiQA), and the sign "
+        "flips across tasks, which the averaged Table~\\ref{tab:main-results} conceals.}",
+        "\\label{tab:per-task-normalized}",
+        "\\begin{tabular}{llrrrrrrl}",
+        "\\toprule",
+        "Task & Metric & Random & RDS+ & LESS & PCU & $\\Delta$Rand & $\\Delta$RDS+ & "
+        "$\\Delta$LESS (95\\% CI) \\\\",
+        "\\midrule",
+    ]
+    for task in TASK_ORDER:
+        sub = main[main["task"].eq(task)]
+        metric_name = str(sub["metric_name"].iloc[0])
+        cell = sub.groupby(["method", "peft"])["metric"].mean()
+        pcu = cell.loc["pcu"].reindex(MAIN_PEFTS).to_numpy(float)
+        rand = cell.loc["random"].reindex(MAIN_PEFTS).to_numpy(float)
+        rds = cell.loc["rds_plus"].reindex(MAIN_PEFTS).to_numpy(float)
+        less = cell.loc["less"].reindex(MAIN_PEFTS).to_numpy(float)
+        rel_rand = 100.0 * (pcu.mean() - rand.mean()) / rand.mean()
+        rel_rds = 100.0 * (pcu.mean() - rds.mean()) / rds.mean()
+        d_less, lo, hi = _paired_ci(pcu - less)
+        ci = f"${d_less:+.2f}$ $[{lo:+.2f}, {hi:+.2f}]$"
+        lines.append(
+            f"{TASK_LABEL[task]} & {METRIC_LABEL.get(metric_name, metric_name)} & "
+            f"{rand.mean():.2f} & {rds.mean():.2f} & {less.mean():.2f} & {pcu.mean():.2f} & "
+            f"{rel_rand:+.1f}\\% & {rel_rds:+.1f}\\% & {ci} \\\\"
+        )
+    lines += ["\\bottomrule", "\\end{tabular}", "\\end{table*}", ""]
+    write(TAB_DIR / "table_per_task_normalized.tex", "\n".join(lines))
 
 
 def table_ablation() -> None:
@@ -427,6 +657,8 @@ def main() -> None:
     fig_config_sensitivity()
     fig_ood_calibration()
     table_main_results()
+    table_per_task_peft()
+    table_per_task_normalized()
     table_ablation()
     table_peft_configs()
     print(f"Wrote figures to {FIG_DIR.relative_to(ROOT)}")

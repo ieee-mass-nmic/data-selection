@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{Per-task normalized improvement of PCU-Select at the 10\% budget. Absolute scores (Random, RDS+, LESS, PCU) are seed- and PEFT-averaged on each task's native metric. $\Delta$Rand and $\Delta$RDS+ are \emph{relative} gains ($100\cdot(\mathrm{PCU}-b)/b$), which place the four heterogeneous metrics on a common scale so that cross-task point-differences are not treated as equivalent. $\Delta$LESS is the absolute paired difference in native points against the strongest baseline, with a 95\% bootstrap CI over the five PEFT cells: a CI that excludes zero marks a per-task win (GSM8K, MMLU) or loss (TyDiQA), and the sign flips across tasks, which the averaged Table~\ref{tab:main-results} conceals.}
+\label{tab:per-task-normalized}
+\begin{tabular}{llrrrrrrl}
+\toprule
+Task & Metric & Random & RDS+ & LESS & PCU & $\Delta$Rand & $\Delta$RDS+ & $\Delta$LESS (95\% CI) \\
+\midrule
+GSM8K & EM & 33.43 & 36.08 & 36.50 & 37.01 & +10.7\% & +2.6\% & $+0.51$ $[+0.03, +0.98]$ \\
+HumanEval & Pass@1 & 29.54 & 31.57 & 32.88 & 32.80 & +11.0\% & +3.9\% & $-0.08$ $[-0.81, +0.58]$ \\
+MMLU & Acc & 44.75 & 47.59 & 48.48 & 49.15 & +9.8\% & +3.3\% & $+0.67$ $[+0.24, +1.08]$ \\
+TyDiQA & F1 & 48.98 & 52.08 & 53.07 & 52.30 & +6.8\% & +0.4\% & $-0.77$ $[-1.17, -0.43]$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
