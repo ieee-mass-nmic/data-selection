@@ -86,9 +86,9 @@ re-implementation must reinstate this evaluation adapter to reproduce them.
 \subsection{Baseline Specifications}
 \label{sec:appendix-baselines}
 
-This subsection specifies the two baselines whose names invoke prior work, and
-the reviewer-requested low-fidelity-proxy control, exactly as implemented in the
-released selectors so that the comparison is auditable.
+This subsection specifies the two baselines whose names invoke prior work,
+exactly as implemented in the released selectors so that the comparison is
+auditable.
 
 \paragraph{RDS+ (representation similarity).}
 RDS+ operates on the joint semantic embedding $e_x^{\text{joint}}$---the same
@@ -132,20 +132,6 @@ nonetheless charges LESS-style the per-target gradient recomputation the origina
 method requires, so its reported cost reflects the algorithm it stands in for
 rather than our datastore-sharing shortcut; we flag this modeling choice
 explicitly.
-
-\paragraph{Low-fidelity-proxy control.}
-The low-fidelity-proxy baseline scores candidates with the identical
-$u^{\mathrm{lo}}$ signal above, but replaces global top-$k$ with PCU-Select's own
-selection stack: semantic MiniBatch $k$-means clustering followed by the adaptive
-quota allocation of Appendix~\ref{sec:appendix-repro}, with the uncertainty term
-disabled ($\sigma\equiv 0$, so $q=u^{\mathrm{lo}}$) and $\alpha{=}0.6$. It thus
-shares every component with PCU-Select except the learned conditional scorer,
-which the raw proxy replaces. This makes it the controlled ``simple scorer''
-comparison the main table needs: the PCU-Select$-$proxy difference measures the
-marginal contribution of the learned scorer over a forward-only proxy, holding
-clustering and quota fixed. It requires no per-PEFT backward pass beyond the
-$\tilde\alpha_p^\omega$ reweighting, so its selection cost matches the LESS-style
-apply cost without the trained-scorer offline investment.
 
 \subsection{Reproducibility Supplement}
 \label{sec:appendix-repro}

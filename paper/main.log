@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  6 JUL 2026 03:39
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  7 JUL 2026 02:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -449,7 +449,7 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 <Figures/fig_cost_break_even.pdf, id=50, 214.37715pt x 161.20627pt>
 File: Figures/fig_cost_break_even.pdf Graphic file (type pdf)
 <use Figures/fig_cost_break_even.pdf>
-Package pdftex.def Info: Figures/fig_cost_break_even.pdf  used on input line 34
+Package pdftex.def Info: Figures/fig_cost_break_even.pdf  used on input line 28
 .
 (pdftex.def)             Requested size: 239.39438pt x 180.01845pt.
 )
@@ -467,12 +467,19 @@ File: Figures/fig_ood_calibration.pdf Graphic file (type pdf)
 Package pdftex.def Info: Figures/fig_ood_calibration.pdf  used on input line 25
 .
 (pdftex.def)             Requested size: 239.39438pt x 211.46696pt.
-)
-(./Sections/07_conclusion.tex) [6 <./Figures/fig_cost_break_even.pdf>] [7 <./Fi
-gures/fig_config_sensitivity.pdf>] (./main.bbl [8 <./Figures/fig_ood_calibratio
-n.pdf>]) [9
 
-] (./Sections/08_appendix.tex (./tables/table_per_task_peft.tex
+Underfull \vbox (badness 1270) has occurred while \output is active []
+
+)
+(./Sections/07_conclusion.tex)
+Underfull \vbox (badness 5245) has occurred while \output is active []
+
+ [6 <./Figures/fig_cost_break_even.pdf>] [7 <./Figures/fig_config_sensitivity.p
+df>]
+(./main.bbl [8 <./Figures/fig_ood_calibration.pdf>]) [9
+
+]
+(./Sections/08_appendix.tex (./tables/table_per_task_peft.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
 (Font)              scaled to size 9.0pt on input line 11.
 )
@@ -488,28 +495,26 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
  [10
 
 {/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}]
-Underfull \vbox (badness 2913) has occurred while \output is active []
-
-
-Underfull \hbox (badness 1448) in paragraph at lines 174--187
+Underfull \hbox (badness 1448) in paragraph at lines 160--173
  \T1/ntxtlf/b/n/10 Task sketch con-struc-tion and Hu-manEval leak-age.
  []
 
-[11]
-Underfull \hbox (badness 5681) in paragraph at lines 281--289
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [11]
+Underfull \hbox (badness 5681) in paragraph at lines 267--275
  \T1/ntxtlf/b/n/10 Multi-fidelity la-bels. \T1/ntxtlf/m/n/10 High-fidelity su-p
 er-vi-sion uses
  []
 
 )
-Underfull \hbox (badness 1048) in paragraph at lines 291--121
+Underfull \hbox (badness 1048) in paragraph at lines 277--121
 \OT1/cmr/m/n/10 ([] \OMS/cmsy/m/n/10 ^^B []\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 =\
 OT1/cmr/m/n/10 3600$\T1/ntxtlf/m/n/10 . The of-fline cost is
  []
 
-[12] [13
-
-] (./main.aux)
+[12] [13] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
@@ -522,7 +527,7 @@ Here is how much of TeX's memory you used:
  36380 multiletter control sequences out of 15000+600000
  677939 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,11n,117p,2019b,386s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,11n,117p,1751b,402s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></
@@ -542,7 +547,7 @@ exmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2026/texmf-dis
 t/fonts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts/t
 ype1/public/newtx/ztmr.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/publ
 ic/newtx/ztmri.pfb>
-Output written on main.pdf (13 pages, 1809374 bytes).
+Output written on main.pdf (13 pages, 1808638 bytes).
 PDF statistics:
  218 PDF objects out of 1000 (max. 8388607)
  125 compressed objects within 2 object streams

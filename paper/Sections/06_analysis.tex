@@ -6,7 +6,7 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{Figures/fig_config_sensitivity.pdf}
-\caption{PCU-Select reacts to configuration changes. Left: subsets selected for one LoRA configuration degrade when used to train another, with an average 2.42-point diagonal-off-diagonal gap. Right: PCU-Select's selection difference grows with configuration distance, while PEFT-agnostic RDS+ stays nearly flat.}
+\caption{PCU-Select reacts to configuration changes. \textbf{Left:} mismatch matrix over seven LoRA configurations. Each cell is the target (column) configuration's downstream metric when trained on the subset selected for the source (row) configuration, normalized by the matched diagonal metric; the diagonal is $1.00$ by construction and off-diagonal cells fall below it. Cells span $0.85$--$1.00$, and the mean off-diagonal drop of $0.068$ corresponds to a $2.42$-point absolute gap (mean matched metric $35.41$ vs.\ mismatched $32.99$). \textbf{Right:} selection difference ($1-$Jaccard overlap of the two selected subsets) versus \emph{configuration distance}---a heuristic ordinal metric that sums the base-2 log-rank gap and unit penalties for differing layer placement and target-module set between two registry configurations. PCU-Select's selection difference grows with configuration distance, while PEFT-agnostic RDS+ stays nearly flat.}
 \label{fig:config-sensitivity}
 \end{figure*}
 
@@ -31,4 +31,4 @@ The Mahalanobis OOD check predicts when the offline scorer needs target-specific
 
 \subsection{Limitations}
 
-The current evidence covers one backbone family, four tasks, and a finite PEFT registry. The result bundle includes Qwen-style motivation assets, but the main E1--E5 quantitative claims are centered on the Llama2-7B registry. PCU-Select also uses short-horizon utility labels rather than full-training marginal contribution as supervision, so the scorer inherits the bias of that proxy. The cost claim is comparative. PCU-Select amortizes against per-PEFT influence recomputation, but cheap PEFT-agnostic selectors remain preferable when raw selection cost dominates and a small performance loss is acceptable.
+The current evidence covers one backbone family (Llama2-7B), four tasks, and a finite PEFT registry, so the claims are cross-PEFT within a single backbone family rather than cross-backbone. PCU-Select also uses short-horizon utility labels rather than full-training marginal contribution as supervision, so the scorer inherits the bias of that proxy. The cost claim is comparative. PCU-Select amortizes against per-PEFT influence recomputation, but cheap PEFT-agnostic selectors remain preferable when raw selection cost dominates and a small performance loss is acceptable.

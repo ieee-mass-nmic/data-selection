@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1783280385.7384 "main.aux" "main.bbl" "main" 1783280387.64651 0
+["bibtex main"] 1783363604.60207 "main.aux" "main.bbl" "main" 1783363606.60535 0
   "./aaai2027.bib" 1782704500 17411 8f6dccdf99cbf306cfb986aa0f781d6e ""
   "./aaai2027.bst" 1782704500 30207 bd248dfe461b9b2fc7481a44feafe197 ""
-  "main.aux" 1783280387.46433 4502 bf98dbb5e2bc6358be82974b6c17f878 "pdflatex"
+  "main.aux" 1783363606.39624 4502 960480fbcf05eb3137d5abca47b5f8b3 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1783280385.81029 "main.tex" "main.pdf" "main" 1783280387.64661 0
+["pdflatex"] 1783363604.71971 "main.tex" "main.pdf" "main" 1783363606.60545 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1698694482 2914 fdbc4a54b9bc76f4551b5303f2737d33 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -120,24 +120,24 @@
   "Figures/fig_cost_break_even.pdf" 1783279662.86769 41912 9916c6ff31bac7e86505c6f022f62aba ""
   "Figures/fig_motivation_disagreement.pdf" 1783279662.59499 48376 47d2dc91703d86bc6797976b66740582 ""
   "Figures/fig_ood_calibration.pdf" 1783279663.08319 12102 ab88e733f03c7d873a6561e92d1f7fa4 ""
-  "Sections/00_abstract.tex" 1783271917.37585 1657 18d603ec664ed5b74b25f1569b73a4e7 ""
-  "Sections/01_introduction.tex" 1783271948.89147 4677 3d24afa137720005449675bb3165e05d ""
+  "Sections/00_abstract.tex" 1783363565.61968 1684 5aa7e98523c5c06b3e6f4a573eef038c ""
+  "Sections/01_introduction.tex" 1783363570.99274 4704 5000d0638a816f23b8c6bea71d6c6124 ""
   "Sections/02_related_work.tex" 1782854288.52632 3597 a7daaec90792164c94eccfa1b06a4da9 ""
   "Sections/03_problem_formulation.tex" 1782854113.19598 2174 7366003c492a0082140097837e450d40 ""
   "Sections/04_method.tex" 1782854229.90949 5204 bd6408d77de4f0c1ef0b2c506baed323 ""
-  "Sections/05_experiments.tex" 1783280090.78978 6891 84873babed37d4649e54a5ab5c97afb2 ""
-  "Sections/06_analysis.tex" 1782854490.90277 3783 2e0be3d40abb948bfce69d9af7654745 ""
+  "Sections/05_experiments.tex" 1783360314.07607 5871 ff48a5e919f616e019d8789aa7b5f44f ""
+  "Sections/06_analysis.tex" 1783363529.48143 4384 8c7584e00d82314ac0b6b3135a95c916 ""
   "Sections/07_conclusion.tex" 1782854114.0323 745 0c427c7b76a4a8f2fda68a984d771e76 ""
-  "Sections/08_appendix.tex" 1783280133.194 18756 c70b4440a19cd49c779a9ca9eea3f84f ""
+  "Sections/08_appendix.tex" 1783360337.25168 17735 7bc5b00de9ece56a515c448d901f136d ""
   "aaai2027.sty" 1782704500 16915 1b1c792e2acfbbd8b672259e267b95d8 ""
-  "main.aux" 1783280387.46433 4502 bf98dbb5e2bc6358be82974b6c17f878 "pdflatex"
-  "main.bbl" 1783280385.80904 8738 b5f39d2a9a892685029673a40433d747 "bibtex main"
+  "main.aux" 1783363606.39624 4502 960480fbcf05eb3137d5abca47b5f8b3 "pdflatex"
+  "main.bbl" 1783363604.71726 8738 b5f39d2a9a892685029673a40433d747 "bibtex main"
   "main.tex" 1783272955.1491 4573 7050c33deef6343a60549725afd92da1 ""
   "tables/table_ablations.tex" 1783279663.82834 776 98965609e67483938b0ef1478b960c6c ""
-  "tables/table_main_results.tex" 1783279663.70091 1687 a9e296f3ec10cb12d9bc021f070a4db0 ""
-  "tables/table_peft_configs.tex" 1783279663.83054 592 b1b37f74888da32351f1b295b23e2723 ""
-  "tables/table_per_task_normalized.tex" 1783279663.82473 1364 33321c66c33a7b65eb866e3eccf7b0e7 ""
-  "tables/table_per_task_peft.tex" 1783279663.71836 5134 ef9082a6d77476da962ce7ab4b85528f ""
+  "tables/table_main_results.tex" 1783363439.56088 1695 3954815a98182860548d8de4991656dc ""
+  "tables/table_peft_configs.tex" 1783363439.56488 944 b1afe74f97bf945098b40dd46fc63a8a ""
+  "tables/table_per_task_normalized.tex" 1783363439.68881 1364 33321c66c33a7b65eb866e3eccf7b0e7 ""
+  "tables/table_per_task_peft.tex" 1783363439.58367 5142 7f6f44ffbaf1a292c2fd7e4317e1d17c ""
   (generated)
   "main.aux"
   "main.log"
