@@ -7,13 +7,15 @@ We formalize \emph{cross-PEFT data-efficient fine-tuning}: selecting a compact t
   \mathrm{Perf}\!\left(\mathrm{Tune}(M_0,p,\mathcal{S}),V_t^{\mathrm{test}}\right).
   \label{eq:selection-objective}
 \end{equation}
-Directly optimizing Eq.~\eqref{eq:selection-objective} is infeasible because it requires training and evaluating many subsets for every target $(p,t)$ pair.
+The held-out set $V_t^{\mathrm{test}}$ appears only in this definition of the oracle; it is never used for training or for selection, which see only the sketch $V_t$. Directly optimizing Eq.~\eqref{eq:selection-objective} is infeasible because it requires training and evaluating many subsets for every target $(p,t)$ pair.
 
 PCU-Select replaces the subset oracle with a conditional per-example utility,
 \begin{equation}
   s_{\phi}(x,p,t)\approx u(x,p,t),
   \label{eq:surrogate}
 \end{equation}
-where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Conditioning on $p$ is the core departure from PEFT-agnostic selection. A sample's gradient can be useful in the attention projections trained by LoRA, weak in the residual bottlenecks trained by adapters, and different again under multiplicative (IA)$^3$ gates. The selected subset should therefore change when the trainable subspace changes.
+where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Concretely, $u(x,p,t)\in[0,1]$ is a rank-normalized short-horizon utility built from sketch-loss reductions (Sec.~\ref{sec:method}), not a raw loss or a generic quality score. Conditioning on $p$ is the core departure from PEFT-agnostic selection. A sample's gradient can be useful in the attention projections trained by LoRA, weak in the residual bottlenecks trained by adapters, and different again under multiplicative (IA)$^3$ gates. The selected subset should therefore change when the trainable subspace changes.
+
+Task relativity is concrete: a worked-solution arithmetic example receives high utility under the GSM8K sketch but low utility under the TyDiQA sketch, because its gradient aligns with the reasoning task but not with multilingual span extraction; the same example's utility also shifts across PEFTs when the aligned sites are not the ones a given method trains.
 
 The formulation rests on four requirements. \textbf{PEFT dependence}: the scorer must take $p$ as an explicit input. \textbf{Task relativity}: utility must be defined relative to $V_t$ so that the model does not learn a generic quality score. \textbf{Structural encodability}: PEFT methods must be represented by their sites, operator type, capacity, and recipe, not just by a family name. \textbf{Amortizable cost}: expensive labels and scorer training are paid offline, while applying to a new $(p,t)$ pair uses cached features and forward scoring.

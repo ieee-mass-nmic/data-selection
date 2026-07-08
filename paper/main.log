@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  7 JUL 2026 02:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  8 JUL 2026 20:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -406,6 +406,8 @@ File: Figures/fig_motivation_disagreement.pdf Graphic file (type pdf)
 Package pdftex.def Info: Figures/fig_motivation_disagreement.pdf  used on input
  line 9.
 (pdftex.def)             Requested size: 505.89pt x 241.27187pt.
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
+(Font)              scaled to size 10.0pt on input line 10.
  [1{/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/
 local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc}
 
@@ -423,22 +425,50 @@ LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
 )
 (./Sections/02_related_work.tex [2{/usr/local/texlive/2026/texmf-dist/fonts/enc
 /dvips/tex-gyre/q-ts1.enc} <./Figures/fig_motivation_disagreement.pdf>])
-(./Sections/03_problem_formulation.tex
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
-(Font)              scaled to size 10.0pt on input line 4.
-) (./Sections/04_method.tex
-<Figures/Architecture.png, id=36, 1496.59125pt x 1058.95625pt>
-File: Figures/Architecture.png Graphic file (type png)
-<use Figures/Architecture.png>
-Package pdftex.def Info: Figures/Architecture.png  used on input line 8.
-(pdftex.def)             Requested size: 505.89pt x 357.95593pt.
+(./Sections/03_problem_formulation.tex) (./Sections/04_method.tex
+<Figures/Architecture.pdf, id=37, 407.60278pt x 239.6097pt>
+File: Figures/Architecture.pdf Graphic file (type pdf)
+<use Figures/Architecture.pdf>
+Package pdftex.def Info: Figures/Architecture.pdf  used on input line 8.
+(pdftex.def)             Requested size: 505.89pt x 297.39081pt.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 10.95pt on input line 13.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 10.95pt on input line 13.
- [3])
-(./Sections/05_experiments.tex [4 <./Figures/Architecture.png>]
-(./tables/table_peft_configs.tex) (./tables/table_main_results.tex
+ [3]
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 33
+.
+
+(/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+Underfull \hbox (badness 1776) in paragraph at lines 33--34
+\T1/ntxtlf/m/n/10 cate-nates a 768-dimensional se-man-tic em-bed-ding, 16
+ []
+
+
+Underfull \hbox (badness 1509) in paragraph at lines 33--34
+\T1/ntxtlf/m/n/10 dif-fi-culty and for-mat statis-tics, and a 64-dimensional
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
+\T1/pcr/m/n/10 sentence-transformers/all-mpnet-base-v2
+ []
+
+
+Underfull \hbox (badness 2837) in paragraph at lines 33--34
+\T1/ntxtlf/m/n/10 length, to-tal length, re-sponse/instruction ra-tio, seven
+ []
+
+
+Underfull \hbox (badness 2158) in paragraph at lines 33--34
+\T1/ntxtlf/m/n/10 response-LM statis-tics (mean/std/max loss, per-plex-ity,
+ []
+
+[4{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc} <./Figures/A
+rchitecture.pdf>]) (./Sections/05_experiments.tex
+(./tables/table_peft_configs.tex) [5] (./tables/table_main_results.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 7.0pt on input line 11.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
@@ -446,88 +476,108 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 7.0pt on input line 14.
 )
-<Figures/fig_cost_break_even.pdf, id=50, 214.37715pt x 161.20627pt>
+(./tables/table_per_task_compact.tex)
+<Figures/fig_cost_break_even.pdf, id=77, 214.37715pt x 161.20627pt>
 File: Figures/fig_cost_break_even.pdf Graphic file (type pdf)
 <use Figures/fig_cost_break_even.pdf>
-Package pdftex.def Info: Figures/fig_cost_break_even.pdf  used on input line 28
+Package pdftex.def Info: Figures/fig_cost_break_even.pdf  used on input line 31
 .
 (pdftex.def)             Requested size: 239.39438pt x 180.01845pt.
-)
-(./Sections/06_analysis.tex
-<Figures/fig_config_sensitivity.pdf, id=51, 504.20322pt x 197.05571pt>
-File: Figures/fig_config_sensitivity.pdf Graphic file (type pdf)
-<use Figures/fig_config_sensitivity.pdf>
-Package pdftex.def Info: Figures/fig_config_sensitivity.pdf  used on input line
- 8.
-(pdftex.def)             Requested size: 505.89pt x 197.71973pt.
- [5] (./tables/table_ablations.tex)
-<Figures/fig_ood_calibration.pdf, id=55, 219.97809pt x 194.30946pt>
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 5.0pt on input line 36.
+) (./Sections/06_analysis.tex [6]
+<Figures/fig_ood_calibration.pdf, id=81, 219.97809pt x 194.30946pt>
 File: Figures/fig_ood_calibration.pdf Graphic file (type pdf)
 <use Figures/fig_ood_calibration.pdf>
-Package pdftex.def Info: Figures/fig_ood_calibration.pdf  used on input line 25
+Package pdftex.def Info: Figures/fig_ood_calibration.pdf  used on input line 10
 .
-(pdftex.def)             Requested size: 239.39438pt x 211.46696pt.
+(pdftex.def)             Requested size: 186.72731pt x 164.9444pt.
 
-Underfull \vbox (badness 1270) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-)
-(./Sections/07_conclusion.tex)
-Underfull \vbox (badness 5245) has occurred while \output is active []
+ [7 <./Figures/fig_cost_break_even.pdf>] (./tables/table_ablations.tex))
+(./Sections/07_conclusion.tex) (./main.bbl [8 <./Figures/fig_ood_calibration.pd
+f>] [9]) [10
 
- [6 <./Figures/fig_cost_break_even.pdf>] [7 <./Figures/fig_config_sensitivity.p
-df>]
-(./main.bbl [8 <./Figures/fig_ood_calibration.pdf>]) [9
-
-]
-(./Sections/08_appendix.tex (./tables/table_per_task_peft.tex
+] (./Sections/08_appendix.tex (./tables/table_per_task_peft.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/it' will be
 (Font)              scaled to size 9.0pt on input line 11.
 )
 (./tables/table_per_task_normalized.tex)
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 52
-.
+Underfull \vbox (badness 2799) has occurred while \output is active []
 
-(/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd
-File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
-)
-LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 5.0pt on input line 94.
- [10
 
-{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}]
-Underfull \hbox (badness 1448) in paragraph at lines 160--173
- \T1/ntxtlf/b/n/10 Task sketch con-struc-tion and Hu-manEval leak-age.
+Underfull \hbox (badness 1715) in paragraph at lines 105--110
+\T1/ntxtlf/m/n/10 each bench-mark. The task-native eval-u-a-tors are sup-
  []
 
+[11
 
+]
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [11]
-Underfull \hbox (badness 5681) in paragraph at lines 267--275
+ [12]
+Underfull \hbox (badness 6300) in paragraph at lines 160--168
+ \T1/ntxtlf/b/n/10 Base-line con-fig-u-ra-tion and tun-ing. \T1/ntxtlf/m/n/10 R
+an-dom and
+ []
+
+(./tables/table_extra_baselines.tex)
+Underfull \hbox (badness 1325) in paragraph at lines 221--231
+ \T1/ntxtlf/b/n/10 Bench-mark de-con-tam-i-na-tion. \T1/ntxtlf/m/n/10 We de-con
+-tam-i-nate the
+ []
+
+[13]
+Underfull \hbox (badness 5681) in paragraph at lines 348--358
  \T1/ntxtlf/b/n/10 Multi-fidelity la-bels. \T1/ntxtlf/m/n/10 High-fidelity su-p
 er-vi-sion uses
  []
 
-)
-Underfull \hbox (badness 1048) in paragraph at lines 277--121
-\OT1/cmr/m/n/10 ([] \OMS/cmsy/m/n/10 ^^B []\OT1/cmr/m/n/10 )\OML/cmm/m/it/10 =\
-OT1/cmr/m/n/10 3600$\T1/ntxtlf/m/n/10 . The of-fline cost is
+
+Underfull \hbox (badness 2547) in paragraph at lines 361--365
+\T1/ntxtlf/m/n/10 with weights $\OML/cmm/m/it/10 w[][]\OT1/cmr/m/n/10 0\OML/cmm
+/m/it/10 :\OT1/cmr/m/n/10 4\OML/cmm/m/it/10 ;  w[][]\OT1/cmr/m/n/10 0\OML/cmm/m
+/it/10 :\OT1/cmr/m/n/10 6$ \T1/ntxtlf/m/n/10 and an-chors $\OML/cmm/m/it/10 A \
+OT1/cmr/m/n/10 =
  []
 
-[12] [13] (./main.aux)
+
+Underfull \hbox (badness 2653) in paragraph at lines 367--386
+ \T1/ntxtlf/b/n/10 Cost model and seeds. \T1/ntxtlf/m/n/10 All mea-sure-ments a
+re on
+ []
+
+LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
+(Font)              scaled to size 6.0pt on input line 437.
+[14] (./tables/table_budget_sensitivity.tex)
+(./tables/table_ranking_metrics.tex) (./tables/table_transfer_matrix.tex)
+(./tables/table_overlap_axes.tex)
+<Figures/fig_config_sensitivity.pdf, id=138, 504.20322pt x 197.05571pt>
+File: Figures/fig_config_sensitivity.pdf Graphic file (type pdf)
+<use Figures/fig_config_sensitivity.pdf>
+Package pdftex.def Info: Figures/fig_config_sensitivity.pdf  used on input line
+ 485.
+(pdftex.def)             Requested size: 505.89pt x 197.71973pt.
+ (./tables/table_ood_levels.tex)) [15]
+[16
+
+ <./Figures/fig_config_sensitivity.pdf>] [17
+
+] [18] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2020/03/25>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 7646 strings out of 467525
- 124482 string characters out of 5418982
- 556016 words of memory out of 5000000
- 36380 multiletter control sequences out of 15000+600000
- 677939 words of font info for 81 fonts, out of 8000000 for 9000
+ 7767 strings out of 467525
+ 127502 string characters out of 5418982
+ 562368 words of memory out of 5000000
+ 36480 multiletter control sequences out of 15000+600000
+ 680810 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,11n,117p,1751b,402s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,13n,117p,2216b,593s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></
@@ -547,10 +597,10 @@ exmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2026/texmf-dis
 t/fonts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts/t
 ype1/public/newtx/ztmr.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/publ
 ic/newtx/ztmri.pfb>
-Output written on main.pdf (13 pages, 1808638 bytes).
+Output written on main.pdf (18 pages, 559670 bytes).
 PDF statistics:
- 218 PDF objects out of 1000 (max. 8388607)
- 125 compressed objects within 2 object streams
+ 255 PDF objects out of 1000 (max. 8388607)
+ 148 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 

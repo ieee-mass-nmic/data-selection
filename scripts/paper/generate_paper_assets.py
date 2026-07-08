@@ -314,7 +314,7 @@ def fig_config_sensitivity() -> None:
         label = "PCU-Select" if method == "pcu" else "RDS+"
         axes[1].scatter(xs, ys, s=24 if method == "pcu" else 18, alpha=0.78, label=label)
     axes[1].set_xlabel("configuration distance")
-    axes[1].set_ylabel("selection difference (1 - Jaccard)")
+    axes[1].set_ylabel(r"1 $-$ Jaccard overlap")
     axes[1].legend(frameon=False, loc="upper left")
     save_pdf(fig, "fig_config_sensitivity.pdf")
 
@@ -327,13 +327,14 @@ def fig_ood_calibration() -> None:
     )
     levels = ["L0", "L1", "L2"]
     modes = ["zeroshot", "cal200", "cal500"]
+    mode_label = {"zeroshot": "zero-shot", "cal200": "cal200", "cal500": "cal500"}
     means = e5.groupby(["level", "mode"])["metric"].mean().unstack()
     x = np.arange(len(levels))
     width = 0.23
     fig, ax = plt.subplots(figsize=(3.35, 2.35))
     colors = ["#4C78A8", "#F58518", "#54A24B"]
     for i, mode in enumerate(modes):
-        ax.bar(x + (i - 1) * width, means.loc[levels, mode], width, label=mode, color=colors[i])
+        ax.bar(x + (i - 1) * width, means.loc[levels, mode], width, label=mode_label[mode], color=colors[i])
     for method, color in [("less", "black"), ("rds_plus", "0.45")]:
         ax.plot(x, means.loc[levels, method], marker="D", linestyle="--", color=color, label=METHOD_LABEL[method])
     ax.set_xticks(x, levels)

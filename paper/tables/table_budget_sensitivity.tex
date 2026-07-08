@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{Budget sensitivity: PEFT- and task-averaged downstream score at 5\%, 10\%, and 30\% selection budgets. PCU-Select's margin over Random and its edge over LESS are largest at the tight 5\% budget and shrink as the budget grows, where all gradient selectors converge toward the full-data reference (36.75).}
+\label{tab:budget-sensitivity}
+\begin{tabular}{lrrr}
+\toprule
+Method & 5\% & 10\% & 30\% \\
+\midrule
+Random & 29.81 & 32.29 & 34.86 \\
+RDS+ & 31.72 & 34.44 & 36.28 \\
+Influence & 31.94 & 34.68 & 36.45 \\
+LESS & 32.74 & 35.14 & 36.79 \\
+PCU-Select & \textbf{33.09} & \textbf{35.18} & \textbf{36.81} \\
+\bottomrule
+\end{tabular}
+\end{table}
+

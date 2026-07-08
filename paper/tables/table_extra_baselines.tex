@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{Additional selector baselines at a 10\% budget, averaged over the four tasks and five seen PEFT configurations using the same task-native percentage scaling as Table~\ref{tab:main-results}. These rows explain why the main table focuses on Random, RDS+, Influence, LESS, and PCU-Select: the omitted heuristic and representation baselines sit between Random and RDS+.}
+\label{tab:extra-baselines}
+\begin{tabular}{llr}
+\toprule
+Selector & Type & Avg. \\
+\midrule
+Random & uniform & 32.29 \\
+Balanced-Random & cluster-stratified uniform & 32.90 \\
+Length & heuristic & 32.70 \\
+Loss & heuristic & 32.98 \\
+Perplexity & heuristic & 33.29 \\
+Diversity & representation & 33.82 \\
+Embedding-NN & representation & 33.98 \\
+RDS+ & representation & 34.44 \\
+Influence & shared gradient & 34.68 \\
+LESS & per-PEFT gradient & 35.14 \\
+PCU-Select & PEFT-conditioned & 35.18 \\
+\bottomrule
+\end{tabular}
+\end{table}

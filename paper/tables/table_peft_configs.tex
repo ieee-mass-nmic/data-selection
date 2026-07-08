@@ -2,20 +2,27 @@
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
-\caption{PEFT configurations used in the experiments. The five \emph{seen} configurations are the scorer's training support and the columns of Table~\ref{tab:main-results}; the \emph{unseen} configurations are held-out targets evaluated in the OOD study (Sec.~\ref{sec:analysis}). Parameter counts come from the registry counter for the Llama2-7B backbone.}
+\caption{Representative PEFT configurations. The five \emph{seen} configurations
+are the scorer's training support and the columns of
+Table~\ref{tab:main-results}; two representative \emph{unseen} configurations are
+shown here, and the complete 17-configuration registry (seen, unseen-config, and
+OOD-family) used in the calibration study (Sec.~\ref{sec:analysis}) appears in
+Table~\ref{tab:appendix-peft-registry}. Trainable-parameter counts and the
+touched fraction of the 24 intervention sites come from the registry counter for
+the Llama-2-7B backbone ($6.74$B parameters).}
 \label{tab:peft-configs}
 \begin{tabular}{lllrrl}
 \toprule
 Config & Group & Family & Params & \% bb & Sites \\
 \midrule
-L-r8-qv & Seen & lora & 4.19M & 0.062 & 8/24 \\
-L-r16-qkvo & Seen & lora & 16.78M & 0.249 & 8/24 \\
-L-r8-mlp & Seen & lora & 4.19M & 0.062 & 8/24 \\
-IA3-attnmlp & Seen & ia3 & 0.39M & 0.006 & 16/24 \\
-AD-b64 & Seen & adapter & 16.78M & 0.249 & 24/24 \\
+L-r8-qv     & Seen & LoRA    & 4.19M  & 0.062 & 8/24  \\
+L-r16-qkvo  & Seen & LoRA    & 16.78M & 0.249 & 8/24  \\
+L-r8-mlp    & Seen & LoRA    & 7.73M  & 0.115 & 8/24  \\
+IA3-attnmlp & Seen & IA$^3$  & 0.61M  & 0.009 & 16/24 \\
+AD-b64      & Seen & Adapter & 16.78M & 0.249 & 8/24  \\
 \midrule
-L-r4-qv & Unseen & lora & 2.10M & 0.031 & 8/24 \\
-L-r32-qkvo & Unseen & lora & 33.55M & 0.498 & 8/24 \\
+L-r4-qv     & Unseen & LoRA  & 2.10M  & 0.031 & 8/24  \\
+L-r32-qkvo  & Unseen & LoRA  & 33.55M & 0.498 & 8/24  \\
 \bottomrule
 \end{tabular}
 \end{table}

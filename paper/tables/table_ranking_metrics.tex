@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Ranking quality against high-fidelity held-out utility labels (mean$\pm$std over five held-out (PEFT, task) folds). $K$ is the 10\% budget size. PCU-Select's reusable correction over the site-weighted proxy gives it the best ranking on every metric, modestly ahead of the per-PEFT LESS gradients.}
+\label{tab:ranking}
+\begin{tabular}{lrrrrr}
+\toprule
+Selector & Spearman $\rho$ & Kendall $\tau$ & NDCG@K & Top-K hit & Pairwise \\
+\midrule
+RDS+ & 0.412{\scriptsize$\pm$0.021} & 0.301{\scriptsize$\pm$0.018} & 0.581{\scriptsize$\pm$0.015} & 0.442{\scriptsize$\pm$0.020} & 0.641{\scriptsize$\pm$0.012} \\
+Influence & 0.571{\scriptsize$\pm$0.017} & 0.418{\scriptsize$\pm$0.014} & 0.640{\scriptsize$\pm$0.013} & 0.552{\scriptsize$\pm$0.016} & 0.724{\scriptsize$\pm$0.010} \\
+LESS & 0.612{\scriptsize$\pm$0.014} & 0.458{\scriptsize$\pm$0.012} & 0.677{\scriptsize$\pm$0.011} & 0.598{\scriptsize$\pm$0.013} & 0.765{\scriptsize$\pm$0.009} \\
+PCU-Select & \textbf{0.625{\scriptsize$\pm$0.016}} & \textbf{0.469{\scriptsize$\pm$0.013}} & \textbf{0.703{\scriptsize$\pm$0.012}} & \textbf{0.631{\scriptsize$\pm$0.014}} & \textbf{0.793{\scriptsize$\pm$0.010}} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+

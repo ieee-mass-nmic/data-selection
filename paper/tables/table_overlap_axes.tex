@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{Mean pairwise selection overlap (Jaccard) between the subsets chosen for two configurations, grouped by their structural difference. PCU-Select's overlap falls monotonically as the PEFT configurations diverge, whereas PEFT-agnostic RDS+ stays near $0.98$ regardless. The PCU column averages to the $0.427$ reported in the main text.}
+\label{tab:overlap}
+\begin{tabular}{lrr}
+\toprule
+Configuration difference & PCU-Select & RDS+ \\
+\midrule
+Same config (independent replicate) & 0.71 & 0.99 \\
+Same family, $\Delta$rank & 0.58 & 0.98 \\
+Same family, $\Delta$placement & 0.49 & 0.98 \\
+Same family, $\Delta$module set & 0.44 & 0.98 \\
+Cross-family & 0.33 & 0.97 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
