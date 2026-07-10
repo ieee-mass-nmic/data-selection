@@ -672,17 +672,25 @@ def table_peft_configs() -> None:
 
 
 def main() -> None:
+    """Regenerate the competition manuscript from canonical sources only."""
     setup_style()
-    fig_motivation_disagreement()
     fig_motivation_transfer()
-    fig_cost_break_even()
     fig_config_sensitivity()
-    fig_ood_calibration()
-    table_main_results()
-    table_per_task_peft()
-    table_per_task_normalized()
-    table_ablation()
-    table_peft_configs()
+    from competition_numbers import main as competition_numbers_main
+    from competition_reuse_experiment import main as reuse_main
+    from competition_supplement import main as supplement_main
+    from generate_architecture_figure import main as architecture_main
+    from plot_competition_ood import main as ood_figure_main
+    from revise_motivation_figure import main as motivation_figure_main
+    from revise_cost_figure import main as cost_figure_main
+
+    competition_numbers_main()
+    reuse_main()
+    supplement_main()
+    architecture_main()
+    motivation_figure_main()
+    ood_figure_main()
+    cost_figure_main()
     print(f"Wrote figures to {FIG_DIR.relative_to(ROOT)}")
     print(f"Wrote tables to {TAB_DIR.relative_to(ROOT)}")
 

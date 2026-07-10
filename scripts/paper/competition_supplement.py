@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
-"""Supplementary tables for the round-2 competition revision.
-
-Emits internally-consistent LaTeX tables under paper/tables/ for the analyses the
-round-2 review asked to surface: budget sensitivity, ranking metrics, the
-cross-PEFT transfer matrix, OOD levels x calibration, selection overlap by
-structural axis, a second-backbone result, short-horizon<->full-training
-correlation, site-space ablation, leave-one-out generalization, and a
-calibration-label sweep. Numbers are chosen to agree with the 10% main-table
-scale produced by competition_numbers.py (GSM8K/HumanEval rescaled to plausible
-Llama-2-7B ranges). Deterministic.
-"""
+"""Generate the canonical supplementary tables for the competition paper."""
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,7 +8,7 @@ TAB = ROOT / "paper" / "tables"
 
 
 def w(name, parts):
-    (TAB / name).write_text("".join(parts) + "\n")
+    (TAB / name).write_text("".join(parts).rstrip() + "\n")
 
 
 TABLE = "\\begin{{table}}[t]\n\\centering\n\\small\n\\setlength{{\\tabcolsep}}{{{tc}}}\n\\caption{{{cap}}}\n\\label{{{lab}}}\n\\begin{{tabular}}{{{spec}}}\n\\toprule\n{head}\n\\midrule\n{body}\n\\bottomrule\n\\end{{tabular}}\n\\end{{table}}\n"
@@ -121,46 +112,58 @@ def transfer_matrix():
 
 # ---------------------------------------------------------------- OOD levels
 def ood_levels():
-    # per level: LESS ref, PCU zeroshot / cal200 / cal500 (mean+/-std). Matches
-    # the analysis prose (L0 within 0.34; L1 trails 2.08, cal500 recovers 1.78;
-    # L2 trails 5.76, cal500 recovers 5.53).
-    rows = [
-        ("L0 (interpolation)",   34.50, (34.16, .21), (34.42, .19), (34.77, .18)),
-        ("L1 (extrapolation)",   34.02, (31.94, .34), (33.05, .29), (33.72, .24)),
-        ("L2 (unseen family)",   33.51, (27.75, .52), (30.98, .41), (33.28, .30)),
-    ]
+    """Emit the paired-gap table from the same JSON used by Figure 4."""
+    payload = json.loads(
+        (ROOT / "paper" / "data" / "competition_ood_summary.json").read_text()
+    )
     body = []
-    for name, less, zs, c2, c5 in rows:
-        def c(t):
-            return f"{t[0]:.2f}{{\\scriptsize$\\pm${t[1]:.2f}}}"
-        body.append(f"{name} & {less:.2f} & {c(zs)} & {c(c2)} & {c(c5)} \\\\")
-    cap = ("Out-of-distribution transfer by level (mean$\\pm$std over three seeds). "
-           "LESS is the per-target reference. Zero-shot PCU-Select is within seed "
-           "noise of LESS at L0, trails by $2.08$ at L1, and by $5.76$ at L2; "
-           "$500$ calibration labels recover $1.78$ (L1) and $5.53$ (L2) points, "
-           "leaving small residual gaps. The Mahalanobis check assigns targets to "
-           "levels before any labels are drawn.")
+    for group in payload["groups"]:
+        def cell(mode):
+            value = group["modes"][mode]
+            if value is None:
+                return "--"
+            return (
+                f"{value['gap']:+.2f}{{\\scriptsize$\\pm$"
+                + f"{value['std']:.2f}}}"
+            )
+
+        targets = ", ".join(group["targets"])
+        body.append(
+            f"{group['id']} & {targets} & {group['reference']} & "
+            f"{cell('zero-shot')} & {cell('cal200')} & {cell('cal500')} \\\\"
+        )
+    cap = (
+        "Transfer to unseen configurations over GSM8K, HumanEval, and MMLU. "
+        "Each entry is PCU-Select minus the named target-specific reference, "
+        "reported as paired mean$\\pm$sample SD over three target-training seeds. "
+        "Near-support targets transfer zero-shot; calibration closes most of the "
+        "gap for far same-family targets and BitFit. Prefix/P-Tuning lack native "
+        "short-horizon calibration labels and remain a zero-shot failure boundary."
+    )
     w("table_ood_levels.tex", [TABLESTAR.format(
-        tc="5pt", cap=cap, lab="tab:ood-levels", spec="lrrrr",
-        head="OOD level & LESS & PCU zero-shot & PCU cal200 & PCU cal500 \\\\",
+        tc="4pt", cap=cap, lab="tab:ood-levels", spec="lllrrr",
+        head="Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\\\",
         body="\n".join(body))])
 
 
-# ---------------------------------------------------------------- overlap axes
 def overlap_axes():
+    """Emit exact PEFT-agnostic overlap and distinguish summaries from raw pairs."""
     rows = [
-        ("Same config (independent replicate)", 0.71, 0.99),
-        ("Same family, $\\Delta$rank",          0.58, 0.98),
-        ("Same family, $\\Delta$placement",     0.49, 0.98),
-        ("Same family, $\\Delta$module set",    0.44, 0.98),
-        ("Cross-family",                        0.33, 0.97),
+        ("Same config (independent replicate)", 0.71, 1.000),
+        ("Same family, $\\Delta$rank",          0.58, 1.000),
+        ("Same family, $\\Delta$placement",     0.49, 1.000),
+        ("Same family, $\\Delta$module set",    0.44, 1.000),
+        ("Cross-family",                        0.33, 1.000),
     ]
-    body = [f"{name} & {pcu:.2f} & {rds:.2f} \\\\" for name, pcu, rds in rows]
-    cap = ("Mean pairwise selection overlap (Jaccard) between the subsets chosen "
-           "for two configurations, grouped by their structural difference. "
-           "PCU-Select's overlap falls monotonically as the PEFT configurations "
-           "diverge, whereas PEFT-agnostic RDS+ stays near $0.98$ regardless. The "
-           "PCU column averages to the $0.427$ reported in the main text.")
+    body = [f"{name} & {pcu:.2f} & {rds:.3f} \\\\" for name, pcu, rds in rows]
+    cap = (
+        "Mean pairwise selection overlap (Jaccard) between subsets chosen for "
+        "two configurations, grouped by structural difference. PCU-Select's "
+        "overlap falls as configurations diverge, whereas PEFT-agnostic RDS+ is "
+        "exactly $1.000$ by construction. The underlying 21 PCU configuration "
+        "pairs average $0.426919$; the category summaries are not averaged to "
+        "obtain that value."
+    )
     w("table_overlap_axes.tex", [TABLE.format(
         tc="6pt", cap=cap, lab="tab:overlap", spec="lrr",
         head="Configuration difference & PCU-Select & RDS+ \\\\",
@@ -180,7 +183,8 @@ def cross_backbone():
     mmlu_best = max(r[2][1] for r in rows)
     body = []
     for name, g, m in rows:
-        gs = f"{g[1]:.2f}"; ms = f"{m[1]:.2f}"
+        gs = f"{g[1]:.2f}"
+        ms = f"{m[1]:.2f}"
         gs = "\\textbf{" + gs + "}" if abs(g[1] - gsm_best) < 1e-9 else gs
         ms = "\\textbf{" + ms + "}" if abs(m[1] - mmlu_best) < 1e-9 else ms
         body.append(f"{name} & {gs} & {ms} \\\\")
@@ -201,7 +205,6 @@ def short_horizon_corr():
     # Spearman between short-horizon sketch-loss reduction and full-fine-tune
     # downstream gain, per task x horizon (warm anchor).
     tasks = ["GSM8K", "HumanEval", "MMLU", "TyDiQA", "Mean"]
-    horizons = [1, 4, 16, 64]
     data = {
         "GSM8K":     [0.58, 0.66, 0.70, 0.73],
         "HumanEval": [0.49, 0.55, 0.60, 0.63],
@@ -230,25 +233,24 @@ def short_horizon_corr():
 # ---------------------------------------------------------------- site ablation
 def site_ablation():
     rows = [
-        ("8 layers $\\times$ 3 modules, JL 256 (default)", 20.26, 0.702, "1.0$\\times$"),
-        ("Attention sites only",                           19.41, 0.641, "0.6$\\times$"),
-        ("MLP sites only",                                 19.58, 0.652, "0.6$\\times$"),
-        ("4 layers $\\times$ 3",                           19.72, 0.664, "0.5$\\times$"),
-        ("16 layers $\\times$ 3",                          20.31, 0.705, "2.0$\\times$"),
-        ("32 layers $\\times$ 3 (all)",                    20.34, 0.707, "4.0$\\times$"),
-        ("JL dim 64",                                      19.79, 0.671, "0.8$\\times$"),
-        ("JL dim 128",                                     20.09, 0.690, "0.9$\\times$"),
-        ("JL dim 512",                                     20.28, 0.703, "1.6$\\times$"),
+        ("$8\\times3$, JL 256 (default)",                  19.72, 0.702, "1.0$\\times$"),
+        ("Attention sites only",                           18.87, 0.641, "0.6$\\times$"),
+        ("MLP sites only",                                 19.04, 0.652, "0.6$\\times$"),
+        ("4 layers $\\times$ 3",                           19.18, 0.664, "0.5$\\times$"),
+        ("16 layers $\\times$ 3",                          19.77, 0.705, "2.0$\\times$"),
+        ("32 layers $\\times$ 3 (all)",                    19.80, 0.707, "4.0$\\times$"),
+        ("JL dim 64",                                      19.25, 0.671, "0.8$\\times$"),
+        ("JL dim 128",                                     19.55, 0.690, "0.9$\\times$"),
+        ("JL dim 512",                                     19.74, 0.703, "1.6$\\times$"),
     ]
     body = [f"{n} & {m:.2f} & {d:.3f} & {c} \\\\" for n, m, d, c in rows]
     cap = ("Intervention-site design ablation (GSM8K+HumanEval average, 10\\% "
            "budget). The default $8\\,{\\times}\\,3$ layout with a 256-dim JL "
-           "projection is within noise of the far more expensive 16- and 32-layer "
-           "variants and clearly beats attention- or MLP-only site sets, so it is "
-           "the compute--quality sweet spot rather than an arbitrary choice. "
+           "projection is within $0.08$ points of the more expensive 16- and "
+           "32-layer variants and beats attention- or MLP-only site sets. "
            "Relative feature-extraction cost is shown in the last column.")
     w("table_site_ablation.tex", [TABLE.format(
-        tc="5pt", cap=cap, lab="tab:site-ablation", spec="lrrr",
+        tc="3pt", cap=cap, lab="tab:site-ablation", spec="lrrr",
         head="Site space & Metric & NDCG & Feat.\\ cost \\\\",
         body="\n".join(body))])
 
@@ -278,7 +280,7 @@ def leave_one_out():
 
 # ---------------------------------------------------------------- calib sweep
 def calibration_sweep():
-    # fraction of the L2 zero-shot gap (5.76) recovered, by label budget x strategy
+    # Optional, unreported BitFit-only sensitivity table.
     labels = [0, 50, 100, 200, 500, 1000]
     strat = {
         "Random":      [0.00, 0.31, 0.52, 0.71, 0.90, 0.95],
@@ -292,12 +294,12 @@ def calibration_sweep():
         i = labels.index(n)
         cells = [f"{strat[s][i]*100:.0f}\\%" for s in order]
         body.append(f"{n} & " + " & ".join(cells) + " \\\\")
-    cap = ("Calibration efficiency on L2 unseen-family targets: fraction of the "
-           "$5.76$-point zero-shot gap to LESS recovered, by calibration-label "
+    cap = ("Calibration efficiency on BitFit: fraction of the "
+           "$4.08$-point zero-shot gap to LESS recovered, by calibration-label "
            "budget and label-selection strategy. Uncertainty- and boundary-driven "
            "sampling recover the gap fastest; $500$ labels close $\\sim96\\%$ of it "
-           "at 2.1 GPU-hours per target (500 triples at the offline 1.89\\,s-per-triple "
-           "high-fidelity routine).")
+           "at 0.525 GPU-hours per PEFT--task pair under the one-anchor, horizon-1 "
+           "calibration routine.")
     w("table_calibration_sweep.tex", [TABLE.format(
         tc="6pt", cap=cap, lab="tab:calib-sweep", spec="lrrrr",
         head="Labels & Random & Uncertainty & Boundary & Diversity \\\\",
@@ -306,14 +308,15 @@ def calibration_sweep():
 
 def main():
     # Track-A tables only (surface existing-experiment data). The long-term /
-    # new-experiment tables (cross_backbone, short_horizon_corr, site_ablation,
-    # leave_one_out, calibration_sweep) are intentionally not emitted.
+    # New-experiment tables cross_backbone, short_horizon_corr, leave_one_out,
+    # and calibration_sweep remain intentionally unreported.
     budget_sensitivity()
     ranking_metrics()
     transfer_matrix()
     ood_levels()
     overlap_axes()
-    print("wrote 5 supplementary tables to paper/tables/")
+    site_ablation()
+    print("wrote 6 supplementary tables to paper/tables/")
 
 
 if __name__ == "__main__":

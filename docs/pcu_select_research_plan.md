@@ -482,7 +482,7 @@ u^{lo}(x,p,t)
 
 where:
 
-* (\alpha_p^\omega): determined by the PEFT site mask, capacity, and operator type;
+* (\alpha_p^\omega): determined by the PEFT site mask and saturating capacity; operator type enters the separate structured code (z_p);
 * if the PEFT does not act on a site, the weight of that site is 0;
 * if the PEFT has larger capacity at a site, the weight of that site is higher.
 

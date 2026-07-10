@@ -11,15 +11,6 @@ from pcu_select.peft_space.schema import trainable_params_estimate
 from pcu_select.types import ModuleName, OperatorType, PEFTConfig, SiteID
 
 
-# Default operator weight prior (design doc §3).
-RHO_OP: dict[OperatorType, float] = {
-    "additive_low_rank": 1.0,
-    "multiplicative": 0.6,
-    "additive_bottleneck": 0.8,
-    "prefix": 0.4,
-    "bias_shift": 0.3,
-}
-
 ETA: float = 1.0
 
 
@@ -71,10 +62,9 @@ def _module_targets_match(cfg: PEFTConfig, site_module: ModuleName) -> bool:
     if site_module == "mlp_out":
         return bool(tm & {"up_proj", "down_proj", "gate_proj", "mlp", "fc1", "fc2"})
     if site_module == "block_residual":
-        # adapters typically inserted in residual stream; prefix affects all attn layers
-        if cfg.family in ("adapter", "prefix", "bitfit"):
-            return True
-        return False
+        # Only residual adapters intervene directly at the block-residual site.
+        # Prefix/P-Tuning and attention-bias updates are represented at attn_out.
+        return cfg.family == "adapter"
     return False
 
 
@@ -96,10 +86,10 @@ def site_mask_of(cfg: PEFTConfig, sites: SiteSpace) -> dict[SiteID, float]:
             if mask == 0.0:
                 out[(l, m)] = 0.0
                 continue
-            op = operator_of(cfg.family, m)
-            rho = RHO_OP.get(op, 0.5)
             cap_norm = math.log1p(per_site_cap / 4096)  # use d_model=4096 default
-            out[(l, m)] = mask * rho * math.tanh(ETA * cap_norm)
+            # Operator type is encoded explicitly in z_p. A family-wide scalar
+            # would cancel during normalization and is therefore omitted here.
+            out[(l, m)] = mask * math.tanh(ETA * cap_norm)
     return out
 
 

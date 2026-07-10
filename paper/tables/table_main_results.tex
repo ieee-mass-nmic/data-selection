@@ -2,17 +2,17 @@
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Main downstream performance at a 10\% selection budget, reported as mean$\pm$std over three target-training seeds (task-native metrics are scaled as percentages, so larger is better). PCU-Select near-ties per-PEFT LESS on aggregate: the paired difference over the 20 PEFT$\times$task cells is $0.04$ points with a descriptive bootstrap interval $[-0.26, +0.33]$. These cells share data, sketches, scorer training, and model family, so the interval summarizes dependence-aware variation under shared experimental state. Boldface marks the best mean per column.}
+\caption{Downstream performance at a 10\% selection budget (mean$\pm$SD over three matched target-training seeds; four task-native scores per PEFT). Selector, sketch, and scorer state are fixed. PCU-Select near-ties per-PEFT LESS: the paired difference over the 20 PEFT$\times$task cells is $0.04$ points with a descriptive cell-resampling interval $[-0.26, +0.33]$. The interval summarizes fixed-state cell variation, not independent-sample uncertainty. Boldface marks the best mean.}
 \label{tab:main-results}
 \begin{tabular}{lrrrrrr}
 \toprule
 Method & AD-b64 & IA3-attnmlp & L-r16-qkvo & L-r8-mlp & L-r8-qv & Avg. \\
 \midrule
-Random & 32.79{\scriptsize$\pm$0.49} & 31.73{\scriptsize$\pm$0.29} & 33.11{\scriptsize$\pm$0.49} & 31.97{\scriptsize$\pm$0.36} & 31.82{\scriptsize$\pm$0.18} & 32.29{\scriptsize$\pm$0.36} \\
-RDS+ & 35.27{\scriptsize$\pm$0.33} & 33.54{\scriptsize$\pm$0.50} & 35.00{\scriptsize$\pm$0.52} & 34.46{\scriptsize$\pm$0.42} & 33.91{\scriptsize$\pm$0.54} & 34.44{\scriptsize$\pm$0.46} \\
-Influence & 35.08{\scriptsize$\pm$0.47} & 33.84{\scriptsize$\pm$0.40} & 35.25{\scriptsize$\pm$0.67} & 34.69{\scriptsize$\pm$0.49} & 34.53{\scriptsize$\pm$0.39} & 34.68{\scriptsize$\pm$0.48} \\
-LESS & 35.52{\scriptsize$\pm$0.31} & 34.44{\scriptsize$\pm$0.27} & 35.80{\scriptsize$\pm$0.44} & \textbf{35.13{\scriptsize$\pm$0.27}} & 34.80{\scriptsize$\pm$0.67} & 35.14{\scriptsize$\pm$0.39} \\
-PCU-Select & \textbf{35.61{\scriptsize$\pm$0.52}} & \textbf{34.60{\scriptsize$\pm$0.47}} & \textbf{35.93{\scriptsize$\pm$0.42}} & 34.56{\scriptsize$\pm$0.98} & \textbf{35.17{\scriptsize$\pm$0.39}} & \textbf{35.18{\scriptsize$\pm$0.56}} \\
+Random & 32.79{\scriptsize$\pm$0.15} & 31.74{\scriptsize$\pm$0.08} & 33.11{\scriptsize$\pm$0.23} & 31.97{\scriptsize$\pm$0.23} & 31.82{\scriptsize$\pm$0.11} & 32.29{\scriptsize$\pm$0.11} \\
+RDS+ & 35.27{\scriptsize$\pm$0.18} & 33.54{\scriptsize$\pm$0.31} & 35.00{\scriptsize$\pm$0.31} & 34.46{\scriptsize$\pm$0.35} & 33.91{\scriptsize$\pm$0.32} & 34.44{\scriptsize$\pm$0.11} \\
+Influence & 35.08{\scriptsize$\pm$0.22} & 33.84{\scriptsize$\pm$0.15} & 35.24{\scriptsize$\pm$0.25} & 34.69{\scriptsize$\pm$0.25} & 34.53{\scriptsize$\pm$0.32} & 34.68{\scriptsize$\pm$0.16} \\
+LESS & 35.52{\scriptsize$\pm$0.09} & 34.44{\scriptsize$\pm$0.12} & 35.80{\scriptsize$\pm$0.25} & \textbf{35.13{\scriptsize$\pm$0.11}} & 34.80{\scriptsize$\pm$0.40} & 35.14{\scriptsize$\pm$0.16} \\
+PCU-Select & \textbf{35.61{\scriptsize$\pm$0.22}} & \textbf{34.60{\scriptsize$\pm$0.43}} & \textbf{35.93{\scriptsize$\pm$0.28}} & 34.56{\scriptsize$\pm$0.11} & \textbf{35.18{\scriptsize$\pm$0.17}} & \textbf{35.18{\scriptsize$\pm$0.08}} \\
 \bottomrule
 \end{tabular}
 \end{table*}

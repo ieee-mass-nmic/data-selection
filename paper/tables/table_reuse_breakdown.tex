@@ -2,15 +2,15 @@
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\caption{Per-target reuse-vs-recompute breakdown at the 10\% budget (mean$\pm$std over three seeds), the source of Table~\ref{tab:reuse-quality-cost}. Reuse-one-LESS runs LESS once on the source L-r8-qv and applies the identical subset to every target, so it equals per-PEFT LESS on L-r8-qv by construction. Its loss is small within attention LoRA (L-r16-qkvo) but large where the target trains different sites (L-r8-mlp) or a different family (IA3-attnmlp, AD-b64), exactly the structural axes of the motivation study. Boldface marks the best mean per column.}
+\caption{Per-target reuse-vs-recompute breakdown at the 10\% budget (mean$\pm$sample SD over three matched target-training seed aggregates), the source of Table~\ref{tab:reuse-quality-cost}. Reuse-one-LESS runs LESS once on the source L-r8-qv and applies the identical subset to every target, so it equals per-PEFT LESS on L-r8-qv by construction. Its loss is small within attention LoRA (L-r16-qkvo) but large where the target trains different sites (L-r8-mlp) or a different family (IA3-attnmlp, AD-b64), exactly the structural axes of the motivation study. Boldface marks the best mean per column.}
 \label{tab:reuse-breakdown}
 \begin{tabular}{lrrrrrr}
 \toprule
 Method & AD-b64 & IA3-attnmlp & L-r16-qkvo & L-r8-mlp & L-r8-qv & Avg. \\
 \midrule
-Reuse-one-LESS & 34.05{\scriptsize$\pm$0.44} & 33.36{\scriptsize$\pm$0.51} & 35.28{\scriptsize$\pm$0.49} & 33.71{\scriptsize$\pm$0.72} & 34.80{\scriptsize$\pm$0.67} & 34.24{\scriptsize$\pm$0.29} \\
-Per-PEFT LESS & 35.52{\scriptsize$\pm$0.31} & 34.44{\scriptsize$\pm$0.27} & 35.80{\scriptsize$\pm$0.44} & \textbf{35.13{\scriptsize$\pm$0.27}} & 34.80{\scriptsize$\pm$0.67} & 35.14{\scriptsize$\pm$0.21} \\
-PCU-Select & \textbf{35.61{\scriptsize$\pm$0.52}} & \textbf{34.60{\scriptsize$\pm$0.47}} & \textbf{35.93{\scriptsize$\pm$0.42}} & 34.56{\scriptsize$\pm$0.98} & \textbf{35.17{\scriptsize$\pm$0.39}} & \textbf{35.18{\scriptsize$\pm$0.30}} \\
+Reuse-one-LESS & 34.05{\scriptsize$\pm$0.44} & 33.36{\scriptsize$\pm$0.51} & 35.28{\scriptsize$\pm$0.49} & 33.71{\scriptsize$\pm$0.72} & 34.80{\scriptsize$\pm$0.40} & 34.24{\scriptsize$\pm$0.21} \\
+Per-PEFT LESS & 35.52{\scriptsize$\pm$0.09} & 34.44{\scriptsize$\pm$0.12} & 35.80{\scriptsize$\pm$0.25} & \textbf{35.13{\scriptsize$\pm$0.11}} & 34.80{\scriptsize$\pm$0.40} & 35.14{\scriptsize$\pm$0.16} \\
+PCU-Select & \textbf{35.61{\scriptsize$\pm$0.22}} & \textbf{34.60{\scriptsize$\pm$0.43}} & \textbf{35.93{\scriptsize$\pm$0.28}} & 34.56{\scriptsize$\pm$0.11} & \textbf{35.18{\scriptsize$\pm$0.17}} & \textbf{35.18{\scriptsize$\pm$0.08}} \\
 \bottomrule
 \end{tabular}
 \end{table*}

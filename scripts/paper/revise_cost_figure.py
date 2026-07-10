@@ -62,7 +62,7 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(3.25, 2.35))
     for name in order:
         row = methods[name]
-        y = row["offline_gpu_h"] + t_values * row["per_target_selection_gpu_h"]
+        y = row["offline_gpu_h"] + t_values * row["per_configuration_selection_gpu_h"]
         ax.plot(
             t_values,
             y,
@@ -76,7 +76,8 @@ def main() -> None:
     pcu = methods["PCU-Select"]
     less = methods["LESS"]
     t_star = pcu["offline_gpu_h"] / (
-        less["per_target_selection_gpu_h"] - pcu["per_target_selection_gpu_h"]
+        less["per_configuration_selection_gpu_h"]
+        - pcu["per_configuration_selection_gpu_h"]
     )
     ax.axvline(t_star, color="0.35", linestyle=":", linewidth=0.8)
     ax.text(t_star + 0.18, ax.get_ylim()[1] * 0.56, f"T*={t_star:.1f}", fontsize=7)

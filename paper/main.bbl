@@ -1,4 +1,4 @@
-\begin{thebibliography}{23}
+\begin{thebibliography}{34}
 \providecommand{\natexlab}[1]{#1}
 
 \bibitem[{Ben~Zaken, Goldberg, and Ravfogel(2022)}]{zaken2022bitfit}
@@ -24,12 +24,46 @@ Chen, L.; Li, S.; Yan, J.; Wang, H.; Gunaratna, K.; Yadav, V.; Tang, Z.;
 \newblock In \emph{The Twelfth International Conference on Learning
   Representations}.
 
+\bibitem[{Chen et~al.(2021)}]{chen2021humaneval}
+Chen, M.; et~al. 2021.
+\newblock Evaluating Large Language Models Trained on Code.
+\newblock \emph{arXiv preprint arXiv:2107.03374}.
+
+\bibitem[{Clark et~al.(2020)Clark, Choi, Collins, Garrette, Kwiatkowski,
+  Nikolaev, and Palomaki}]{clark2020tydiqa}
+Clark, J.~H.; Choi, E.; Collins, M.; Garrette, D.; Kwiatkowski, T.; Nikolaev,
+  V.; and Palomaki, J. 2020.
+\newblock {TyDi QA}: A Benchmark for Information-Seeking Question Answering in
+  Typologically Diverse Languages.
+\newblock \emph{Transactions of the Association for Computational Linguistics},
+  8: 454--470.
+
+\bibitem[{Cobbe et~al.(2021)Cobbe, Kosaraju, Bavarian, Chen, Jun, Kaiser,
+  Plappert, Tworek, Hilton, Nakano, Hesse, and Schulman}]{cobbe2021gsm8k}
+Cobbe, K.; Kosaraju, V.; Bavarian, M.; Chen, M.; Jun, H.; Kaiser, L.; Plappert,
+  M.; Tworek, J.; Hilton, J.; Nakano, R.; Hesse, C.; and Schulman, J. 2021.
+\newblock Training Verifiers to Solve Math Word Problems.
+\newblock \emph{arXiv preprint arXiv:2110.14168}.
+
+\bibitem[{Dao(2024)}]{dao2024flashattention2}
+Dao, T. 2024.
+\newblock {FlashAttention-2}: Faster Attention with Better Parallelism and Work
+  Partitioning.
+\newblock In \emph{International Conference on Learning Representations}.
+
 \bibitem[{Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and
   Zettlemoyer}]{dettmers2023qlora}
 Dettmers, T.; Pagnoni, A.; Holtzman, A.; and Zettlemoyer, L. 2023.
 \newblock {QLoRA}: Efficient Finetuning of Quantized {LLMs}.
 \newblock In \emph{Advances in Neural Information Processing Systems},
   volume~36.
+
+\bibitem[{Hendrycks et~al.(2021)Hendrycks, Burns, Basart, Zou, Mazeika, Song,
+  and Steinhardt}]{hendrycks2021mmlu}
+Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.; Song, D.; and
+  Steinhardt, J. 2021.
+\newblock Measuring Massive Multitask Language Understanding.
+\newblock In \emph{International Conference on Learning Representations}.
 
 \bibitem[{Houlsby et~al.(2019)Houlsby, Giurgiu, Jastrzebski, Morrone,
   de~Laroussilhe, Gesmundo, Attariyan, and Gelly}]{houlsby2019adapters}
@@ -46,6 +80,12 @@ Hu, E.~J.; Shen, Y.; Wallis, P.; Allen-Zhu, Z.; Li, Y.; Wang, S.; Wang, L.; and
   Chen, W. 2022.
 \newblock {LoRA}: Low-Rank Adaptation of Large Language Models.
 \newblock In \emph{International Conference on Learning Representations}.
+
+\bibitem[{Johnson and Lindenstrauss(1984)}]{johnson1984jl}
+Johnson, W.~B.; and Lindenstrauss, J. 1984.
+\newblock Extensions of Lipschitz Mappings into a Hilbert Space.
+\newblock In \emph{Conference in Modern Analysis and Probability}, volume~26 of
+  \emph{Contemporary Mathematics}, 189--206. American Mathematical Society.
 
 \bibitem[{Koh and Liang(2017)}]{koh2017understanding}
 Koh, P.~W.; and Liang, P. 2017.
@@ -124,6 +164,13 @@ Min, G.; Huang, T.; Wan, K.; and Chen, C. 2026.
   Optimization Geometry.
 \newblock \emph{arXiv preprint arXiv:2602.18584}.
 
+\bibitem[{Perez et~al.(2018)Perez, Strub, de~Vries, Dumoulin, and
+  Courville}]{perez2018film}
+Perez, E.; Strub, F.; de~Vries, H.; Dumoulin, V.; and Courville, A. 2018.
+\newblock {FiLM}: Visual Reasoning with a General Conditioning Layer.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}, volume~32, 3942--3951.
+
 \bibitem[{Pfeiffer et~al.(2021)Pfeiffer, Kamath, R{\"u}ckl{\'e}, Cho, and
   Gurevych}]{pfeiffer2020adapterfusion}
 Pfeiffer, J.; Kamath, A.; R{\"u}ckl{\'e}, A.; Cho, K.; and Gurevych, I. 2021.
@@ -148,6 +195,31 @@ Rao, J.; Liu, X.; Lian, L.; Cheng, S.; Liao, Y.; and Zhang, M. 2024.
 \newblock In \emph{Proceedings of the 2024 Conference on Empirical Methods in
   Natural Language Processing}, 10064--10083. Miami, Florida, USA: Association
   for Computational Linguistics.
+
+\bibitem[{Reimers and Gurevych(2019)}]{reimers2019sentencebert}
+Reimers, N.; and Gurevych, I. 2019.
+\newblock Sentence-{BERT}: Sentence Embeddings using Siamese {BERT}-Networks.
+\newblock In \emph{Proceedings of the 2019 Conference on Empirical Methods in
+  Natural Language Processing and the 9th International Joint Conference on
+  Natural Language Processing}, 3982--3992. Association for Computational
+  Linguistics.
+
+\bibitem[{Sculley(2010)}]{sculley2010minibatch}
+Sculley, D. 2010.
+\newblock Web-Scale K-Means Clustering.
+\newblock In \emph{Proceedings of the 19th International Conference on World
+  Wide Web}, 1177--1178. ACM.
+
+\bibitem[{Song et~al.(2020)Song, Tan, Qin, Lu, and Liu}]{song2020mpnet}
+Song, K.; Tan, X.; Qin, T.; Lu, J.; and Liu, T.-Y. 2020.
+\newblock {MPNet}: Masked and Permuted Pre-training for Language Understanding.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~33, 16857--16867.
+
+\bibitem[{Touvron et~al.(2023)}]{touvron2023llama2}
+Touvron, H.; et~al. 2023.
+\newblock {Llama 2}: Open Foundation and Fine-Tuned Chat Models.
+\newblock \emph{arXiv preprint arXiv:2307.09288}.
 
 \bibitem[{Wang et~al.(2024)Wang, Shen, Guo, Stallone, Kim, Golland, and
   Panda}]{wang2024diversity}

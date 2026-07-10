@@ -2,8 +2,8 @@
 """Generate the PCU-Select architecture figure.
 
 This is a manual pipeline diagram rather than a data plot. It replaces the
-stale raster figure whose PEFT-code dimension label omitted the 64-d
-family/operator embedding.
+stale raster figure and keeps the PEFT-code dimension and support-tier policy
+consistent with the executable pipeline.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "paper" / "Figures" / "Architecture.pdf"
+PNG_OUT = ROOT / "paper" / "Figures" / "Architecture.png"
 
 
 BLUE = "#1f5aa6"
@@ -100,7 +101,7 @@ def main() -> None:
         arrow(ax, (1.6, y), (2.0, y))
 
     box(ax, (3.55, 6.25), (2.35, 1.05), "$z_x$ sample\n848 = 768+16+64", BLUE, LIGHT_BLUE, fontsize=6.2)
-    box(ax, (3.55, 3.98), (2.35, 1.58), "$z_p$ PEFT code\n192 dims\n96 mask + 16 cap\n16 recipe\n64 family/operator", TEAL, LIGHT_TEAL, fontsize=5.6)
+    box(ax, (3.55, 4.18), (2.35, 1.18), "$z_p$ PEFT code\n128 dims\n96 mask + 16 cap\n16 recipe", TEAL, LIGHT_TEAL, fontsize=5.8)
     box(ax, (3.55, 2.15), (2.35, 1.05), "$z_t$ task\n848 + site grads", BLUE, LIGHT_BLUE, fontsize=6.2)
     for y in (7.075, 4.875, 2.675):
         arrow(ax, (3.15, y), (3.55, y))
@@ -134,7 +135,7 @@ def main() -> None:
     online = [
         ("Target PEFT + task", 7.45),
         ("Encode $z_{p^*},z_{t^*}$", 6.55),
-        ("OOD check\nMahalanobis distance", 5.55),
+        ("Support-tier check\nnear / far / new family", 5.55),
         ("Score pool\n$(\\hat\\mu,\\hat\\sigma)$", 4.45),
         ("Conservative score\n$q=\\hat\\mu-\\lambda\\hat\\sigma$", 3.35),
         ("Cluster + quotas", 2.25),
@@ -157,8 +158,9 @@ def main() -> None:
     box(ax, (0.2, -0.02), (15.55, 0.22), "Offline cost is cached and amortized; online selection uses one scorer pass plus clustering.", GRAY, LIGHT_GRAY, fontsize=7.8, lw=0.8)
     OUT.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT, bbox_inches="tight", pad_inches=0.03)
+    fig.savefig(PNG_OUT, dpi=220, bbox_inches="tight", pad_inches=0.03)
     plt.close(fig)
-    print(f"wrote {OUT}")
+    print(f"wrote {OUT} and {PNG_OUT}")
 
 
 if __name__ == "__main__":

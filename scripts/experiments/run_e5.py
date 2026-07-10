@@ -4,9 +4,9 @@ Stratifies unseen targets into three levels and reports uncalibrated vs
 calibrated behaviour for each, plus the Mahalanobis d² that the OOD detector
 uses:
 
-  L0 ID-interpolation : unseen config inside the SEEN convex hull
-  L1 ID-extrapolation : extreme config with optional cal-200/500
-  L2 OOD-family       : prefix / ptuning / bitfit → must calibrate
+  L0 near support : unseen same-family config with a small structural shift
+  L1 far support  : unseen same-family config with an extreme/compound shift
+  L2 unseen family: prefix / ptuning / bitfit
 
 Calibration consumes a SMALL pre-computed high-fidelity label set for the target
 PEFT (`--calib-labels <parquet>` with columns sample_id, peft_id, task_id,
@@ -43,7 +43,8 @@ from pcu_select.ood.calibration import CalibrationHead, fit_calibration, fit_ood
 from pcu_select.peft_space.encoder import encode_peft
 from pcu_select.selection.selector import SelectorConfig, select as cluster_select
 
-# design §6.2 stratification
+# Pre-registered structural strata. Mahalanobis d² is logged only as a
+# diagnostic; it does not define these groups.
 L0 = ["L-r32-qkvo", "AD-b16"]
 L1 = ["L-r64-all", "AD-b256", "L-r8-highlayers"]
 L2 = ["PRE-l16", "PT-l32", "BF"]

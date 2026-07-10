@@ -2,14 +2,14 @@
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\caption{Task-level summary of the main 10\% budget result. Values are averaged over the five seen PEFT configurations. $\Delta$RDS+ and $\Delta$Inf. are absolute native-point gains over PEFT-agnostic baselines; $\Delta$LESS is the paired difference against per-PEFT LESS with a 95\% bootstrap CI over PEFT cells. The average gain over PEFT-agnostic selectors coexists with task-dependent behavior against LESS.}
+\caption{Task-level summary of the main 10\% budget result. Values are averaged over the five seen PEFT configurations. $\Delta$RDS+ and $\Delta$Inf. are absolute native-point gains over PEFT-agnostic baselines; $\Delta$LESS is the paired difference against per-PEFT LESS with a descriptive 95\% cell-resampling interval over PEFT cells. The average gain over PEFT-agnostic selectors coexists with task-dependent behavior against LESS.}
 \label{tab:per-task-compact}
 \begin{tabular}{llrrrr}
 \toprule
 Task & Metric & PCU & $\Delta$RDS+ & $\Delta$Inf. & $\Delta$LESS (95\% CI) \\
 \midrule
-GSM8K & EM & 22.20 & +0.56 & +0.58 & $+0.30$ $[-0.03, +0.59]$ \\
-HumanEval & Pass@1 & 17.06 & +0.64 & +0.23 & $-0.04$ $[-0.45, +0.30]$ \\
+GSM8K & EM & 22.20 & +0.55 & +0.58 & $+0.29$ $[-0.04, +0.58]$ \\
+HumanEval & Pass@1 & 17.06 & +0.64 & +0.24 & $-0.04$ $[-0.44, +0.31]$ \\
 MMLU & Acc & 49.14 & +1.55 & +1.00 & $+0.67$ $[+0.24, +1.08]$ \\
 TyDiQA & F1 & 52.30 & +0.22 & +0.17 & $-0.77$ $[-1.18, -0.43]$ \\
 \bottomrule

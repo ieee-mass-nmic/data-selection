@@ -1,8 +1,8 @@
 peft,family,inserted_into,layers,operator,capacity,n_trainable,pct_backbone,touched_sites,group
 L-r8-qv,lora,"q_proj,v_proj",all (32),add. low-rank,r=8,4194304,0.06224850103888394,8/24,seen
 L-r16-qkvo,lora,"q_proj,k_proj,v_proj,o_proj",all (32),add. low-rank,r=16,16777216,0.24899400415553577,8/24,seen
-L-r8-mlp,lora,"up_proj,down_proj",all (32),add. low-rank,r=8,4194304,0.06224850103888394,8/24,seen
-IA3-attnmlp,ia3,"k_proj,v_proj,down_proj",all (32),multiplicative,—,393216,0.00583579697239537,16/24,seen
-AD-b64,adapter,"o_proj,down_proj",all (32),add. bottleneck,b=64,16777216,0.24899400415553577,24/24,seen
+L-r8-mlp,lora,"up_proj,down_proj",all (32),add. low-rank,r=8,7733248,0.114737,8/24,seen
+IA3-attnmlp,ia3,"k_proj,v_proj,down_proj",all (32),multiplicative,—,614400,0.009116,16/24,seen
+AD-b64,adapter,block_residual,all (32),add. bottleneck,b=64,16777216,0.24899400415553577,8/24,seen
 L-r4-qv,lora,"q_proj,v_proj",all (32),add. low-rank,r=4,2097152,0.03112425051944197,8/24,unseen_config
 L-r32-qkvo,lora,"q_proj,k_proj,v_proj,o_proj",all (32),add. low-rank,r=32,33554432,0.49798800831107154,8/24,unseen_config

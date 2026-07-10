@@ -8,7 +8,8 @@
       "Bash(.venv/bin/python -c ' *)",
       "Bash(.venv/bin/python -c \"import pcu_select.pipeline.apply, pcu_select.ood.calibration, pcu_select.selection.adaptive_quota; print\\('imports OK'\\)\")",
       "Bash(latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex)",
-      "Bash(awk -F'[\\(]' '{print $2}')"
+      "Bash(awk -F'[\\(]' '{print $2}')",
+      "Bash(python3 plot_competition_config_sensitivity.py)"
     ]
   }
 }

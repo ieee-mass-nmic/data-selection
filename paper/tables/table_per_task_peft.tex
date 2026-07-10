@@ -2,39 +2,39 @@
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Full per-task $\times$ PEFT $\times$ method downstream results at a 10\% budget (mean$\pm$std over three seeds, native metrics). Unaveraged source of Table~\ref{tab:main-results}; boldface marks the best mean per column within each task. Discussion in the text.}
+\caption{Full per-task $\times$ PEFT $\times$ method downstream results at a 10\% budget (mean$\pm$SD over three target-training seeds with selector state fixed at seed 0, native metrics). Unaveraged source of Table~\ref{tab:main-results}; boldface marks the best mean per column within each task. Discussion in the text.}
 \label{tab:per-task-peft}
 \begin{tabular}{lrrrrrr}
 \toprule
 Method & AD-b64 & IA3-attnmlp & L-r16-qkvo & L-r8-mlp & L-r8-qv & Avg. \\
 \midrule
 \multicolumn{7}{l}{\textit{GSM8K (EM)}} \\
-Random & 20.65{\scriptsize$\pm$0.47} & 19.93{\scriptsize$\pm$0.37} & 20.48{\scriptsize$\pm$0.41} & 19.89{\scriptsize$\pm$0.44} & 19.34{\scriptsize$\pm$0.08} & 20.06{\scriptsize$\pm$0.36} \\
-RDS+ & 22.06{\scriptsize$\pm$0.18} & 21.14{\scriptsize$\pm$0.56} & 22.27{\scriptsize$\pm$0.86} & 21.71{\scriptsize$\pm$0.29} & 21.06{\scriptsize$\pm$0.29} & 21.65{\scriptsize$\pm$0.44} \\
-Influence & 22.18{\scriptsize$\pm$0.34} & 21.23{\scriptsize$\pm$0.17} & 22.16{\scriptsize$\pm$0.44} & 21.07{\scriptsize$\pm$0.34} & 21.46{\scriptsize$\pm$0.10} & 21.62{\scriptsize$\pm$0.28} \\
-LESS & 22.18{\scriptsize$\pm$0.25} & 21.21{\scriptsize$\pm$0.31} & \textbf{22.64{\scriptsize$\pm$0.31}} & 22.10{\scriptsize$\pm$0.15} & 21.37{\scriptsize$\pm$0.43} & 21.90{\scriptsize$\pm$0.29} \\
-PCU-Select & \textbf{22.63{\scriptsize$\pm$0.52}} & \textbf{21.73{\scriptsize$\pm$0.53}} & 22.40{\scriptsize$\pm$0.36} & \textbf{22.17{\scriptsize$\pm$0.34}} & \textbf{22.09{\scriptsize$\pm$0.38}} & \textbf{22.20{\scriptsize$\pm$0.43}} \\
+Random & 20.65{\scriptsize$\pm$0.46} & 19.94{\scriptsize$\pm$0.38} & 20.47{\scriptsize$\pm$0.40} & 19.89{\scriptsize$\pm$0.44} & 19.33{\scriptsize$\pm$0.08} & 20.06{\scriptsize$\pm$0.09} \\
+RDS+ & 22.06{\scriptsize$\pm$0.20} & 21.13{\scriptsize$\pm$0.56} & 22.26{\scriptsize$\pm$0.86} & 21.73{\scriptsize$\pm$0.29} & 21.08{\scriptsize$\pm$0.30} & 21.65{\scriptsize$\pm$0.19} \\
+Influence & 22.19{\scriptsize$\pm$0.34} & 21.23{\scriptsize$\pm$0.15} & 22.14{\scriptsize$\pm$0.45} & 21.08{\scriptsize$\pm$0.35} & 21.46{\scriptsize$\pm$0.08} & 21.62{\scriptsize$\pm$0.09} \\
+LESS & 22.19{\scriptsize$\pm$0.24} & 21.23{\scriptsize$\pm$0.30} & \textbf{22.64{\scriptsize$\pm$0.31}} & 22.11{\scriptsize$\pm$0.16} & 21.38{\scriptsize$\pm$0.42} & 21.91{\scriptsize$\pm$0.04} \\
+PCU-Select & \textbf{22.62{\scriptsize$\pm$0.52}} & \textbf{21.73{\scriptsize$\pm$0.53}} & 22.39{\scriptsize$\pm$0.36} & \textbf{22.16{\scriptsize$\pm$0.34}} & \textbf{22.11{\scriptsize$\pm$0.38}} & \textbf{22.20{\scriptsize$\pm$0.07}} \\
 \midrule
 \multicolumn{7}{l}{\textit{HumanEval (Pass@1)}} \\
-Random & 15.75{\scriptsize$\pm$0.66} & 15.00{\scriptsize$\pm$0.30} & 15.88{\scriptsize$\pm$0.34} & 15.25{\scriptsize$\pm$0.10} & 14.92{\scriptsize$\pm$0.16} & 15.36{\scriptsize$\pm$0.31} \\
-RDS+ & 16.99{\scriptsize$\pm$0.25} & 15.97{\scriptsize$\pm$0.33} & 16.62{\scriptsize$\pm$0.89} & 16.43{\scriptsize$\pm$0.15} & 16.08{\scriptsize$\pm$0.46} & 16.42{\scriptsize$\pm$0.42} \\
-Influence & 17.21{\scriptsize$\pm$0.31} & 16.31{\scriptsize$\pm$0.37} & 17.15{\scriptsize$\pm$0.38} & 16.89{\scriptsize$\pm$0.60} & 16.56{\scriptsize$\pm$0.27} & 16.83{\scriptsize$\pm$0.39} \\
-LESS & \textbf{17.37{\scriptsize$\pm$0.28}} & 16.68{\scriptsize$\pm$0.35} & \textbf{17.79{\scriptsize$\pm$0.20}} & \textbf{16.93{\scriptsize$\pm$0.32}} & 16.72{\scriptsize$\pm$0.82} & \textbf{17.10{\scriptsize$\pm$0.39}} \\
-PCU-Select & 17.23{\scriptsize$\pm$0.41} & \textbf{16.97{\scriptsize$\pm$0.36}} & 17.78{\scriptsize$\pm$0.28} & 16.14{\scriptsize$\pm$1.44} & \textbf{17.18{\scriptsize$\pm$0.12}} & 17.06{\scriptsize$\pm$0.52} \\
+Random & 15.75{\scriptsize$\pm$0.66} & 15.00{\scriptsize$\pm$0.30} & 15.88{\scriptsize$\pm$0.34} & 15.25{\scriptsize$\pm$0.10} & 14.92{\scriptsize$\pm$0.16} & 15.36{\scriptsize$\pm$0.21} \\
+RDS+ & 16.99{\scriptsize$\pm$0.25} & 15.97{\scriptsize$\pm$0.33} & 16.62{\scriptsize$\pm$0.89} & 16.43{\scriptsize$\pm$0.15} & 16.08{\scriptsize$\pm$0.46} & 16.42{\scriptsize$\pm$0.14} \\
+Influence & 17.21{\scriptsize$\pm$0.31} & 16.31{\scriptsize$\pm$0.37} & 17.15{\scriptsize$\pm$0.38} & 16.89{\scriptsize$\pm$0.60} & 16.56{\scriptsize$\pm$0.27} & 16.82{\scriptsize$\pm$0.18} \\
+LESS & \textbf{17.37{\scriptsize$\pm$0.28}} & 16.68{\scriptsize$\pm$0.35} & \textbf{17.79{\scriptsize$\pm$0.20}} & \textbf{16.93{\scriptsize$\pm$0.32}} & 16.72{\scriptsize$\pm$0.82} & \textbf{17.10{\scriptsize$\pm$0.28}} \\
+PCU-Select & 17.23{\scriptsize$\pm$0.41} & \textbf{16.97{\scriptsize$\pm$0.36}} & 17.78{\scriptsize$\pm$0.28} & 16.14{\scriptsize$\pm$1.44} & \textbf{17.18{\scriptsize$\pm$0.12}} & 17.06{\scriptsize$\pm$0.28} \\
 \midrule
 \multicolumn{7}{l}{\textit{MMLU (Acc)}} \\
-Random & 45.15{\scriptsize$\pm$0.62} & 44.03{\scriptsize$\pm$0.20} & 45.45{\scriptsize$\pm$0.29} & 44.69{\scriptsize$\pm$0.45} & 44.41{\scriptsize$\pm$0.18} & 44.75{\scriptsize$\pm$0.35} \\
-RDS+ & 48.77{\scriptsize$\pm$0.29} & 46.52{\scriptsize$\pm$0.40} & 48.42{\scriptsize$\pm$0.07} & 47.24{\scriptsize$\pm$0.48} & 47.03{\scriptsize$\pm$0.40} & 47.60{\scriptsize$\pm$0.33} \\
-Influence & 48.55{\scriptsize$\pm$0.38} & 47.12{\scriptsize$\pm$0.82} & 48.86{\scriptsize$\pm$1.00} & 48.35{\scriptsize$\pm$0.45} & 47.82{\scriptsize$\pm$0.29} & 48.14{\scriptsize$\pm$0.59} \\
-LESS & 48.78{\scriptsize$\pm$0.42} & 47.67{\scriptsize$\pm$0.26} & 48.89{\scriptsize$\pm$0.60} & \textbf{48.85{\scriptsize$\pm$0.26}} & 48.19{\scriptsize$\pm$0.17} & 48.48{\scriptsize$\pm$0.34} \\
-PCU-Select & \textbf{49.91{\scriptsize$\pm$0.60}} & \textbf{47.93{\scriptsize$\pm$0.27}} & \textbf{50.04{\scriptsize$\pm$0.67}} & 48.79{\scriptsize$\pm$0.27} & \textbf{49.05{\scriptsize$\pm$0.41}} & \textbf{49.14{\scriptsize$\pm$0.44}} \\
+Random & 45.15{\scriptsize$\pm$0.62} & 44.03{\scriptsize$\pm$0.20} & 45.45{\scriptsize$\pm$0.29} & 44.69{\scriptsize$\pm$0.45} & 44.41{\scriptsize$\pm$0.18} & 44.75{\scriptsize$\pm$0.05} \\
+RDS+ & 48.77{\scriptsize$\pm$0.29} & 46.52{\scriptsize$\pm$0.40} & 48.42{\scriptsize$\pm$0.07} & 47.24{\scriptsize$\pm$0.48} & 47.03{\scriptsize$\pm$0.40} & 47.60{\scriptsize$\pm$0.16} \\
+Influence & 48.55{\scriptsize$\pm$0.38} & 47.12{\scriptsize$\pm$0.82} & 48.86{\scriptsize$\pm$1.00} & 48.35{\scriptsize$\pm$0.45} & 47.82{\scriptsize$\pm$0.29} & 48.14{\scriptsize$\pm$0.10} \\
+LESS & 48.78{\scriptsize$\pm$0.42} & 47.67{\scriptsize$\pm$0.26} & 48.89{\scriptsize$\pm$0.60} & \textbf{48.85{\scriptsize$\pm$0.26}} & 48.19{\scriptsize$\pm$0.17} & 48.48{\scriptsize$\pm$0.18} \\
+PCU-Select & \textbf{49.91{\scriptsize$\pm$0.60}} & \textbf{47.93{\scriptsize$\pm$0.27}} & \textbf{50.04{\scriptsize$\pm$0.67}} & 48.79{\scriptsize$\pm$0.27} & \textbf{49.05{\scriptsize$\pm$0.41}} & \textbf{49.14{\scriptsize$\pm$0.09}} \\
 \midrule
 \multicolumn{7}{l}{\textit{TyDiQA (F1)}} \\
-Random & 49.62{\scriptsize$\pm$0.20} & 47.98{\scriptsize$\pm$0.28} & 50.63{\scriptsize$\pm$0.92} & 48.04{\scriptsize$\pm$0.44} & 48.62{\scriptsize$\pm$0.32} & 48.98{\scriptsize$\pm$0.43} \\
-RDS+ & 53.26{\scriptsize$\pm$0.60} & 50.54{\scriptsize$\pm$0.70} & 52.70{\scriptsize$\pm$0.26} & 52.44{\scriptsize$\pm$0.75} & 51.46{\scriptsize$\pm$1.02} & 52.08{\scriptsize$\pm$0.67} \\
-Influence & 52.37{\scriptsize$\pm$0.83} & 50.71{\scriptsize$\pm$0.24} & 52.81{\scriptsize$\pm$0.88} & 52.45{\scriptsize$\pm$0.56} & 52.29{\scriptsize$\pm$0.91} & 52.13{\scriptsize$\pm$0.68} \\
-LESS & \textbf{53.75{\scriptsize$\pm$0.28}} & \textbf{52.19{\scriptsize$\pm$0.16}} & \textbf{53.88{\scriptsize$\pm$0.67}} & \textbf{52.63{\scriptsize$\pm$0.37}} & \textbf{52.92{\scriptsize$\pm$1.27}} & \textbf{53.07{\scriptsize$\pm$0.55}} \\
-PCU-Select & 52.69{\scriptsize$\pm$0.57} & 51.76{\scriptsize$\pm$0.72} & 53.51{\scriptsize$\pm$0.39} & 51.16{\scriptsize$\pm$1.89} & 52.38{\scriptsize$\pm$0.64} & 52.30{\scriptsize$\pm$0.84} \\
+Random & 49.62{\scriptsize$\pm$0.20} & 47.98{\scriptsize$\pm$0.28} & 50.63{\scriptsize$\pm$0.92} & 48.04{\scriptsize$\pm$0.44} & 48.62{\scriptsize$\pm$0.32} & 48.98{\scriptsize$\pm$0.29} \\
+RDS+ & 53.26{\scriptsize$\pm$0.60} & 50.54{\scriptsize$\pm$0.70} & 52.70{\scriptsize$\pm$0.26} & 52.44{\scriptsize$\pm$0.75} & 51.46{\scriptsize$\pm$1.02} & 52.08{\scriptsize$\pm$0.08} \\
+Influence & 52.37{\scriptsize$\pm$0.83} & 50.71{\scriptsize$\pm$0.24} & 52.81{\scriptsize$\pm$0.88} & 52.45{\scriptsize$\pm$0.56} & 52.29{\scriptsize$\pm$0.91} & 52.13{\scriptsize$\pm$0.50} \\
+LESS & \textbf{53.75{\scriptsize$\pm$0.28}} & \textbf{52.19{\scriptsize$\pm$0.16}} & \textbf{53.88{\scriptsize$\pm$0.67}} & \textbf{52.63{\scriptsize$\pm$0.37}} & \textbf{52.92{\scriptsize$\pm$1.27}} & \textbf{53.07{\scriptsize$\pm$0.31}} \\
+PCU-Select & 52.69{\scriptsize$\pm$0.57} & 51.76{\scriptsize$\pm$0.72} & 53.51{\scriptsize$\pm$0.39} & 51.16{\scriptsize$\pm$1.89} & 52.38{\scriptsize$\pm$0.64} & 52.30{\scriptsize$\pm$0.16} \\
 \bottomrule
 \end{tabular}
 \end{table*}

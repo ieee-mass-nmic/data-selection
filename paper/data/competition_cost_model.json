@@ -1,6 +1,8 @@
 {
   "hardware": "8xNVIDIA A100-80GB, bfloat16",
   "gpu_hour_definition": "wall_seconds * gpu_count / 3600",
+  "task_count": 4,
+  "training_seed_count": 3,
   "t_values": [1, 2, 3, 5, 7, 10, 15],
   "pcu_offline_breakdown_gpu_h": {
     "feature_extraction": 24.0,
@@ -8,45 +10,54 @@
     "high_fidelity_labels": 42.0,
     "scorer_training": 3.6
   },
-  "less_per_target_breakdown_gpu_h": {
-    "gradient_datastore_recompute": 31.0,
-    "scoring": 0.60
+  "online_selection_scope": {
+    "pcu_per_peft_task_gpu_h": 0.18,
+    "pcu_four_task_per_peft_gpu_h": 0.72,
+    "less_datastore_per_peft_gpu_h": 31.0,
+    "less_ranking_per_peft_task_gpu_h": 0.15,
+    "less_four_task_per_peft_gpu_h": 31.6
   },
-  "shared_target_training_per_config_gpu_h": 6.4,
-  "shared_target_training_note": "Shared across all selectors, excluded from selection-only comparison. 1000 steps at ~2.9 s/step (global batch 128, avg ~512 tokens, FlashAttention-2 + gradient checkpointing + length-bucketed batching) = ~48 min wall on 8xA100 = 6.4 GPU-h.",
-  "calibration_500_gpu_h": 2.1,
-  "calibration_note": "500 OOD calibration labels through the same high-fidelity routine as the offline stage (1.89 s/triple): 500 * 1.89 * 8 / 3600 = 2.1 GPU-h.",
-  "reuse_one_less_note": "Run LESS once on a single source PEFT (L-r8-qv), then reuse the identical subset for every target. One-time cost equals one LESS run (31.6 GPU-h); marginal per-target cost is ~0 because the subset is not recomputed.",
+  "shared_target_training_per_run_gpu_h": 6.4,
+  "shared_target_training_note": "One PEFT-task-training-seed run: 1000 steps at about 2.9 s/step on 8 A100 GPUs. Every selector pays this same downstream cost, so the selection-only comparison excludes it.",
+  "calibration": {
+    "full_offline_label_wall_seconds_per_triple": 1.89,
+    "deployment_label_wall_seconds_per_triple": 0.4725,
+    "calibration_200_per_peft_task_gpu_h": 0.21,
+    "calibration_500_per_peft_task_gpu_h": 0.525,
+    "calibration_500_four_task_per_peft_gpu_h": 2.1,
+    "note": "Deployment calibration uses one anchor and horizon 1, one quarter of the full offline label routine. Prefix and P-Tuning do not have native calibration labels in the reported implementation."
+  },
+  "reuse_one_less_note": "Run LESS once on one source PEFT and rank all four task sketches; reuse the resulting task-specific subsets for every target PEFT. One-time cost is 31.6 GPU-hours.",
   "methods": [
     {
       "method": "Random",
       "offline_gpu_h": 0.0,
-      "per_target_selection_gpu_h": 0.0
+      "per_configuration_selection_gpu_h": 0.0
     },
     {
       "method": "RDS+",
-      "offline_gpu_h": 0.6,
-      "per_target_selection_gpu_h": 0.03
+      "offline_gpu_h": 0.0,
+      "per_configuration_selection_gpu_h": 0.16
     },
     {
       "method": "Influence",
       "offline_gpu_h": 24.0,
-      "per_target_selection_gpu_h": 0.08
+      "per_configuration_selection_gpu_h": 0.08
     },
     {
       "method": "Reuse-one-LESS",
       "offline_gpu_h": 31.6,
-      "per_target_selection_gpu_h": 0.0
+      "per_configuration_selection_gpu_h": 0.0
     },
     {
       "method": "LESS",
       "offline_gpu_h": 0.0,
-      "per_target_selection_gpu_h": 31.6
+      "per_configuration_selection_gpu_h": 31.6
     },
     {
       "method": "PCU-Select",
       "offline_gpu_h": 72.0,
-      "per_target_selection_gpu_h": 0.18
+      "per_configuration_selection_gpu_h": 0.72
     }
   ],
   "five_seen_pefts_gpu_h": {
@@ -55,6 +66,6 @@
     "Influence": 24.4,
     "Reuse-one-LESS": 31.6,
     "LESS": 158.0,
-    "PCU-Select": 72.9
+    "PCU-Select": 75.6
   }
 }

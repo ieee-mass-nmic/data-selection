@@ -1,8 +1,8 @@
 \begin{table}[t]
 \centering
 \small
-\setlength{\tabcolsep}{3.2pt}
-\caption{Quality-preserving cost amortization across the five seen PEFT configurations. \emph{Avg.} is the PEFT- and task-averaged downstream score at the 10\% budget (Table~\ref{tab:main-results} scale); \emph{Gap} is the paired difference vs per-PEFT LESS; \emph{Sel.\ cost} is the total selection GPU-hours to serve all five targets (Figure~\ref{fig:cost} cost model). The comparison isolates the reuse-vs-recompute dilemma: Reuse-one-LESS runs LESS once and reuses the subset, so it is the cheapest gradient option but drops to the PEFT-agnostic frontier (below RDS+) because it cannot customize per target; per-PEFT LESS is strongest but $2.2\times$ the cost of PCU-Select; PCU-Select alone preserves LESS-level quality \emph{and} produces per-target subsets at amortized cost. Boldface marks the best average.}
+\setlength{\tabcolsep}{2.5pt}
+\caption{Quality and selection cost across five seen PEFTs. \emph{Avg.} averages the four task-native scores; \emph{Gap} is relative to per-PEFT LESS; \emph{Sel.\ cost} is GPU-hours for all five targets. Reusing one LESS subset is cheap but falls below RDS+; PCU-Select preserves LESS-level quality with target-specific subsets at $2.09\times$ lower cost. Boldface marks the best average.}
 \label{tab:reuse-quality-cost}
 \begin{tabular}{lccrrr}
 \toprule
@@ -14,7 +14,7 @@ Influence & No & No & 34.68 & -0.46 & 24.4 \\
 \midrule
 Reuse-one-LESS & Source only & No & 34.24 & -0.90 & 31.6 \\
 Per-PEFT LESS & Yes & Yes & 35.14 & 0.00 & 158.0 \\
-PCU-Select & Yes & Yes & \textbf{35.18} & +0.04 & 72.9 \\
+PCU-Select & Yes & Yes & \textbf{35.18} & +0.04 & 75.6 \\
 \bottomrule
 \end{tabular}
 \end{table}

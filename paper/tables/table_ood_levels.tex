@@ -1,17 +1,17 @@
 \begin{table*}[t]
 \centering
 \small
-\setlength{\tabcolsep}{5pt}
-\caption{Out-of-distribution transfer by level (mean$\pm$std over three seeds). LESS is the per-target reference. Zero-shot PCU-Select is within seed noise of LESS at L0, trails by $2.08$ at L1, and by $5.76$ at L2; $500$ calibration labels recover $1.78$ (L1) and $5.53$ (L2) points, leaving small residual gaps. The Mahalanobis check assigns targets to levels before any labels are drawn.}
+\setlength{\tabcolsep}{4pt}
+\caption{Transfer to unseen configurations over GSM8K, HumanEval, and MMLU. Each entry is PCU-Select minus the named target-specific reference, reported as paired mean$\pm$sample SD over three target-training seeds. Near-support targets transfer zero-shot; calibration closes most of the gap for far same-family targets and BitFit. Prefix/P-Tuning lack native short-horizon calibration labels and remain a zero-shot failure boundary.}
 \label{tab:ood-levels}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lllrrr}
 \toprule
-OOD level & LESS & PCU zero-shot & PCU cal200 & PCU cal500 \\
+Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\
 \midrule
-L0 (interpolation) & 34.50 & 34.16{\scriptsize$\pm$0.21} & 34.42{\scriptsize$\pm$0.19} & 34.77{\scriptsize$\pm$0.18} \\
-L1 (extrapolation) & 34.02 & 31.94{\scriptsize$\pm$0.34} & 33.05{\scriptsize$\pm$0.29} & 33.72{\scriptsize$\pm$0.24} \\
-L2 (unseen family) & 33.51 & 27.75{\scriptsize$\pm$0.52} & 30.98{\scriptsize$\pm$0.41} & 33.28{\scriptsize$\pm$0.30} \\
+L0 & L-r32-qkvo, AD-b16 & LESS & -0.34{\scriptsize$\pm$0.41} & -- & -- \\
+L1 & L-r64-all, AD-b256, L-r8-highlayers & LESS & -2.08{\scriptsize$\pm$0.44} & -0.91{\scriptsize$\pm$0.29} & -0.30{\scriptsize$\pm$0.36} \\
+L2-BF & BF & LESS & -4.08{\scriptsize$\pm$0.70} & -0.65{\scriptsize$\pm$0.26} & -0.23{\scriptsize$\pm$0.42} \\
+L2-Prompt & PRE-l16, PT-l32 & RDS+ & -6.97{\scriptsize$\pm$0.34} & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{table*}
-

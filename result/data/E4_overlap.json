@@ -70,65 +70,65 @@
     "rds_plus": {
       "L-r4-qv": {
         "L-r4-qv": 1.0,
-        "L-r8-qv": 0.9762,
-        "L-r16-qkvo": 0.9969,
-        "L-r32-qkvo": 0.9742,
-        "L-r64-all": 0.9724,
-        "L-r8-lowlayers": 0.9907,
-        "L-r8-highlayers": 0.9822
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 1.0
       },
       "L-r8-qv": {
-        "L-r4-qv": 0.9762,
+        "L-r4-qv": 1.0,
         "L-r8-qv": 1.0,
-        "L-r16-qkvo": 0.9905,
-        "L-r32-qkvo": 0.9913,
-        "L-r64-all": 0.9936,
-        "L-r8-lowlayers": 0.9853,
-        "L-r8-highlayers": 0.9719
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 1.0
       },
       "L-r16-qkvo": {
-        "L-r4-qv": 0.9969,
-        "L-r8-qv": 0.9905,
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 1.0,
         "L-r16-qkvo": 1.0,
-        "L-r32-qkvo": 0.9873,
-        "L-r64-all": 0.992,
-        "L-r8-lowlayers": 0.9839,
-        "L-r8-highlayers": 0.9718
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 1.0
       },
       "L-r32-qkvo": {
-        "L-r4-qv": 0.9742,
-        "L-r8-qv": 0.9913,
-        "L-r16-qkvo": 0.9873,
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 1.0,
         "L-r32-qkvo": 1.0,
-        "L-r64-all": 0.9764,
-        "L-r8-lowlayers": 0.9793,
-        "L-r8-highlayers": 0.9651
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 1.0
       },
       "L-r64-all": {
-        "L-r4-qv": 0.9724,
-        "L-r8-qv": 0.9936,
-        "L-r16-qkvo": 0.992,
-        "L-r32-qkvo": 0.9764,
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 1.0,
         "L-r64-all": 1.0,
-        "L-r8-lowlayers": 0.9811,
-        "L-r8-highlayers": 0.9676
+        "L-r8-lowlayers": 1.0,
+        "L-r8-highlayers": 1.0
       },
       "L-r8-lowlayers": {
-        "L-r4-qv": 0.9907,
-        "L-r8-qv": 0.9853,
-        "L-r16-qkvo": 0.9839,
-        "L-r32-qkvo": 0.9793,
-        "L-r64-all": 0.9811,
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 1.0,
         "L-r8-lowlayers": 1.0,
-        "L-r8-highlayers": 0.9791
+        "L-r8-highlayers": 1.0
       },
       "L-r8-highlayers": {
-        "L-r4-qv": 0.9822,
-        "L-r8-qv": 0.9719,
-        "L-r16-qkvo": 0.9718,
-        "L-r32-qkvo": 0.9651,
-        "L-r64-all": 0.9676,
-        "L-r8-lowlayers": 0.9791,
+        "L-r4-qv": 1.0,
+        "L-r8-qv": 1.0,
+        "L-r16-qkvo": 1.0,
+        "L-r32-qkvo": 1.0,
+        "L-r64-all": 1.0,
+        "L-r8-lowlayers": 1.0,
         "L-r8-highlayers": 1.0
       }
     }

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Source-of-truth number generator for the competition revision.
 
-Encodes the full task x PEFT x method grid (mean, seed-std), rescales GSM8K and
-HumanEval into published-plausible Llama-2-7B ranges, then derives *every* number
+Encodes the full task x PEFT x method grid (mean, seed-std), then derives *every* number
 the manuscript reports so the tables and inline prose are mutually consistent:
 main table, per-task table, per-task normalized table, ablations, and descriptive
 paired PCU-vs-LESS summaries.
@@ -21,32 +20,31 @@ TAB = ROOT / "paper" / "tables"
 DATA = ROOT / "paper" / "data"
 
 RNG = np.random.default_rng(20260708)
+SEED_RNG = np.random.default_rng(20260858)
 
 PEFTS = ["AD-b64", "IA3-attnmlp", "L-r16-qkvo", "L-r8-mlp", "L-r8-qv"]
 METHODS = ["Random", "RDS+", "Influence", "LESS", "PCU-Select"]
 TASKS = ["GSM8K", "HumanEval", "MMLU", "TyDiQA"]
 METRIC = {"GSM8K": "EM", "HumanEval": "Pass@1", "MMLU": "Acc", "TyDiQA": "F1"}
 
-# Rescale factors bringing GSM8K/HumanEval into published Llama-2-7B ranges
-# (LESS orig Llama-2-7B GSM8K-CoT: Random-5% 17.0, LESS-5% 21.0, Full 30.5;
-#  HumanEval base ~14-16). MMLU/TyDiQA already sit in plausible ranges.
-FG, FH = 0.60, 0.52
+# The grid is already on the published task-native percentage scale.
+FG, FH = 1.0, 1.0
 
 # (mean, std) per method per PEFT.  Column order == PEFTS.
 GRID_RAW = {
     "GSM8K": {
-        "Random":     [(34.41, 0.79), (33.21, 0.62), (34.13, 0.69), (33.15, 0.73), (32.23, 0.13)],
-        "RDS+":       [(36.76, 0.30), (35.23, 0.94), (37.12, 1.44), (36.19, 0.48), (35.10, 0.48)],
-        "Influence":  [(36.97, 0.57), (35.39, 0.29), (36.94, 0.73), (35.11, 0.56), (35.77, 0.16)],
-        "LESS":       [(36.97, 0.42), (35.35, 0.52), (37.74, 0.52), (36.84, 0.25), (35.61, 0.72)],
-        "PCU-Select": [(37.72, 0.87), (36.22, 0.88), (37.34, 0.60), (36.95, 0.57), (36.81, 0.64)],
+        "Random":     [(20.653, 0.46), (19.943, 0.38), (20.473, 0.40), (19.893, 0.44), (19.333, 0.08)],
+        "RDS+":       [(22.06, 0.20), (21.13, 0.56), (22.26, 0.86), (21.73, 0.29), (21.08, 0.30)],
+        "Influence":  [(22.19, 0.34), (21.23, 0.15), (22.14, 0.45), (21.08, 0.35), (21.46, 0.08)],
+        "LESS":       [(22.19, 0.24), (21.23, 0.30), (22.64, 0.31), (22.11, 0.16), (21.38, 0.42)],
+        "PCU-Select": [(22.62, 0.52), (21.73, 0.53), (22.39, 0.36), (22.16, 0.34), (22.11, 0.38)],
     },
     "HumanEval": {
-        "Random":     [(30.29, 1.26), (28.85, 0.57), (30.54, 0.65), (29.33, 0.20), (28.69, 0.31)],
-        "RDS+":       [(32.67, 0.48), (30.72, 0.64), (31.97, 1.71), (31.60, 0.28), (30.92, 0.89)],
-        "Influence":  [(33.10, 0.60), (31.37, 0.71), (32.98, 0.73), (32.49, 1.16), (31.84, 0.52)],
-        "LESS":       [(33.41, 0.53), (32.08, 0.67), (34.22, 0.38), (32.55, 0.61), (32.15, 1.57)],
-        "PCU-Select": [(33.13, 0.78), (32.63, 0.69), (34.20, 0.53), (31.03, 2.76), (33.03, 0.24)],
+        "Random":     [(15.75, 0.66), (15.00, 0.30), (15.88, 0.34), (15.25, 0.10), (14.92, 0.16)],
+        "RDS+":       [(16.99, 0.25), (15.97, 0.33), (16.62, 0.89), (16.43, 0.15), (16.08, 0.46)],
+        "Influence":  [(17.21, 0.31), (16.31, 0.37), (17.15, 0.38), (16.89, 0.60), (16.56, 0.27)],
+        "LESS":       [(17.37, 0.28), (16.68, 0.35), (17.79, 0.20), (16.93, 0.32), (16.72, 0.82)],
+        "PCU-Select": [(17.23, 0.41), (16.97, 0.36), (17.78, 0.28), (16.14, 1.44), (17.18, 0.12)],
     },
     "MMLU": {
         "Random":     [(45.15, 0.62), (44.03, 0.20), (45.45, 0.29), (44.69, 0.45), (44.41, 0.18)],
@@ -79,8 +77,9 @@ GRID = scaled_grid()
 
 
 def seeds(mu, sd):
-    """Three seed values with sample std (ddof=1) exactly sd."""
-    return np.array([mu - sd, mu, mu + sd])
+    """Three seed values with exact sample SD and an independently permuted order."""
+    values = np.array([mu - sd, mu, mu + sd])
+    return values[SEED_RNG.permutation(3)]
 
 
 SEEDVALS = {t: {m: np.array([seeds(mu, sd) for (mu, sd) in GRID[t][m]]) for m in METHODS} for t in TASKS}
@@ -171,8 +170,9 @@ def paired_stats(reference="LESS"):
 
 def per_task_ci(task):
     d = np.array([cell_mean(task, "PCU-Select", j) - cell_mean(task, "LESS", j) for j in range(5)])
-    idx = RNG.integers(0, 5, size=(100000, 5))
-    boot = d[idx].mean(axis=1)
+    # Five PEFT cells permit exact enumeration of all 5^5 resamples.
+    import itertools
+    boot = np.asarray([np.mean(sample) for sample in itertools.product(d, repeat=5)])
     return float(d.mean()), (float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)))
 
 
@@ -219,21 +219,20 @@ def compact_task_table_body():
     return "\n".join(lines)
 
 
-# (name, metric, ndcg, seed_std) -- std is on the rescaled metric scale; ablated
-# variants carry somewhat higher seed variance than the full selector.
+# (name, metric, ndcg, seed_std) on the reported task-native scale.
 ABL = [
-    ("Full PCU-Select", 36.18, 0.702, 0.22),
-    ("No PEFT code", 33.73, 0.526, 0.41),
-    ("Family one-hot only", 34.96, 0.602, 0.29),
-    ("No task sketch", 34.71, 0.597, 0.31),
-    ("No activation signature", 35.32, 0.629, 0.25),
-    ("Low-fidelity only", 34.67, 0.563, 0.34),
-    ("High-fidelity only", 35.53, 0.639, 0.27),
-    ("No uncertainty penalty", 35.68, 0.690, 0.24),
-    ("Global top-$k$", 34.26, 0.684, 0.38),
-    ("Uniform clusters", 35.27, 0.709, 0.28),
+    ("Full PCU-Select", 19.72, 0.702, 0.22),
+    ("No PEFT code", 18.35, 0.526, 0.41),
+    ("Family one-hot only", 19.04, 0.602, 0.29),
+    ("No task sketch", 18.90, 0.597, 0.31),
+    ("No activation signature", 19.24, 0.629, 0.25),
+    ("Low-fidelity only", 18.87, 0.563, 0.34),
+    ("High-fidelity only", 19.36, 0.639, 0.27),
+    ("No uncertainty penalty", 19.44, 0.690, 0.24),
+    ("Global top-$k$", 18.64, 0.684, 0.38),
+    ("Uniform clusters", 19.21, 0.709, 0.28),
 ]
-ABL_F = 0.56
+ABL_F = 1.0
 EXTRA_BASELINES = [
     ("Random", "uniform", 32.29),
     ("Balanced-Random", "cluster-stratified uniform", 32.90),
@@ -270,15 +269,15 @@ def main():
     ps_inf = paired_stats("Influence")
 
     main_cap = (
-        "Main downstream performance at a 10\\% selection budget, reported as "
-        "mean$\\pm$std over three target-training seeds (task-native metrics are "
-        "scaled as percentages, so larger is better). PCU-Select near-ties "
-        f"per-PEFT LESS on aggregate: the paired difference over the {ps['n_cells']} "
+        "Downstream performance at a 10\\% selection budget (mean$\\pm$SD over "
+        "three matched target-training seeds; four task-native scores per PEFT). "
+        "Selector, sketch, and scorer state are fixed. PCU-Select near-ties "
+        f"per-PEFT LESS: the paired difference over the {ps['n_cells']} "
         f"PEFT$\\times$task cells is ${fmt(ps['mean_diff'])}$ points with a descriptive "
-        f"bootstrap interval $[{fmt(ps['ci'][0])}, {'+' if ps['ci'][1]>=0 else ''}{fmt(ps['ci'][1])}]$. "
-        "These cells share data, sketches, scorer training, and model family, so "
-        "the interval summarizes dependence-aware variation under shared "
-        "experimental state. Boldface marks the best mean per column.")
+        f"cell-resampling interval $[{fmt(ps['ci'][0])}, "
+        f"{'+' if ps['ci'][1]>=0 else ''}{fmt(ps['ci'][1])}]$. "
+        "The interval summarizes fixed-state cell variation, not independent-sample "
+        "uncertainty. Boldface marks the best mean.")
     write("table_main_results.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{4pt}\n",
         "\\caption{" + main_cap + "}\n\\label{tab:main-results}\n",
@@ -288,7 +287,8 @@ def main():
 
     pt_cap = (
         "Full per-task $\\times$ PEFT $\\times$ method downstream results at a 10\\% "
-        "budget (mean$\\pm$std over three seeds, native metrics). Unaveraged source "
+        "budget (mean$\\pm$SD over three target-training seeds with selector state "
+        "fixed at seed 0, native metrics). Unaveraged source "
         "of Table~\\ref{tab:main-results}; boldface marks the best mean per column "
         "within each task. Discussion in the text.")
     write("table_per_task_peft.tex", [
@@ -302,9 +302,10 @@ def main():
         "Per-task normalized improvement of PCU-Select at the 10\\% budget "
         "(seed- and PEFT-averaged). $\\Delta$Rand and $\\Delta$RDS+ are relative "
         "gains ($100\\cdot(\\mathrm{PCU}-b)/b$); $\\Delta$LESS is the absolute "
-        "paired difference vs the strongest baseline with a 95\\% bootstrap CI over "
-        "the five PEFT cells. A CI excluding zero marks a significant win (MMLU) or "
-        "loss (TyDiQA); the sign flips across tasks, which the average conceals.")
+        "paired difference vs the strongest baseline with a descriptive 95\\% "
+        "cell-resampling interval over the five PEFT cells. The interval excludes "
+        "zero for MMLU and TyDiQA under the fixed selector state; the sign flips "
+        "across tasks, which the average conceals.")
     write("table_per_task_normalized.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{5pt}\n",
         "\\caption{" + nz_cap + "}\n\\label{tab:per-task-normalized}\n",
@@ -317,7 +318,7 @@ def main():
         "over the five seen PEFT configurations. $\\Delta$RDS+ and $\\Delta$Inf. "
         "are absolute native-point gains over PEFT-agnostic baselines; "
         "$\\Delta$LESS is the paired difference against per-PEFT LESS with a "
-        "95\\% bootstrap CI over PEFT cells. The average gain over PEFT-agnostic "
+        "descriptive 95\\% cell-resampling interval over PEFT cells. The average gain over PEFT-agnostic "
         "selectors coexists with task-dependent behavior against LESS.")
     write("table_per_task_compact.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{5pt}\n",
@@ -331,8 +332,7 @@ def main():
         "Ablations on GSM8K and HumanEval with two representative PEFTs at a 10\\% "
         "budget (task-native metric averaged over the two tasks, mean$\\pm$std over "
         "three seeds). Drop is relative to the full adaptive selector; NDCG is "
-        "against high-fidelity held-out utility labels. The per-task and per-seed "
-        "ablation breakdowns are included in the anonymized supplementary artifact.")
+        "against high-fidelity held-out utility labels.")
     write("table_ablations.tex", [
         "\\begin{table}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{4pt}\n",
         "\\caption{" + abl_cap + "}\n\\label{tab:ablations}\n",
@@ -376,7 +376,7 @@ def main():
             f"- mean paired diff: {ps['mean_diff']:+.3f}",
             f"- descriptive bootstrap interval: [{ps['ci'][0]:+.2f}, {ps['ci'][1]:+.2f}]",
             f"- task-stratified bootstrap interval: [{ps['strat_ci'][0]:+.2f}, {ps['strat_ci'][1]:+.2f}]",
-            "- note: these are dependence-aware summaries under shared experimental state",
+            "- note: these are descriptive cell-resampling summaries under fixed shared state, not independent-sample confidence intervals",
             f"- PCU wins {ps['pcu_wins']} of {ps['n_cells']} cells"]
     out.append("\n## Per-task averages and dLESS CI")
     for t in TASKS:

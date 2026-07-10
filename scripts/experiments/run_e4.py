@@ -5,7 +5,7 @@ which data is valuable? Three sub-experiments over a LoRA configuration sweep:
 
   E4-a  selection difference: pairwise Jaccard / top-k overlap of the subsets
         PCU selects per config — contrasted with a PEFT-agnostic baseline
-        (rds_plus), whose overlap is ≈ 1 by construction. → E4_overlap.json
+        (rds_plus), whose overlap is exactly 1 by construction. → E4_overlap.json
         (mechanism metric; computed on the first task / first seed only).
   E4-b  per-config performance: PCU vs Random / RDS+ / LESS on each config.
         → E4.jsonl  (one method row per task × config × method × seed)

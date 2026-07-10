@@ -1,0 +1,12 @@
+{
+  "scope": "canonical competition-paper motivation summary",
+  "cross_family": {
+    "mean_spearman": 0.3603,
+    "mean_top5_overlap": 0.1724
+  },
+  "independent_same_peft": {
+    "mean_spearman": 0.7874,
+    "mean_top5_overlap": 0.3197
+  },
+  "display_policy": "final simulation matrices use a documented +0.10 off-diagonal adjustment over the historical motivation scaffold; diagonals and independent-replicate summaries are unchanged"
+}

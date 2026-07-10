@@ -51,7 +51,14 @@ def test_fingerprint_appends_64_dims():
 
 @pytest.mark.parametrize(
     "family,slot",
-    [("lora", 9), ("ia3", 10), ("adapter", 11), ("prefix", 12), ("bitfit", 13)],
+    [
+        ("lora", 9),
+        ("ia3", 10),
+        ("adapter", 11),
+        ("prefix", 12),
+        ("ptuning", 12),
+        ("bitfit", 13),
+    ],
 )
 def test_capacity_family_one_hot(family, slot):
     c = encode_capacity(_cfg(family, rank=8, adapter_bottleneck=64, prefix_len=16))

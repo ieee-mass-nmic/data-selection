@@ -108,7 +108,7 @@ PEFT_REGISTRY: dict[str, PeftSpec] = {
     "L-r4-qv": PeftSpec("L-r4-qv", "lora", "qv", "unseen_config", rank=4, alpha=8, lr=2e-4,
                         note="tiny capacity"),
     "L-r32-qkvo": PeftSpec("L-r32-qkvo", "lora", "qkvo", "unseen_config", rank=32, alpha=64,
-                           lr=2e-4, note="large capacity, ID-interpolation"),
+                           lr=2e-4, note="large capacity, near structural support"),
     "L-r64-all": PeftSpec("L-r64-all", "lora", "all_linear", "unseen_config", rank=64, alpha=128,
                           lr=1e-4, note="capacity + placement extrapolation"),
     "L-r8-lowlayers": PeftSpec("L-r8-lowlayers", "lora", "qv", "unseen_config", layer_range="low",

@@ -1,0 +1,50 @@
+{
+  "tasks": ["gsm8k", "humaneval", "mmlu"],
+  "dispersion": "sample standard deviation of the paired seed-level mean over target-training seeds 0, 1, and 2",
+  "groups": [
+    {
+      "id": "L0",
+      "label": "near-support same-family",
+      "targets": ["L-r32-qkvo", "AD-b16"],
+      "reference": "LESS",
+      "modes": {
+        "zero-shot": {"gap": -0.34, "std": 0.41},
+        "cal200": null,
+        "cal500": null
+      }
+    },
+    {
+      "id": "L1",
+      "label": "far-support same-family",
+      "targets": ["L-r64-all", "AD-b256", "L-r8-highlayers"],
+      "reference": "LESS",
+      "modes": {
+        "zero-shot": {"gap": -2.08, "std": 0.44},
+        "cal200": {"gap": -0.91, "std": 0.29},
+        "cal500": {"gap": -0.30, "std": 0.36}
+      }
+    },
+    {
+      "id": "L2-BF",
+      "label": "unseen-family BitFit",
+      "targets": ["BF"],
+      "reference": "LESS",
+      "modes": {
+        "zero-shot": {"gap": -4.08, "std": 0.70},
+        "cal200": {"gap": -0.65, "std": 0.26},
+        "cal500": {"gap": -0.23, "std": 0.42}
+      }
+    },
+    {
+      "id": "L2-Prompt",
+      "label": "unseen-family Prefix/P-Tuning",
+      "targets": ["PRE-l16", "PT-l32"],
+      "reference": "RDS+",
+      "modes": {
+        "zero-shot": {"gap": -6.97, "std": 0.34},
+        "cal200": null,
+        "cal500": null
+      }
+    }
+  ]
+}

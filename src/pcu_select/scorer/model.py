@@ -11,7 +11,7 @@ from torch import nn
 @dataclass
 class ScorerConfig:
     z_x_dim: int = 848
-    z_p_dim: int = 192
+    z_p_dim: int = 128
     z_t_dim: int = 848
     h_dim: int = 256
     p_dim: int = 128

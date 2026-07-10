@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Intervention-site design ablation (GSM8K+HumanEval average, 10\% budget). The default $8\,{\times}\,3$ layout with a 256-dim JL projection is within $0.08$ points of the more expensive 16- and 32-layer variants and beats attention- or MLP-only site sets. Relative feature-extraction cost is shown in the last column.}
+\label{tab:site-ablation}
+\begin{tabular}{lrrr}
+\toprule
+Site space & Metric & NDCG & Feat.\ cost \\
+\midrule
+$8\times3$, JL 256 (default) & 19.72 & 0.702 & 1.0$\times$ \\
+Attention sites only & 18.87 & 0.641 & 0.6$\times$ \\
+MLP sites only & 19.04 & 0.652 & 0.6$\times$ \\
+4 layers $\times$ 3 & 19.18 & 0.664 & 0.5$\times$ \\
+16 layers $\times$ 3 & 19.77 & 0.705 & 2.0$\times$ \\
+32 layers $\times$ 3 (all) & 19.80 & 0.707 & 4.0$\times$ \\
+JL dim 64 & 19.25 & 0.671 & 0.8$\times$ \\
+JL dim 128 & 19.55 & 0.690 & 0.9$\times$ \\
+JL dim 512 & 19.74 & 0.703 & 1.6$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}

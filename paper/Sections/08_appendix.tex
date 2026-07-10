@@ -12,23 +12,24 @@ another, and the average can hide task-level structure. To make the comparison
 auditable we report the full, unaveraged grid and a per-task normalized view.
 
 Table~\ref{tab:per-task-peft} gives every task $\times$ PEFT $\times$ method cell
-at the 10\% budget, as mean$\pm$std over the three target-training seeds.
+at the 10\% budget, as mean$\pm$SD over three target-training seeds with selector
+state fixed at seed 0.
 Table~\ref{tab:per-task-normalized} summarizes PCU-Select's improvement per task:
 gains over Random and RDS+ are reported as scale-free \emph{relative}
 improvements so that heterogeneous metrics are placed on a common footing, while
 the head-to-head with LESS---the strongest baseline---is an absolute paired
-difference in native points with a 95\% bootstrap confidence interval over the
-five PEFT cells.
+difference in native points with a descriptive 95\% cell-resampling interval over
+the five PEFT cells. These intervals do not estimate independent-sample uncertainty.
 
 The per-task view refines, rather than overturns, the main-results reading. The
-advantage over Random ($+6.8\%$ to $+11.0\%$
+advantage over Random ($+6.8\%$ to $+11.1\%$
 relative) and RDS+ ($+0.4\%$ to $+3.9\%$ relative) holds on all four tasks and is
 the primary performance claim. Against LESS the outcome is task-dependent and
-the sign flips: PCU-Select's gain has a CI excluding zero only on MMLU
-($+0.67$ Acc, CI $[+0.24,+1.08]$), within seed noise on GSM8K
-($+0.30$ EM, CI $[-0.03,+0.59]$) and HumanEval ($-0.04$ Pass@1,
-CI $[-0.45,+0.30]$), and a CI-excluding deficit on TyDiQA
-($-0.77$ F1, CI $[-1.18,-0.43]$). Averaging over tasks smooths these offsetting
+the sign flips: the fixed-state interval excludes zero on MMLU
+($+0.67$ Acc, $[+0.24,+1.08]$), includes zero on GSM8K
+($+0.29$ EM, $[-0.04,+0.58]$) and HumanEval ($-0.04$ Pass@1,
+$[-0.44,+0.31]$), and excludes zero in the negative direction on TyDiQA
+($-0.77$ F1, $[-1.18,-0.43]$). Averaging over tasks smooths these offsetting
 differences into the near-zero aggregate gap reported in
 Table~\ref{tab:main-results}. We therefore characterize PCU-Select and
 per-PEFT LESS as near-tied on the seen registry, with visible task/configuration
@@ -40,15 +41,15 @@ PCU-Select's distinguishing property.
 \input{tables/table_per_task_normalized}
 
 \paragraph{Where PCU-Select trails LESS.}
-Two cells favor LESS and merit analysis. On \textbf{TyDiQA}, PCU-Select trails
-LESS by $0.77$ F1 (CI $[-1.18,-0.43]$). TyDiQA-GoldP is multilingual span
+Two slices favor LESS and merit analysis. On \textbf{TyDiQA}, PCU-Select trails
+LESS by $0.77$ F1 (descriptive interval $[-1.18,-0.43]$). TyDiQA-GoldP is multilingual span
 extraction, where the useful signal is answer-span alignment rather than the
 reasoning- and generation-heavy signal that dominates the other three tasks; the
 intervention-site gradient signatures and the English-centric task sketch
 under-represent this, so the site-weighted proxy that PCU-Select distills is a
 weaker teacher here, whereas per-target LESS gradients capture it directly. On
 the \textbf{MLP-only LoRA} column (L-r8-mlp), PCU-Select trails LESS by $0.57$
-points with a large seed std ($\pm0.98$): MLP-only placement concentrates all
+points; its HumanEval and TyDiQA cells have SDs of $1.44$ and $1.89$. MLP-only placement concentrates all
 trainable capacity on the three \texttt{mlp\_out} sites, so a single mis-weighted
 site prior degrades the whole proxy, and the higher variance indicates the scorer
 is least confident exactly where the site mask is most concentrated. Both cases
@@ -64,17 +65,17 @@ selected subset changes. Target training fine-tunes the target PEFT on the
 selected samples under a fixed recipe (AdamW, per-configuration learning rate,
 cosine schedule with a $0.03$ warmup ratio, per-device batch size $16$ over
 $8$ GPUs for an effective global batch of $128$, gradient clipping at
-$1.0$, $1000$ steps, bfloat16, max sequence length $1024$) on the Llama-2-7B
+$1.0$, $1000$ steps, bfloat16, max sequence length $1024$) on the Llama-2-7B~\cite{touvron2023llama2}
 backbone, with the backbone frozen and only the adapter trained. At the 10\%
 budget the selected subset holds $30$K examples, so $1000$ steps at a global
 batch of $128$ amount to $128$K sample-passes, or about $4.3$ passes over the
 subset; the dataloader shuffles the full subset each epoch, so every selected
 example is used. The selected instruction examples average $\approx512$ tokens,
-and batches are length-bucketed to reduce padding; with FlashAttention-2 and
+and batches are length-bucketed to reduce padding; with FlashAttention-2~\cite{dao2024flashattention2} and
 gradient checkpointing the run sustains $\approx2.9$ wall-clock seconds per step
 ($\approx44$ sample-passes/s aggregate, $\approx2.8$K tokens/s per GPU),
 so the $1000$ steps take about $48$ minutes of wall time, i.e.\ $6.4$ GPU-hours
-per configuration under the $(\text{wall seconds}\times\text{GPU count})/3600$
+per PEFT--task--seed run under the $(\text{wall seconds}\times\text{GPU count})/3600$
 convention. This shared target-training cost is identical across selectors and is
 therefore excluded from the selection-only cost comparison; gradient
 checkpointing trades compute for memory and is the dominant reason the per-step
@@ -85,26 +86,33 @@ for adapters, 1e-4 for L-r64-all). A held-out
 response-LM loss is logged as an auxiliary diagnostic (\texttt{eval\_loss}) and
 is never substituted for the primary task metric.
 
+A uniform draw from the entire 300K pool under the same 1000-step budget averages
+36.75 across tasks. This is a fixed-compute reference, not a converged full-data
+upper bound: it covers only 0.43 pool epochs, whereas the 10\% subset receives
+about 4.3 passes. At 30\%, PCU-Select (36.81) and LESS (36.79) slightly exceed
+the reference by concentrating the same 128K sample-passes
+(Table~\ref{tab:budget-sensitivity}).
+
 The primary downstream metric for each task is its public-standard, task-native
 score, computed by a task evaluator injected into the training runner. Concrete
 per-task decoding and scoring protocols are:
 
 \begin{itemize}
-  \item \textbf{GSM8K (exact match).} Chain-of-thought generation with greedy
+  \item \textbf{GSM8K (exact match).} Chain-of-thought generation~\cite{cobbe2021gsm8k} with greedy
     decoding; the final numeric answer is extracted and compared for exact
     match.
-  \item \textbf{HumanEval (Pass@1).} The standard unbiased Pass@1 estimator:
+  \item \textbf{HumanEval (Pass@1).} The standard unbiased Pass@1 estimator~\cite{chen2021humaneval}:
     sampling at temperature $0.2$ with $n{=}20$ samples per problem, scored by
     unit-test execution. This is a multi-sample estimate of Pass@1, not a single
     greedy sample.
-  \item \textbf{MMLU (accuracy).} Log-likelihood scoring of the four answer
+  \item \textbf{MMLU (accuracy).} Log-likelihood scoring~\cite{hendrycks2021mmlu} of the four answer
     options; the highest-likelihood option is selected (no free-form
     generation).
-  \item \textbf{TyDiQA-GoldP (F1).} Greedy decoding of the answer span, scored
+  \item \textbf{TyDiQA-GoldP (F1).} Greedy decoding of the answer span~\cite{clark2020tydiqa}, scored
     with token-level F1 against the gold answers.
 \end{itemize}
 
-For reference, the un-fine-tuned Llama-2-7B scores $13.9$ (GSM8K EM), $12.4$
+For reference, the un-fine-tuned Llama-2-7B~\cite{touvron2023llama2} scores $13.9$ (GSM8K EM), $12.4$
 (HumanEval Pass@1), $43.9$ (MMLU Acc), and $46.2$ (TyDiQA F1) under these same
 evaluators; our MMLU number is slightly below Meta's reported $45.3$ because of
 prompt and harness differences. Every selector's fine-tune, including Random,
@@ -115,8 +123,7 @@ selection effect rather than a weak-baseline artifact.
 These protocols follow the standard public setups for each benchmark. The
 task-native evaluators are supplied to the runner through an evaluation adapter
 (the \texttt{-{}-task-metric-factory} hook) whose decoding and scoring settings
-are fixed to the values above and included in the anonymized supplementary artifact, so
-the metric definitions are reproducible rather than left to the run environment.
+are fixed to the values above, so the run environment cannot change metric definitions.
 
 \subsection{Baseline Specifications}
 \label{sec:appendix-baselines}
@@ -159,11 +166,17 @@ state; (ii) extracts Adam-preconditioned per-checkpoint gradients over the
 adapter's own trainable parameters; (iii) random-projects them into a
 target-specific low-dimensional datastore; and (iv) ranks candidates by their
 projected-gradient influence on the $32$-example validation sketch, averaged over
-the warmup checkpoints. Both the datastore and the ranking are therefore
-recomputed per target, at 31.0 GPU-hours of gradient recomputation plus 0.60
-GPU-hours of scoring per configuration. LESS is the strongest and most expensive
-baseline in our study, and the amortized-cost analysis charges it exactly this
-per-target recomputation,
+the warmup checkpoints. The gradient datastore in steps (i)--(iii) is built over
+the target adapter's \emph{own} trainable parameters, so it is PEFT-specific but
+task-independent: it is constructed once per PEFT configuration and reused to rank
+against every task's sketch. Only step (iv), the projected-gradient scoring
+against a task sketch, is per task, and it is cheap---about $0.15$ GPU-hours per
+task, so the $0.60$ scoring figure covers all four task sketches for a
+configuration. The per-target cost of a PEFT configuration is therefore $31.0$
+(datastore) $+\,0.60$ (four per-task rankings) $=31.6$ GPU-hours, already spanning
+the full four-task evaluation; the five-PEFT registry cost is $5\times31.6=158.0$.
+LESS is the strongest and most expensive baseline in our study, and the
+amortized-cost analysis charges it exactly this per-configuration recomputation,
 consistent with the algorithm as implemented.
 
 \paragraph{Baseline configuration and tuning.}
@@ -248,15 +261,22 @@ external code-instruction source (MBPP train split and CodeAlpaca) rather than
 from HumanEval itself; we remove any item matching one of the $164$ HumanEval
 evaluation problems by exact and AST-normalized function-signature matching and
 verify that the resulting sketch source has zero overlap with the evaluation set.
+Because the candidate pool also contains a $20$K CodeAlpaca slice, the $32$
+sketch examples are additionally held out from the pool: every sketch item is
+removed from the candidate pool (by content hash and the same AST-normalized
+signature match) \emph{before} selection, so no selector can recover a sketch
+example into the training subset. The sketch is therefore disjoint from both the
+HumanEval test set and the candidate pool.
 Because the sketch is a selection \emph{signal}, this disjointness is required
 for all selectors, not only PCU-Select, and it is enforced identically across
 methods.
 
 \paragraph{PEFT registry.}
-Table~\ref{tab:appendix-peft-registry} lists all 17 PEFT configurations,
-partitioned into the five seen configurations the scorer trains on, nine
-unseen-configuration targets (same families, settings outside the training
-support), and three out-of-distribution family targets. All configurations share
+Table~\ref{tab:appendix-peft-registry} lists all 17 PEFT configurations:
+five seen, nine unseen same-family configurations, and three unseen families.
+E5 evaluates eight held-out targets---L-r32-qkvo, AD-b16, L-r64-all, AD-b256,
+L-r8-highlayers, PRE-l16, PT-l32, and BF---while the configuration-sensitivity
+study uses the additional LoRA variants. All configurations share
 the recipe injected at materialization: $1000$ steps, cosine schedule,
 $0.03$ warmup ratio; the learning rate is per configuration.
 
@@ -305,21 +325,21 @@ The site space $\Omega$ has $24$ sites: $8$ layers $\times\ 3$ per-layer modules
 (\texttt{attn\_out}, \texttt{mlp\_out}, \texttt{block\_residual}). Layers are
 chosen uniformly by depth; for the 32-layer backbone this yields indices
 $\{3,7,11,15,19,23,27,31\}$. Each site carries a Johnson--Lindenstrauss random
-projection $\Phi_\omega \in \mathbb{R}^{256 \times 4096}$ with entries drawn
+projection~\cite{johnson1984jl} $\Phi_\omega \in \mathbb{R}^{256 \times 4096}$ with entries drawn
 $\mathcal{N}(0, 1/256)$ under a per-site seed
 $\mathrm{SHA256}(\texttt{site}, \texttt{global\_seed}{=}0)$; projected gradients
 are $L_2$-normalized per row. Each sample's signature is $24\times256$ values;
 in bfloat16 the cached low-fidelity gradient store for the $300$K pool is
 $300\text{K}\times24\times256\times2\,\text{B}\approx 3.5$~GB, held on disk as a
 memory-mapped array and read once per online selection. A PEFT configuration
-activates a site through an operator-weight prior $\rho$ by family (additive
-low-rank $1.0$, multiplicative $0.6$, additive bottleneck $0.8$, prefix $0.4$,
-bias-shift $0.3$) scaled by $\tanh(\eta\, \widehat{\mathrm{cap}})$ with
-$\eta{=}1.0$; the per-family capacity mapping is in Table~\ref{tab:capacity}.
+activates sites through its mask and a saturating capacity factor
+$\tanh(\eta\, \widehat{\mathrm{cap}})$ with $\eta{=}1.0$. Operator type enters
+the explicit PEFT code rather than a scalar site prior; the per-family capacity
+mapping is in Table~\ref{tab:capacity}.
 
 \paragraph{Conditional scorer.}
 The scorer has three input towers---sample $z_x \in \mathbb{R}^{848}$, PEFT
-condition $z_p \in \mathbb{R}^{192}$, task sketch $z_t \in \mathbb{R}^{848}$---each
+condition $z_p \in \mathbb{R}^{128}$, task sketch $z_t \in \mathbb{R}^{848}$---each
 a LayerNorm--Linear--GELU--Linear--LayerNorm MLP projecting to hidden size $256$
 ($128$ for the PEFT tower). A FiLM modulation and a bilinear fusion
 ($256 \times 128 \to 64$) feed a two-head output (mean $\mu$ and heteroscedastic
@@ -342,17 +362,47 @@ best held-out NDCG. No dropout is used.
 \paragraph{Selection, clustering, and quotas.}
 At application time the scorer produces per-example utility $q = \mu - \lambda\,\sigma$
 with uncertainty penalty $\lambda{=}0.2$. Semantic clustering uses MiniBatch
-$k$-means over joint embeddings with $k = \max(50, \lfloor\sqrt{N}\rfloor)$, batch
+$k$-means~\cite{sculley2010minibatch} over joint embeddings with $k = \max(50, \lfloor\sqrt{N}\rfloor)$, batch
 size $4096$, $n_{\text{init}}{=}3$, and random state $0$. Adaptive quotas allocate
 budget $B$ across clusters by
 $b_k = \mathrm{round}\!\big(B\, (v_k^+)^{\gamma}\, |C_k|^{1-\gamma} / Z\big)$ with
 $\gamma{=}0.6$, where the cluster value $v_k$ is the mean utility of the top
 $10\%$ of its members; remainders are distributed greedily by descending weight
-and over-allocation is trimmed from the lowest-weight clusters. Out-of-distribution
-detection uses a Mahalanobis distance on $z_p$ at the $0.95$ quantile; the
+and over-allocation is trimmed from the lowest-weight clusters. The
 calibration head is a zero-initialized linear residual fit for $200$ epochs at
 lr $5\times10^{-3}$ (Adam, MSE) on the calibration labels (200 or 500
 high-fidelity labels for the OOD study).
+
+\paragraph{Structural support tiers.}
+The reported $z_p\in\mathbb{R}^{128}$ contains only the site/operator mask,
+capacity, and recipe vectors. Prefix, P-Tuning, and BitFit use the same
+deterministic encoding rules as the seen families; no centroid, learned family
+lookup, or functional fingerprint enters the reported model. E5 fixes its
+registry taxonomy before evaluation. \textbf{L0} contains near-support
+same-family targets (L-r32-qkvo and AD-b16). \textbf{L1} contains farther
+same-family shifts (L-r64-all, AD-b256, and L-r8-highlayers). \textbf{L2}
+contains unseen families (PRE-l16, PT-l32, and BF). These tiers describe
+structural support and do not claim convex-hull interpolation or estimate a
+configuration density. Prefix/P-Tuning lack native short-horizon calibration
+labels; BitFit supports the calibration path.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Deployment protocol from the registry-defined structural tier. Costs are per PEFT--task pair, in addition to 0.18 GPU-hours for online selection.}
+\label{tab:protocol}
+\begin{tabular}{@{}p{.12\columnwidth}p{.34\columnwidth}p{.46\columnwidth}@{}}
+\toprule
+Tier & Definition & Recommended action \\
+\midrule
+L0 & near-support same family & zero-shot selection \\
+L1 & far-support same family & 200--500 labels (0.21--0.53 GPU-h) \\
+L2-BF & unseen family, native labels & calibrate before use \\
+L2-Prompt & Prefix/P-Tuning & use a per-target selector \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Multi-fidelity labels.}
 High-fidelity supervision uses $10{,}000$ triples split $0.5/0.3/0.2$ across
@@ -377,23 +427,23 @@ rank-normalized within its (PEFT, task, anchor $a$, horizon $h$) bucket.
 We measure all costs on $8{\times}$NVIDIA A100-80GB (SXM4, bfloat16, NVLink)
 as $(\text{wall seconds} \times \text{GPU count}) / 3600$. The offline
 cost is 72.0 GPU-hours (feature extraction 24.0, low-fidelity labels 2.4,
-high-fidelity labels 42.0, scorer training 3.6), paid once. Per-target
-\emph{selection} costs are 0.18 GPU-hours for PCU-Select (cached-feature reuse,
-forward scoring, clustering) versus 31.6 for LESS (31.0 gradient-datastore
-recomputation $+\,0.60$ scoring); the shared target-training cost ($6.4$ per
-configuration, i.e.\ $\approx2.9$\,s/step for $1000$ steps; see
-Sec.~\ref{sec:appendix-protocols}) is identical across methods and excluded from this comparison.
-Break-even is
-$T = C_{\text{offline}} / (C^{\text{LESS}}_{\text{sel}} - C^{\text{PCU}}_{\text{sel}})
-= 72.0 / (31.6 - 0.18) \approx 2.29$ target configurations.
-The pipeline seeds Python, NumPy, PyTorch, and CUDA from a single global seed;
-reported downstream numbers average three target-training seeds ($0,1,2$), while
-selection-scorer training, task-sketch sampling, and candidate-pool ordering are
-fixed to seed $0$, so the reported dispersion isolates target-training variance.
-The full per-seed, per-cell result matrices behind every table---including the
-selected-sample identifiers for each method, PEFT, and seed---are included in
-the anonymized supplementary artifact, so the reported means and the win/loss
-counts are auditable.
+high-fidelity labels 42.0, scorer training 3.6), paid once. PCU-Select costs
+0.18 GPU-hours per PEFT--task application, hence 0.72 for four tasks. LESS costs
+31.0 per PEFT datastore plus 0.15 per task ranking, hence 31.6 for four tasks.
+The shared 6.4 GPU-hour downstream cost applies to each PEFT--task--seed run and
+is excluded. For four tasks, break-even is
+$P^\star=72.0/[31.0+4(0.15-0.18)]=2.33$ configurations. The pipeline fixes
+selector-scorer training, task-sketch sampling, and pool ordering at seed 0.
+Reported SDs vary target-training seeds ($0,1,2$); they do not include selector
+or scorer-training uncertainty. The canonical table generator recomputes all
+means, dispersions, paired gaps, and win counts from those seed-level values.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{Figures/fig_cost_break_even.pdf}
+\caption{Selection cost over a four-task PEFT registry. PCU-Select pays 72.0 GPU-hours offline and 0.18 per PEFT--task application; it breaks even with LESS after 2.33 configurations. Five configurations cost 75.6 versus 158.0 GPU-hours.}
+\label{fig:cost}
+\end{figure}
 
 \subsection{Algorithms}
 \label{sec:appendix-algorithms}
@@ -421,8 +471,8 @@ Algorithm~\ref{alg:offline} builds the reusable supervision once; Algorithm~\ref
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} target $(p^{*},t^{*})$, budget $B$, cached features, scorer $s_\phi$
 \STATE Encode $z_{p^{*}}, z_{t^{*}}$
-\IF{Mahalanobis$(z_{p^{*}}) > \tau$}
-  \STATE fit calibration residual head from a few hundred $u^{\mathrm{hi}}$ labels
+\IF{$\mathrm{tier}(p^{*})\in\{\mathrm{L1},\mathrm{L2}\}$ and native labels exist}
+  \STATE fit calibration residual head from 200 or 500 $u^{\mathrm{hi}}$ labels
 \ENDIF
 \STATE $(\hat\mu,\hat\sigma)\gets s_\phi(z_x,z_{p^{*}},z_{t^{*}})$; $q(x)\gets\hat\mu-\lambda\hat\sigma$ for all $x$
 \STATE Cluster the pool; allocate quotas $b_k$ by Eq.~\eqref{eq:quota}
@@ -443,25 +493,40 @@ so that capacity is monotone but saturating.
 \centering
 \small
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
-Family & Size knob & $\mathrm{cap}(p,\omega)$ at a touched site & $\rho_{\text{op}}$ \\
+Family & Size knob & $\mathrm{cap}(p,\omega)$ at a touched site \\
 \midrule
-LoRA      & rank $r$        & $r\,(d_{\text{in}}+d_{\text{out}})$ & $1.0$ \\
-Adapter   & bottleneck $b$  & $2\,d_{\text{model}}\,b$            & $0.8$ \\
-(IA)$^3$  & (per-vector)    & \#scaled activations                & $0.6$ \\
-Prefix    & length $L$      & $L\,d_{\text{model}}$               & $0.4$ \\
-BitFit    & (per-bias)      & \#bias parameters                   & $0.3$ \\
+LoRA      & rank $r$        & $r\,(d_{\text{in}}+d_{\text{out}})$ \\
+Adapter   & bottleneck $b$  & $2\,d_{\text{model}}\,b$ \\
+(IA)$^3$  & (per-vector)    & \#scaled activations \\
+Prefix    & length $L$      & $L\,d_{\text{model}}$ \\
+BitFit    & (per-bias)      & \#bias parameters \\
 \bottomrule
 \end{tabular}
-\caption{Per-family capacity mapping and operator-weight prior. Capacity is the
-trainable-parameter count contributed at a touched site; $\rho_{\text{op}}$
-reflects how directly the operator drives that site.}
+\caption{Per-family capacity mapping. Capacity is the trainable-parameter count
+contributed at a touched site; operator type is encoded separately in $z_p$.}
 \label{tab:capacity}
 \end{table}
 
 \subsection{Supplementary Analyses}
 \label{sec:appendix-supplement}
+
+\paragraph{Component ablations.}
+Table~\ref{tab:ablations} reports the full component breakdown summarized in the
+main analysis. Removing the structured PEFT code produces the largest loss;
+task relativity, both label fidelities, uncertainty, and adaptive coverage also
+contribute.
+
+\input{tables/table_ablations}
+
+\paragraph{Intervention-site sensitivity.}
+Table~\ref{tab:site-ablation} varies the layer coverage, module sites, and random
+projection dimension behind the shared coordinate system. The default matches
+larger site spaces within 0.08 points while using one quarter of the feature cost
+of all 32 layers; either attention-only or MLP-only coverage loses more.
+
+\input{tables/table_site_ablation}
 
 \paragraph{Budget sensitivity.}
 Table~\ref{tab:budget-sensitivity} reports the PEFT- and task-averaged score at
@@ -486,8 +551,8 @@ Table~\ref{tab:transfer} is the transfer matrix behind the introduction's
 2.0-point cross-family mismatch penalty: training on the subset selected for a
 mismatched source PEFT costs performance that grows with structural distance.
 Table~\ref{tab:overlap} shows the mechanism from the selection side---PCU-Select's
-subset overlap falls monotonically as configurations diverge, while PEFT-agnostic
-RDS+ stays near $0.98$.
+subset overlap falls as configurations diverge, while PEFT-agnostic
+RDS+ remains exactly $1.000$.
 
 \input{tables/table_transfer_matrix}
 \input{tables/table_overlap_axes}
@@ -508,15 +573,15 @@ per-PEFT LESS quality at reduced cost.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{Figures/fig_config_sensitivity.pdf}
-\caption{PCU-Select reacts to configuration changes. \textbf{Left:} mismatch matrix over seven LoRA configurations. Each cell is the target (column) configuration's downstream metric when trained on the subset selected for the source (row) configuration, normalized by the matched diagonal metric; the diagonal is $1.00$ by construction and off-diagonal cells fall below it. Cells span $0.85$--$1.00$, and the mean off-diagonal drop of $0.068$ corresponds to a $1.45$-point absolute gap (mean matched metric $21.25$ vs.\ mismatched $19.79$). \textbf{Right:} selection difference ($1-$Jaccard overlap of the two selected subsets) versus \emph{configuration distance}, a heuristic ordinal metric that sums the base-2 log-rank gap and unit penalties for differing layer placement and target-module set between two registry configurations. PCU-Select's selection difference grows with configuration distance (Spearman $\rho=0.71$ between distance and selection difference), while PEFT-agnostic RDS+ stays nearly flat.}
+\caption{PCU-Select reacts to configuration changes. \textbf{Left:} target performance after training on a source-selected subset, normalized by the matched diagonal. The mean off-diagonal drop of $0.068$ corresponds to a $1.45$-point gap (21.25 matched vs.\ 19.79 mismatched). \textbf{Right:} selection difference ($1-$Jaccard) versus a heuristic configuration distance combining log-rank, placement, and module-set changes. Across 21 unordered pairs, the descriptive Spearman correlation is $\rho=0.969$; leave-one-configuration-out values span $[0.947,0.972]$. RDS+ lies at zero because its same-task ranking is PEFT-independent.}
 \label{fig:config-sensitivity}
 \end{figure*}
 
-\paragraph{OOD levels.}
-Table~\ref{tab:ood-levels} is the per-level source for Figure~\ref{fig:ood-calibration},
-with seed dispersion and the LESS reference. It confirms the reading in the main
-text: zero-shot transfer degrades with OOD level and calibration recovers most of
-the gap, leaving small residuals.
+\paragraph{Unseen-configuration transfer.}
+Table~\ref{tab:ood-levels} is the paired source for
+Figure~\ref{fig:ood-calibration}. Near-support targets transfer zero-shot.
+Calibration closes most of the gap for far same-family targets and BitFit.
+Prefix/P-Tuning have no native calibration labels and remain a failure boundary.
 
 \input{tables/table_ood_levels}
 
@@ -525,14 +590,10 @@ the gap, leaving small residuals.
 \subsection*{Competition Disclosure}
 \label{sec:competition-disclosure}
 
-This manuscript was produced as an entry in a \emph{paper-writing simulation
-challenge}, whose goal is to rehearse the end-to-end research-writing workflow
-rather than to report a peer-reviewed study. Per the challenge rules, we disclose
-here that \textbf{this paper is a competition artifact and is not a peer-reviewed
-publication}. While the experimental design, cost model, and analyses are
-constructed to be internally consistent and quantitatively plausible, some
-reported numbers were adjusted for illustrative consistency rather than obtained
-from a fully re-run experimental pipeline, and therefore \textbf{may not be
-accurate}. Nothing in this document should be cited as an empirical result, used
-to guide deployment decisions, or submitted to a real venue as original research.
-
+This manuscript is an entry in a paper-writing simulation challenge. It is a
+competition artifact, not a peer-reviewed publication or a record of a fully
+executed experimental study. The experimental design, cost model, and analyses
+were constructed for the challenge; some reported values were adjusted for
+internal consistency and may be inaccurate. This document must not be cited as
+empirical evidence, used for deployment decisions, or submitted to a research
+venue as original experimental work.

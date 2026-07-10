@@ -17,19 +17,26 @@ PCU-Select replaces the subset oracle with a conditional per-example utility,
 where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes sketch-loss reductions into a rank-normalized short-horizon utility score, as defined in the Method section. Conditioning on $p$ is the core departure from PEFT-agnostic selection. A sample's gradient can be useful in the attention projections trained by LoRA, weak in the residual bottlenecks trained by adapters, and different again under multiplicative (IA)$^3$ gates. The selected subset should therefore change when the trainable subspace changes.
 
 \paragraph{Amortization objective.}
-A registry makes cost, not single-target accuracy, the operative criterion. Let $\mathcal{P}_{\mathrm{target}}=\{p_1,\dots,p_T\}$ be the target PEFT configurations a fixed pool must serve. A per-target influence selector such as LESS pays a selection cost for each configuration, whereas an amortized selector pays a one-time offline cost plus a small online cost per target:
+A registry makes cost, not single-target accuracy, the operative criterion. Let $P$ be the number of target PEFT configurations and $Q$ the number of task sketches served from a fixed pool. LESS builds one datastore per PEFT and ranks it against each task, whereas PCU-Select pays one offline cost and one scorer application per PEFT--task pair:
 \begin{equation}
-  C_{\mathrm{LESS}}(T)=T\, C^{\mathrm{sel}}_{\mathrm{LESS}},
-  \qquad
-  C_{\mathrm{PCU}}(T)=C_{\mathrm{offline}}+T\, C^{\mathrm{sel}}_{\mathrm{PCU}},
+  \begin{aligned}
+  C_{\mathrm{LESS}}(P,Q)
+    &=P\!\left(C^{\mathrm{data}}_{\mathrm{LESS}}+
+      Q C^{\mathrm{rank}}_{\mathrm{LESS}}\right),\\
+  C_{\mathrm{PCU}}(P,Q)
+    &=C_{\mathrm{offline}}+PQ C^{\mathrm{pair}}_{\mathrm{PCU}},
+  \end{aligned}
   \label{eq:cost}
 \end{equation}
-with $C^{\mathrm{sel}}_{\mathrm{PCU}}\ll C^{\mathrm{sel}}_{\mathrm{LESS}}$. The goal is \emph{quality-preserving amortization}: match the per-PEFT selector's downstream quality,
+with $C^{\mathrm{pair}}_{\mathrm{PCU}}\ll C^{\mathrm{data}}_{\mathrm{LESS}}$. The goal is \emph{quality-preserving amortization}: match the per-PEFT selector's downstream quality,
 \begin{equation}
   \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}}\approx 0,
   \label{eq:quality-tie}
 \end{equation}
-while spending strictly less once the registry exceeds the break-even size $T^{\star}=C_{\mathrm{offline}}/(C^{\mathrm{sel}}_{\mathrm{LESS}}-C^{\mathrm{sel}}_{\mathrm{PCU}})$, i.e.\ $C_{\mathrm{PCU}}(T)<C_{\mathrm{LESS}}(T)$ for $T>T^{\star}$. Under this criterion a near-tie with LESS is the design target, not a shortfall: LESS is the quality reference and PCU-Select is its amortized alternative. Reusing a single LESS subset is the degenerate point $C_{\mathrm{offline}}{=}C^{\mathrm{sel}}_{\mathrm{LESS}}$, $C^{\mathrm{sel}}{=}0$ of the same trade-off---cheap, but PEFT-agnostic in effect and therefore quality-losing.
+while spending less once $P$ exceeds
+$P^{\star}=C_{\mathrm{offline}}/[C^{\mathrm{data}}_{\mathrm{LESS}}+
+Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})]$.
+Under this criterion a near-tie with LESS is the design target: LESS is the quality reference and PCU-Select is its amortized alternative. Reusing one LESS-selected task subset per task pays one datastore plus $Q$ rankings but removes target-PEFT conditioning, which lowers quality.
 
 Task relativity is concrete: a worked-solution arithmetic example receives high utility under the GSM8K sketch but low utility under the TyDiQA sketch, because its gradient aligns with the reasoning task but not with multilingual span extraction; the same example's utility also shifts across PEFTs when the aligned sites are not the ones a given method trains.
 

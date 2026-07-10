@@ -48,7 +48,14 @@ def encode_capacity(cfg: PEFTConfig, *, d_model: int = 4096) -> np.ndarray:
     v[7] = math.log1p(total * 4 / (1024 * 1024))  # extra mem MB proxy
     v[8] = 1.0 if cfg.family in ("prefix", "ptuning") else 0.0  # affects KV cache
     # per_op share (5 dims): mostly one-hot on family
-    fam_idx = {"lora": 9, "ia3": 10, "adapter": 11, "prefix": 12, "bitfit": 13}.get(cfg.family, 9)
+    fam_idx = {
+        "lora": 9,
+        "ia3": 10,
+        "adapter": 11,
+        "prefix": 12,
+        "ptuning": 12,
+        "bitfit": 13,
+    }.get(cfg.family, 9)
     v[fam_idx] = 1.0
     v[14] = len(cfg.target_layers) / 32.0
     v[15] = len(cfg.target_modules) / 8.0
@@ -83,7 +90,7 @@ def encode_peft(
     *,
     fingerprint: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Concat [m_p; c_p; r_p; f_p]. Fingerprint optional."""
+    """Concat [m_p; c_p; r_p] and append an optional functional fingerprint."""
     m_p = encode_site_mask(cfg, sites)
     c_p = encode_capacity(cfg)
     r_p = encode_recipe(cfg)
