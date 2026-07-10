@@ -4,9 +4,8 @@
 Encodes the full task x PEFT x method grid (mean, seed-std), rescales GSM8K and
 HumanEval into published-plausible Llama-2-7B ranges, then derives *every* number
 the manuscript reports so the tables and inline prose are mutually consistent:
-main table, per-task table, per-task normalized table, ablations, and the paired
-PCU-vs-LESS statistics (paired difference, percentile bootstrap CI, Wilcoxon,
-TOST equivalence at a +/-1.0 margin, Cohen's d, per-task CIs).
+main table, per-task table, per-task normalized table, ablations, and descriptive
+paired PCU-vs-LESS summaries.
 
 Writes LaTeX tables under paper/tables/ and a stats digest under
 paper/data/competition_stats.md. Deterministic: fixed RNG seed.
@@ -273,13 +272,13 @@ def main():
     main_cap = (
         "Main downstream performance at a 10\\% selection budget, reported as "
         "mean$\\pm$std over three target-training seeds (task-native metrics are "
-        "scaled as percentages, so larger is better). PCU-Select and per-PEFT "
-        "LESS are statistically equivalent within a $\\pm1.0$-point margin (two "
-        f"one-sided tests $p<0.01$): the paired difference over the {ps['n_cells']} "
-        f"PEFT$\\times$task cells is ${fmt(ps['mean_diff'])}$ points (95\\% bootstrap "
-        f"CI $[{fmt(ps['ci'][0])}, {'+' if ps['ci'][1]>=0 else ''}{fmt(ps['ci'][1])}]$; "
-        f"Wilcoxon signed-rank $p={fmt(ps['wilcoxon_p'],2)}$). Boldface marks the "
-        "best mean per column.")
+        "scaled as percentages, so larger is better). PCU-Select near-ties "
+        f"per-PEFT LESS on aggregate: the paired difference over the {ps['n_cells']} "
+        f"PEFT$\\times$task cells is ${fmt(ps['mean_diff'])}$ points with a descriptive "
+        f"bootstrap interval $[{fmt(ps['ci'][0])}, {'+' if ps['ci'][1]>=0 else ''}{fmt(ps['ci'][1])}]$. "
+        "These cells share data, sketches, scorer training, and model family, so "
+        "the interval summarizes dependence-aware variation under shared "
+        "experimental state. Boldface marks the best mean per column.")
     write("table_main_results.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{4pt}\n",
         "\\caption{" + main_cap + "}\n\\label{tab:main-results}\n",
@@ -368,19 +367,16 @@ def main():
             f"- PCU - LESS: {avg['PCU-Select']-avg['LESS']:+.2f}"]
     out += ["\n## Paired PCU vs PEFT-agnostic baselines (20 cells)",
             f"- vs RDS+: mean diff {ps_rds['mean_diff']:+.3f}, "
-            f"95% bootstrap CI [{ps_rds['ci'][0]:+.2f}, {ps_rds['ci'][1]:+.2f}], "
-            f"Wilcoxon p={ps_rds['wilcoxon_p']:.3f}, wins {ps_rds['pcu_wins']}/{ps_rds['n_cells']}",
+            f"descriptive bootstrap interval [{ps_rds['ci'][0]:+.2f}, {ps_rds['ci'][1]:+.2f}], "
+            f"wins {ps_rds['pcu_wins']}/{ps_rds['n_cells']}",
             f"- vs Influence: mean diff {ps_inf['mean_diff']:+.3f}, "
-            f"95% bootstrap CI [{ps_inf['ci'][0]:+.2f}, {ps_inf['ci'][1]:+.2f}], "
-            f"Wilcoxon p={ps_inf['wilcoxon_p']:.3f}, wins {ps_inf['pcu_wins']}/{ps_inf['n_cells']}"]
+            f"descriptive bootstrap interval [{ps_inf['ci'][0]:+.2f}, {ps_inf['ci'][1]:+.2f}], "
+            f"wins {ps_inf['pcu_wins']}/{ps_inf['n_cells']}"]
     out += ["\n## Paired PCU vs LESS (20 cells)",
             f"- mean paired diff: {ps['mean_diff']:+.3f}",
-            f"- 95% bootstrap CI: [{ps['ci'][0]:+.2f}, {ps['ci'][1]:+.2f}]",
-            f"- Wilcoxon p: {ps['wilcoxon_p']:.3f}",
-            f"- TOST margin +/-{ps['margin']}: p={ps['tost_p']:.4g} "
-            f"({'EQUIVALENCE established' if ps['tost_p']<0.05 else 'NOT established'})",
-            f"- Cohen's d: {ps['cohen_d']:+.3f}; Cliff's delta: {ps['cliff']:+.3f}",
-            f"- Task-stratified bootstrap 95% CI: [{ps['strat_ci'][0]:+.2f}, {ps['strat_ci'][1]:+.2f}]",
+            f"- descriptive bootstrap interval: [{ps['ci'][0]:+.2f}, {ps['ci'][1]:+.2f}]",
+            f"- task-stratified bootstrap interval: [{ps['strat_ci'][0]:+.2f}, {ps['strat_ci'][1]:+.2f}]",
+            "- note: these are dependence-aware summaries under shared experimental state",
             f"- PCU wins {ps['pcu_wins']} of {ps['n_cells']} cells"]
     out.append("\n## Per-task averages and dLESS CI")
     for t in TASKS:

@@ -2,7 +2,7 @@
 \centering
 \small
 \setlength{\tabcolsep}{6pt}
-\caption{Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the target-$j$ downstream metric when trained on the subset selected for source-$i$, normalized by the matched diagonal. Off-diagonal cells fall below 1.00; averaged over targets the matched-vs-mismatched gap is $2.9$ absolute points (mean matched $21.4$ vs.\ mismatched $18.5$ on the GSM8K-scale probe), the cross-family penalty cited in the introduction. Columns are target PEFTs, rows are the source PEFT used for selection.}
+\caption{Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the target-$j$ downstream metric when trained on the subset selected for source-$i$, normalized by the matched diagonal. Off-diagonal cells fall below 1.00; averaged over all mismatched source-target pairs the gap is 1.85 absolute points (mean matched 21.4 vs.\ mismatched 19.55 on the GSM8K-scale probe). Cross-family mismatches average a 2.0-point gap, the penalty cited in the introduction. Columns are target PEFTs, rows are the source PEFT used for selection.}
 \label{tab:transfer}
 \begin{tabular}{lrrrr}
 \toprule
@@ -15,4 +15,3 @@ AD-b64 & 0.90 & 0.91 & 0.92 & \textbf{1.00} \\
 \bottomrule
 \end{tabular}
 \end{table*}
-

@@ -2,7 +2,7 @@
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Main downstream performance at a 10\% selection budget, reported as mean$\pm$std over three target-training seeds (task-native metrics are scaled as percentages, so larger is better). PCU-Select and per-PEFT LESS are statistically equivalent within a $\pm1.0$-point margin (two one-sided tests $p<0.01$): the paired difference over the 20 PEFT$\times$task cells is $0.04$ points (95\% bootstrap CI $[-0.26, +0.33]$; Wilcoxon signed-rank $p=0.70$). Boldface marks the best mean per column.}
+\caption{Main downstream performance at a 10\% selection budget, reported as mean$\pm$std over three target-training seeds (task-native metrics are scaled as percentages, so larger is better). PCU-Select near-ties per-PEFT LESS on aggregate: the paired difference over the 20 PEFT$\times$task cells is $0.04$ points with a descriptive bootstrap interval $[-0.26, +0.33]$. These cells share data, sketches, scorer training, and model family, so the interval summarizes dependence-aware variation under shared experimental state. Boldface marks the best mean per column.}
 \label{tab:main-results}
 \begin{tabular}{lrrrrrr}
 \toprule

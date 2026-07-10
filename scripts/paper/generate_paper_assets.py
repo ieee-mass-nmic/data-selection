@@ -375,8 +375,8 @@ def paired_pcu_vs_less(main: pd.DataFrame) -> dict:
     """Paired PCU-vs-LESS comparison across the 20 PEFT x task cells.
 
     Each cell is the seed-averaged metric. Returns the mean paired difference,
-    a 95% paired-bootstrap CI on that mean, the Wilcoxon signed-rank p-value,
-    and the win count, so the reframed 'comparable' claim is reproducible.
+    a paired-bootstrap interval on that mean, a legacy Wilcoxon diagnostic, and
+    the win count, so the reframed near-tie claim is reproducible.
     """
     cell = main.groupby(["method", "peft", "task"])["metric"].mean()
     pcu = cell.loc["pcu"].reindex(MAIN_PEFTS, level="peft")
@@ -421,11 +421,13 @@ def table_main_results() -> None:
     caption = (
         "Main downstream performance at a 10\\% selection budget, reported as "
         "mean$\\pm$std over three target-training seeds (task-native metrics are "
-        "scaled as percentages, so larger is better). PCU-Select and per-PEFT "
-        "LESS are statistically indistinguishable: the paired difference over the "
+        "scaled as percentages, so larger is better). PCU-Select near-ties "
+        "per-PEFT LESS on aggregate: the paired difference over the "
         f"{test['n']} PEFT$\\times$task cells is ${test['mean']:.2f}$ points "
-        f"(95\\% bootstrap CI $[{test['ci_lo']:.2f}, {test['ci_hi']:.2f}]$; "
-        f"Wilcoxon signed-rank $p={test['p']:.2f}$). Boldface marks the best mean "
+        f"with a descriptive bootstrap interval $[{test['ci_lo']:.2f}, {test['ci_hi']:.2f}]$. "
+        "These cells share data, sketches, scorer training, and model family, so "
+        "the interval summarizes dependence-aware variation under shared "
+        "experimental state. Boldface marks the best mean "
         "per column."
     )
     lines = [

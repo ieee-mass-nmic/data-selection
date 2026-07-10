@@ -1,7 +1,7 @@
 \section{Method: PCU-Select}
 \label{sec:method}
 
-PCU-Select learns the surrogate in Eq.~\eqref{eq:surrogate} and uses it to select a budgeted subset for a target PEFT and task. Figure~\ref{fig:architecture} summarizes the pipeline. The offline stage extracts reusable sample and task signatures, builds low- and high-fidelity utility labels, and trains the scorer. The online stage encodes a target $(p^{*},t^{*})$, checks whether $p^{*}$ is outside the training configuration distribution, scores the pool, and allocates the budget across semantic clusters. Appendix~\ref{sec:appendix-algorithms} states both stages as Algorithms~\ref{alg:offline} and~\ref{alg:online}.
+PCU-Select learns the surrogate in Eq.~\eqref{eq:surrogate} and uses it to select a budgeted subset for a target PEFT and task. Figure~\ref{fig:architecture} summarizes the pipeline. The offline stage extracts reusable sample and task signatures, builds low- and high-fidelity utility labels, and trains the scorer. The online stage encodes a target $(p^{*},t^{*})$, checks whether $p^{*}$ is outside the training configuration distribution, scores the pool, and allocates the budget across semantic clusters. Algorithms~\ref{alg:offline} and~\ref{alg:online} in the appendix state both stages.
 
 \begin{figure*}[t]
 \centering
@@ -26,7 +26,7 @@ Each PEFT configuration maps to a site mask and an operator type. Attention LoRA
   \end{aligned}
   \label{eq:site-weight}
 \end{equation}
-This weight is zero for untouched sites and increases with the target PEFT's capacity at touched sites. The capacity $\mathrm{cap}(p,\omega)$ maps each family's size knob---LoRA rank, adapter bottleneck width, (IA)$^3$ vector count, prefix length, BitFit bias count---onto a common trainable-parameter scale (Appendix~\ref{sec:appendix-capacity}, Table~\ref{tab:capacity}); the $\tanh$ saturates it so high-capacity configurations do not swamp the site weights, and the operator-weight prior $\rho_{\mathrm{op}}$ encodes that additive low-rank updates ($\rho{=}1.0$) exercise a site more directly than multiplicative gates ($0.6$), bottlenecks ($0.8$), prefixes ($0.4$), or bias shifts ($0.3$).
+This weight is zero for untouched sites and increases with the target PEFT's capacity at touched sites. The capacity $\mathrm{cap}(p,\omega)$ maps each family's size knob---LoRA rank, adapter bottleneck width, (IA)$^3$ vector count, prefix length, BitFit bias count---onto a common trainable-parameter scale (Appendix Table~\ref{tab:capacity}); the $\tanh$ saturates it so high-capacity configurations do not swamp the site weights, and the operator-weight prior $\rho_{\mathrm{op}}$ encodes that additive low-rank updates ($\rho{=}1.0$) exercise a site more directly than multiplicative gates ($0.6$), bottlenecks ($0.8$), prefixes ($0.4$), or bias shifts ($0.3$).
 
 \subsection{Representations and Utility Labels}
 
@@ -69,4 +69,4 @@ Pure top-$k$ ranking can over-select near-duplicates, so PCU-Select clusters exa
   {\sum_j(v_j^{+})^{\gamma}|C_j|^{1-\gamma}}\right),\qquad \gamma=0.6.
   \label{eq:quota}
 \end{equation}
-Here $v_k$ is the mean conservative score of the top 10\% examples in cluster $C_k$, and $v_k^{+}=\max(v_k,0)$. For the 300K pool, $k=\max(50,\lfloor\sqrt{N}\rfloor)$ yields 547 clusters with about 548 examples per cluster on average; clustering is included in the 0.10 selection GPU-hours reported below. The final subset takes the top-$b_k$ examples by $q$ inside each cluster. Clusters with non-positive value ($v_k^{+}\le 0$) receive no budget, rounding remainders are distributed greedily by descending cluster weight, and any over-allocation beyond a cluster's size is trimmed and reassigned, so the quotas always sum to exactly $B$. For unseen PEFTs, a Mahalanobis distance over $z_p$ flags out-of-distribution targets; optional calibration fits a lightweight residual head from a few hundred high-fidelity labels.
+Here $v_k$ is the mean conservative score of the top 10\% examples in cluster $C_k$, and $v_k^{+}=\max(v_k,0)$. For the 300K pool, $k=\max(50,\lfloor\sqrt{N}\rfloor)$ yields 547 clusters with about 548 examples per cluster on average; clustering is included in the 0.18 selection GPU-hours reported below. The final subset takes the top-$b_k$ examples by $q$ inside each cluster. Clusters with non-positive value ($v_k^{+}\le 0$) receive no budget, rounding remainders are distributed greedily by descending cluster weight, and any over-allocation beyond a cluster's size is trimmed and reassigned, so the quotas always sum to exactly $B$. For unseen PEFTs, a Mahalanobis distance over $z_p$ flags out-of-distribution targets; optional calibration fits a lightweight residual head from a few hundred high-fidelity labels.

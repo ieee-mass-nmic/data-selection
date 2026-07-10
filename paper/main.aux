@@ -3,6 +3,9 @@
 \citation{hu2022lora}
 \citation{houlsby2019adapters}
 \citation{liu2022ia3}
+\citation{xia2024less}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:motivation-disagreement}{{1}{2}{}{figure.1}{}}
 \citation{zhou2023lima}
 \citation{chen2024alpagasus}
 \citation{lu2023instag}
@@ -15,8 +18,6 @@
 \citation{pruthi2020tracin}
 \citation{xia2024less}
 \citation{kwon2023datainf}
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:motivation-disagreement}{{1}{2}{}{figure.1}{}}
 \citation{houlsby2019adapters,pfeiffer2020adapterfusion}
 \citation{li2021prefixtuning,lester2021prompttuning}
 \citation{hu2022lora}
@@ -25,27 +26,31 @@
 \citation{liu2022ia3}
 \citation{kwon2023datainf,xia2024less}
 \citation{min2026gist}
-\newlabel{sec:problem}{{}{3}{}{figure.1}{}}
+\newlabel{sec:problem}{{3}{3}{}{section.3}{}}
 \newlabel{eq:selection-objective}{{1}{3}{}{equation.1}{}}
 \newlabel{eq:surrogate}{{2}{3}{}{equation.2}{}}
-\newlabel{sec:method}{{}{3}{}{equation.2}{}}
-\newlabel{fig:architecture}{{2}{4}{}{figure.2}{}}
-\newlabel{eq:site-weight}{{3}{4}{}{equation.3}{}}
+\newlabel{eq:cost}{{3}{3}{}{equation.3}{}}
+\newlabel{eq:quality-tie}{{4}{4}{}{equation.4}{}}
+\newlabel{sec:method}{{4}{4}{}{section.4}{}}
+\newlabel{eq:site-weight}{{5}{4}{}{equation.5}{}}
+\newlabel{fig:architecture}{{2}{5}{}{figure.2}{}}
+\newlabel{eq:ulo}{{6}{5}{}{equation.6}{}}
+\newlabel{eq:delta}{{7}{5}{}{equation.7}{}}
 \citation{xia2024less}
-\newlabel{eq:ulo}{{4}{5}{}{equation.4}{}}
-\newlabel{eq:delta}{{5}{5}{}{equation.5}{}}
-\newlabel{eq:qscore}{{6}{5}{}{equation.6}{}}
-\newlabel{eq:quota}{{7}{5}{}{equation.7}{}}
-\newlabel{sec:experiments}{{}{5}{}{equation.7}{}}
+\newlabel{eq:qscore}{{8}{6}{}{equation.8}{}}
+\newlabel{eq:quota}{{9}{6}{}{equation.9}{}}
+\newlabel{sec:experiments}{{5}{6}{}{section.5}{}}
 \newlabel{tab:peft-configs}{{1}{6}{}{table.1}{}}
 \newlabel{tab:main-results}{{2}{7}{}{table.2}{}}
-\newlabel{tab:per-task-compact}{{3}{7}{}{table.3}{}}
-\newlabel{fig:cost}{{3}{7}{}{figure.3}{}}
-\newlabel{sec:analysis}{{}{7}{}{figure.3}{}}
+\newlabel{tab:reuse-quality-cost}{{3}{7}{}{table.3}{}}
+\newlabel{sec:reuse}{{5}{7}{}{table.2}{}}
+\newlabel{fig:cost}{{3}{8}{}{figure.3}{}}
+\newlabel{sec:analysis}{{6}{8}{}{section.6}{}}
+\newlabel{tab:ablations}{{4}{9}{}{table.4}{}}
+\newlabel{fig:ood-calibration}{{4}{9}{}{figure.4}{}}
+\newlabel{tab:protocol}{{5}{9}{}{table.5}{}}
 \bibdata{aaai2027}
 \bibcite{zaken2022bitfit}{{1}{2022}{{Ben~Zaken, Goldberg, and Ravfogel}}{{}}}
-\newlabel{tab:ablations}{{4}{8}{}{table.4}{}}
-\newlabel{fig:ood-calibration}{{4}{8}{}{figure.4}{}}
 \bibcite{bukharin2023diversity}{{2}{2023}{{Bukharin et~al.}}{{Bukharin, Li, Wang, Yang, Yin, Li, Zhang, Zhao, and Jiang}}}
 \bibcite{chen2024alpagasus}{{3}{2024}{{Chen et~al.}}{{Chen, Li, Yan, Wang, Gunaratna, Yadav, Tang, Srinivasan, Zhou, Huang, and Jin}}}
 \bibcite{dettmers2023qlora}{{4}{2023}{{Dettmers et~al.}}{{Dettmers, Pagnoni, Holtzman, and Zettlemoyer}}}
@@ -68,28 +73,30 @@
 \bibcite{xia2024less}{{21}{2024}{{Xia et~al.}}{{Xia, Malladi, Gururangan, Arora, and Chen}}}
 \bibcite{yang2024smalltolarge}{{22}{2024}{{Yang et~al.}}{{Yang, Mishra, Chiang, and Mirzasoleiman}}}
 \bibcite{zhou2023lima}{{23}{2023}{{Zhou et~al.}}{{Zhou, Liu, Xu, Iyer, Sun, Mao, Ma, Efrat, Yu, Yu, Zhang, Ghosh, Lewis, Zettlemoyer, and Levy}}}
-\newlabel{sec:appendix}{{}{11}{}{table.4}{}}
-\newlabel{sec:appendix-per-task}{{}{11}{}{table.4}{}}
-\newlabel{sec:appendix-protocols}{{}{11}{}{table.6}{}}
-\newlabel{sec:appendix-baselines}{{}{11}{}{table.6}{}}
+\newlabel{sec:appendix}{{A}{12}{}{section.1}{}}
+\newlabel{sec:appendix-per-task}{{A}{12}{}{section.1}{}}
+\newlabel{sec:appendix-protocols}{{A}{12}{}{table.8}{}}
+\newlabel{tab:per-task-compact}{{6}{13}{}{table.6}{}}
+\newlabel{tab:per-task-peft}{{7}{13}{}{table.7}{}}
+\newlabel{sec:appendix-baselines}{{A}{13}{}{table.8}{}}
 \citation{xia2024less}
-\newlabel{tab:per-task-peft}{{5}{12}{}{table.5}{}}
-\newlabel{tab:per-task-normalized}{{6}{12}{}{table.6}{}}
-\newlabel{tab:extra-baselines}{{7}{13}{}{table.7}{}}
-\newlabel{sec:appendix-repro}{{}{13}{}{table.7}{}}
-\newlabel{tab:appendix-provenance}{{8}{13}{}{table.8}{}}
-\newlabel{sec:appendix-algorithms}{{}{14}{}{table.9}{}}
-\newlabel{sec:appendix-capacity}{{}{14}{}{ALC@unique.16}{}}
-\newlabel{tab:appendix-peft-registry}{{9}{15}{}{table.9}{}}
-\newlabel{alg:offline}{{1}{15}{}{algorithm.1}{}}
-\newlabel{sec:appendix-supplement}{{}{15}{}{table.10}{}}
-\newlabel{alg:online}{{2}{15}{}{algorithm.2}{}}
-\newlabel{sec:appendix-disclosure}{{}{15}{}{table.15}{}}
-\newlabel{fig:config-sensitivity}{{5}{16}{}{figure.5}{}}
-\newlabel{tab:capacity}{{10}{16}{}{table.10}{}}
-\newlabel{tab:budget-sensitivity}{{11}{16}{}{table.11}{}}
-\newlabel{tab:ranking}{{12}{17}{}{table.12}{}}
-\newlabel{tab:transfer}{{13}{17}{}{table.13}{}}
-\newlabel{tab:overlap}{{14}{17}{}{table.14}{}}
-\newlabel{tab:ood-levels}{{15}{18}{}{table.15}{}}
-\gdef \@abspage@last{18}
+\newlabel{tab:per-task-normalized}{{8}{14}{}{table.8}{}}
+\newlabel{sec:appendix-repro}{{A}{14}{}{table.9}{}}
+\newlabel{tab:extra-baselines}{{9}{14}{}{table.9}{}}
+\newlabel{tab:appendix-provenance}{{10}{15}{}{table.10}{}}
+\newlabel{tab:appendix-peft-registry}{{11}{16}{}{table.11}{}}
+\newlabel{sec:appendix-algorithms}{{A}{16}{}{table.11}{}}
+\newlabel{sec:appendix-capacity}{{A}{16}{}{ALC@unique.16}{}}
+\newlabel{alg:offline}{{1}{16}{}{algorithm.1}{}}
+\newlabel{sec:appendix-supplement}{{A}{16}{}{table.12}{}}
+\newlabel{alg:online}{{2}{17}{}{algorithm.2}{}}
+\newlabel{tab:capacity}{{12}{17}{}{table.12}{}}
+\newlabel{tab:budget-sensitivity}{{13}{17}{}{table.13}{}}
+\newlabel{tab:ranking}{{14}{18}{}{table.14}{}}
+\newlabel{tab:transfer}{{15}{18}{}{table.15}{}}
+\newlabel{tab:overlap}{{16}{18}{}{table.16}{}}
+\newlabel{tab:reuse-breakdown}{{17}{19}{}{table.17}{}}
+\newlabel{fig:config-sensitivity}{{5}{19}{}{figure.5}{}}
+\newlabel{tab:ood-levels}{{18}{19}{}{table.18}{}}
+\newlabel{sec:competition-disclosure}{{A}{20}{}{table.18}{}}
+\gdef \@abspage@last{20}

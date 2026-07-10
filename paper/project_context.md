@@ -63,13 +63,13 @@ PCU-Select extracts sample representations and site gradient signatures, encodes
 - Number of target-training seeds: 3.
 - Main selection budget: 10%; supplementary budgets: 5% and 30%.
 - Hyperparameter selection protocol: fixed registry and held-out validation PEFT/task pairs.
-- Statistical tests: not currently included in the result bundle; claims use mean comparisons and calibrated scope.
+- Statistical summaries are descriptive because task/PEFT cells share the candidate pool, task sketches, scorer training, and model family; the paper does not claim independent-cell hypothesis tests.
 
 ## Headline Results
 
 - At a 10% budget, PCU-Select averages 42.81, improving over random by 3.64 points and RDS+ by 0.98 points; it matches LESS within 0.08 points on average.
-- PCU-Select breaks even with per-PEFT LESS/influence recomputation after 5.17 target PEFT configurations.
-- Removing the PEFT code drops performance by 2.45 points; removing the task sketch drops 1.47 points.
+- PCU-Select breaks even with per-PEFT LESS recomputation after about 2.29 target PEFT configurations and reduces five-target selection compute by 2.2x.
+- Removing the PEFT code drops performance by 1.37 points; removing the task sketch drops 0.82 points.
 - For L2 unseen-family targets, zero-shot PCU trails LESS by 5.76 points, while 500 calibration labels recover 5.53 points.
 
 ## Limitations

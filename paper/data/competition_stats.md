@@ -13,16 +13,14 @@
 - PCU - LESS: +0.04
 
 ## Paired PCU vs PEFT-agnostic baselines (20 cells)
-- vs RDS+: mean diff +0.741, 95% bootstrap CI [+0.38, +1.06], Wilcoxon p=0.001, wins 17/20
-- vs Influence: mean diff +0.499, 95% bootstrap CI [+0.20, +0.76], Wilcoxon p=0.005, wins 18/20
+- vs RDS+: mean diff +0.741, descriptive bootstrap interval [+0.38, +1.06], wins 17/20
+- vs Influence: mean diff +0.499, descriptive bootstrap interval [+0.20, +0.76], wins 18/20
 
 ## Paired PCU vs LESS (20 cells)
 - mean paired diff: +0.039
-- 95% bootstrap CI: [-0.26, +0.33]
-- Wilcoxon p: 0.701
-- TOST margin +/-1.0: p=3.262e-06 (EQUIVALENCE established)
-- Cohen's d: +0.056; Cliff's delta: +0.015
-- Task-stratified bootstrap 95% CI: [-0.15, +0.22]
+- descriptive bootstrap interval: [-0.26, +0.33]
+- task-stratified bootstrap interval: [-0.15, +0.22]
+- note: these are summaries, not independent-cell significance tests
 - PCU wins 10 of 20 cells
 
 ## Per-task averages and dLESS CI

@@ -108,11 +108,11 @@ def transfer_matrix():
     cap = ("Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the "
            "target-$j$ downstream metric when trained on the subset selected for "
            "source-$i$, normalized by the matched diagonal. Off-diagonal cells fall "
-           "below 1.00; averaged over targets the matched-vs-mismatched gap is "
-           "$2.9$ absolute points (mean matched $21.4$ vs.\\ mismatched $18.5$ on "
-           "the GSM8K-scale probe), the cross-family penalty cited in the "
-           "introduction. Columns are target PEFTs, rows are the source PEFT used "
-           "for selection.")
+           "below 1.00; averaged over all mismatched source-target pairs the gap is "
+           "1.85 absolute points (mean matched 21.4 vs.\\ mismatched 19.55 on the "
+           "GSM8K-scale probe). Cross-family mismatches average a 2.0-point gap, "
+           "the penalty cited in the introduction. Columns are target PEFTs, rows "
+           "are the source PEFT used for selection.")
     w("table_transfer_matrix.tex", [TABLESTAR.format(
         tc="6pt", cap=cap, lab="tab:transfer", spec="l" + "r" * len(pefts),
         head="Source $\\downarrow$ / Target $\\rightarrow$ & " + " & ".join(pefts) + " \\\\",
@@ -296,7 +296,8 @@ def calibration_sweep():
            "$5.76$-point zero-shot gap to LESS recovered, by calibration-label "
            "budget and label-selection strategy. Uncertainty- and boundary-driven "
            "sampling recover the gap fastest; $500$ labels close $\\sim96\\%$ of it "
-           "at $0.23$ GPU-hours per target.")
+           "at 2.1 GPU-hours per target (500 triples at the offline 1.89\\,s-per-triple "
+           "high-fidelity routine).")
     w("table_calibration_sweep.tex", [TABLE.format(
         tc="6pt", cap=cap, lab="tab:calib-sweep", spec="lrrrr",
         head="Labels & Random & Uncertainty & Boundary & Diversity \\\\",

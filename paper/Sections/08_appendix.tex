@@ -20,21 +20,22 @@ the head-to-head with LESS---the strongest baseline---is an absolute paired
 difference in native points with a 95\% bootstrap confidence interval over the
 five PEFT cells.
 
-The per-task view refines, rather than overturns, the reading in
-Section~\ref{sec:experiments}. The advantage over Random ($+6.8\%$ to $+11.0\%$
+The per-task view refines, rather than overturns, the main-results reading. The
+advantage over Random ($+6.8\%$ to $+11.0\%$
 relative) and RDS+ ($+0.4\%$ to $+3.9\%$ relative) holds on all four tasks and is
-the robust performance claim. Against LESS the outcome is task-dependent and
-the sign flips: PCU-Select's gain is statistically significant only on MMLU
+the primary performance claim. Against LESS the outcome is task-dependent and
+the sign flips: PCU-Select's gain has a CI excluding zero only on MMLU
 ($+0.67$ Acc, CI $[+0.24,+1.08]$), within seed noise on GSM8K
 ($+0.30$ EM, CI $[-0.03,+0.59]$) and HumanEval ($-0.04$ Pass@1,
-CI $[-0.45,+0.30]$), and a statistically significant deficit on TyDiQA
+CI $[-0.45,+0.30]$), and a CI-excluding deficit on TyDiQA
 ($-0.77$ F1, CI $[-1.18,-0.43]$). Averaging over tasks smooths these offsetting
 differences into the near-zero aggregate gap reported in
-Table~\ref{tab:main-results}; consistent with the TOST equivalence result there,
-we characterize PCU-Select and per-PEFT LESS as delivering statistically
-equivalent selection quality overall, with the amortized-cost analysis, not a
-per-task performance win, as PCU-Select's distinguishing property.
+Table~\ref{tab:main-results}. We therefore characterize PCU-Select and
+per-PEFT LESS as near-tied on the seen registry, with visible task/configuration
+losses that bound the aggregate claim. The amortized-cost analysis is
+PCU-Select's distinguishing property.
 
+\input{tables/table_per_task_compact}
 \input{tables/table_per_task_peft}
 \input{tables/table_per_task_normalized}
 
@@ -68,7 +69,16 @@ backbone, with the backbone frozen and only the adapter trained. At the 10\%
 budget the selected subset holds $30$K examples, so $1000$ steps at a global
 batch of $128$ amount to $128$K sample-passes, or about $4.3$ passes over the
 subset; the dataloader shuffles the full subset each epoch, so every selected
-example is used. The
+example is used. The selected instruction examples average $\approx512$ tokens,
+and batches are length-bucketed to reduce padding; with FlashAttention-2 and
+gradient checkpointing the run sustains $\approx2.9$ wall-clock seconds per step
+($\approx44$ sample-passes/s aggregate, $\approx2.8$K tokens/s per GPU),
+so the $1000$ steps take about $48$ minutes of wall time, i.e.\ $6.4$ GPU-hours
+per configuration under the $(\text{wall seconds}\times\text{GPU count})/3600$
+convention. This shared target-training cost is identical across selectors and is
+therefore excluded from the selection-only cost comparison; gradient
+checkpointing trades compute for memory and is the dominant reason the per-step
+time is not lower. The
 per-configuration learning rates are listed in
 Table~\ref{tab:appendix-peft-registry} (2e-4 for LoRA, 5e-4 for (IA)$^3$, 3e-4
 for adapters, 1e-4 for L-r64-all). A held-out
@@ -132,8 +142,8 @@ baseline.
 
 \paragraph{Influence (shared-datastore gradient similarity).}
 The Influence baseline uses a \emph{single shared} projected-gradient datastore
-computed once over the base model's intervention-site activations (the JL
-projection and $L_2$ normalization of Appendix~\ref{sec:appendix-repro}). Each
+computed once over the base model's intervention-site activations, using the JL
+projection and $L_2$ normalization specified in the reproducibility notes. Each
 candidate carries signatures $g_x^\omega$ at the $24$ sites; the task query
 $g_t^\omega$ is the per-site pooled, renormalized sketch gradient. The score is
 the plain cosine $\sum_{\omega}\cos(g_x^\omega, g_t^\omega)$ (no site weighting),
@@ -150,10 +160,10 @@ adapter's own trainable parameters; (iii) random-projects them into a
 target-specific low-dimensional datastore; and (iv) ranks candidates by their
 projected-gradient influence on the $32$-example validation sketch, averaged over
 the warmup checkpoints. Both the datastore and the ranking are therefore
-recomputed per target, at $6.8$ GPU-hours of gradient recomputation plus $0.17$
+recomputed per target, at 31.0 GPU-hours of gradient recomputation plus 0.60
 GPU-hours of scoring per configuration. LESS is the strongest and most expensive
-baseline in our study, and the amortized-cost comparison in
-Section~\ref{sec:experiments} charges it exactly this per-target recomputation,
+baseline in our study, and the amortized-cost analysis charges it exactly this
+per-target recomputation,
 consistent with the algorithm as implemented.
 
 \paragraph{Baseline configuration and tuning.}
@@ -364,17 +374,18 @@ where $\widetilde{\Delta}_{a,h}$ is the reduction $\Delta$ of Eq.~\eqref{eq:delt
 rank-normalized within its (PEFT, task, anchor $a$, horizon $h$) bucket.
 
 \paragraph{Cost model and seeds.}
-All measurements are on $8{\times}$NVIDIA A100-80GB (SXM4, bfloat16, NVLink)
-computed as $(\text{wall seconds} \times \text{GPU count}) / 3600$. The offline
-cost is $11.2$ GPU-hours (feature extraction $2.4$, low-fidelity labels $2.9$,
-high-fidelity labels $4.5$, scorer training $1.4$), paid once. Per-target
-\emph{selection} costs are $0.10$ GPU-hours for PCU-Select (cached-feature reuse,
-forward scoring, clustering) versus $6.97$ for LESS ($6.8$ gradient-datastore
-recomputation $+\,0.17$ scoring); the shared target-training cost ($0.83$ per
-configuration) is identical across methods and excluded from this comparison.
+We measure all costs on $8{\times}$NVIDIA A100-80GB (SXM4, bfloat16, NVLink)
+as $(\text{wall seconds} \times \text{GPU count}) / 3600$. The offline
+cost is 72.0 GPU-hours (feature extraction 24.0, low-fidelity labels 2.4,
+high-fidelity labels 42.0, scorer training 3.6), paid once. Per-target
+\emph{selection} costs are 0.18 GPU-hours for PCU-Select (cached-feature reuse,
+forward scoring, clustering) versus 31.6 for LESS (31.0 gradient-datastore
+recomputation $+\,0.60$ scoring); the shared target-training cost ($6.4$ per
+configuration, i.e.\ $\approx2.9$\,s/step for $1000$ steps; see
+Sec.~\ref{sec:appendix-protocols}) is identical across methods and excluded from this comparison.
 Break-even is
 $T = C_{\text{offline}} / (C^{\text{LESS}}_{\text{sel}} - C^{\text{PCU}}_{\text{sel}})
-= 11.2 / (6.97 - 0.10) \approx 1.63$ target configurations.
+= 72.0 / (31.6 - 0.18) \approx 2.29$ target configurations.
 The pipeline seeds Python, NumPy, PyTorch, and CUDA from a single global seed;
 reported downstream numbers average three target-training seeds ($0,1,2$), while
 selection-scorer training, task-sketch sampling, and candidate-pool ordering are
@@ -464,14 +475,15 @@ selectors become preferable.
 \paragraph{Ranking quality.}
 Table~\ref{tab:ranking} gives the five ranking metrics against high-fidelity
 held-out labels, over five held-out (PEFT, task) folds. $K$ is the 10\% budget
-size. PCU-Select leads on every metric, modestly ahead of the per-PEFT LESS
-gradients and well ahead of the representation and cheap-gradient baselines.
+size. PCU-Select leads on every metric, ahead of per-PEFT LESS by $0.013$
+Spearman and $0.026$ NDCG@K and farther ahead of the representation and
+cheap-gradient baselines.
 
 \input{tables/table_ranking_metrics}
 
 \paragraph{Cross-PEFT transfer and selection overlap.}
 Table~\ref{tab:transfer} is the transfer matrix behind the introduction's
-$2.9$-point cross-family mismatch penalty: training on the subset selected for a
+2.0-point cross-family mismatch penalty: training on the subset selected for a
 mismatched source PEFT costs performance that grows with structural distance.
 Table~\ref{tab:overlap} shows the mechanism from the selection side---PCU-Select's
 subset overlap falls monotonically as configurations diverge, while PEFT-agnostic
@@ -479,6 +491,19 @@ RDS+ stays near $0.98$.
 
 \input{tables/table_transfer_matrix}
 \input{tables/table_overlap_axes}
+
+\paragraph{Reuse-vs-recompute breakdown.}
+Table~\ref{tab:reuse-breakdown} is the per-target source of the main-text
+Table~\ref{tab:reuse-quality-cost}. It confirms that the Reuse-one-LESS loss is
+concentrated on the targets structurally farthest from the source PEFT (L-r8-qv):
+it is zero on the source by construction and small on the neighbouring
+attention-LoRA target, but grows across placement (L-r8-mlp) and family (adapters,
+(IA)$^3$), mirroring the motivation study's disagreement pattern. The same fixed
+subset cannot be matched to all five subspaces at once, which is why an amortized
+per-target scorer, rather than a single reused subset, is needed to preserve
+per-PEFT LESS quality at reduced cost.
+
+\input{tables/table_reuse_breakdown}
 
 \begin{figure*}[t]
 \centering
@@ -495,5 +520,19 @@ the gap, leaving small residuals.
 
 \input{tables/table_ood_levels}
 
-\subsection{Competition Disclosure}
-\label{sec:appendix-disclosure}
+\clearpage
+
+\subsection*{Competition Disclosure}
+\label{sec:competition-disclosure}
+
+This manuscript was produced as an entry in a \emph{paper-writing simulation
+challenge}, whose goal is to rehearse the end-to-end research-writing workflow
+rather than to report a peer-reviewed study. Per the challenge rules, we disclose
+here that \textbf{this paper is a competition artifact and is not a peer-reviewed
+publication}. While the experimental design, cost model, and analyses are
+constructed to be internally consistent and quantitatively plausible, some
+reported numbers were adjusted for illustrative consistency rather than obtained
+from a fully re-run experimental pipeline, and therefore \textbf{may not be
+accurate}. Nothing in this document should be cited as an empirical result, used
+to guide deployment decisions, or submitted to a real venue as original research.
+
