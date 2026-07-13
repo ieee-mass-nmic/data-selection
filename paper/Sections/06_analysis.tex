@@ -18,10 +18,10 @@ Appendix Table~\ref{tab:ablations} gives the full ablation. Removing the PEFT co
 
 \subsection{Transfer Protocol for Unseen PEFTs}
 
-E5 fixes a structural taxonomy before evaluation: L0 contains near-support same-family targets, L1 farther same-family shifts, and L2 unseen families (full registry in Appendix Table~\ref{tab:appendix-peft-registry}). The tiers are qualitative and make no density-estimation claim.
+E5 fixes a structural taxonomy before evaluation: L0 contains near-support same-family targets, L1 farther same-family shifts, and L2 unseen families (full registry in Appendix Table~\ref{tab:appendix-peft-registry}).
 
-L0 trails LESS by 0.34 points zero-shot. With 500 labels, the L1 gap falls from 2.08 to 0.30 and the BitFit gap from 4.08 to 0.23. Prefix/P-Tuning lack native short-horizon labels and trail RDS+ by 6.97 zero-shot. Calibration costs 0.525 GPU-hours per PEFT--task pair (Figure~\ref{fig:ood-calibration}; Appendix Table~\ref{tab:ood-levels}). \textbf{Takeaway.} Calibration repairs supported far targets; prompt families mark the deployment boundary.
+L0 trails LESS by 0.34 points zero-shot. With 500 labels, the L1 gap falls from 2.08 to 0.30 and the BitFit gap from 4.08 to 0.23. Prefix/P-Tuning lack native short-horizon labels and trail RDS+ by 6.97 zero-shot. Calibration costs 1.05 GPU-hours per PEFT--task pair, using reduced single-anchor, horizon-1 labels---one quarter of the offline label routine (Figure~\ref{fig:ood-calibration}; Appendix Table~\ref{tab:ood-levels}). \textbf{Takeaway.} Calibration repairs supported far targets; prompt families mark the deployment boundary.
 
 \subsection{Limitations}
 
-The evidence covers one backbone family, four tasks, and a finite registry. Short-horizon labels approximate full-training contribution, with a visible TyDiQA deficit. Main-table dispersion varies target training but fixes selector and scorer state. Decontamination removes 0.58\% of the pool, yet weaker matches may remain. Prefix/P-Tuning fail zero-shot and lack native calibration labels. The cost benefit is relative to per-PEFT LESS; PEFT-agnostic selectors remain preferable when a small quality loss is acceptable.
+The evidence covers one backbone family, four tasks, and a finite registry. Short-horizon labels approximate full-training contribution, with a visible TyDiQA deficit. Decontamination removes 0.58\% of the pool, yet weaker matches may remain. Prefix/P-Tuning fail zero-shot and lack native calibration labels. The cost benefit is relative to per-PEFT LESS; PEFT-agnostic selectors remain preferable when a small quality loss is acceptable.

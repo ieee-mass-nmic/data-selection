@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Supervision breadth ($P_{\text{train}}$): number of seen PEFTs used to
+build the offline scorer, evaluated by its transfer to held-out targets. The cost
+curve of Figure~\ref{fig:cost} fixes this scorer and varies only the number of
+\emph{served} configurations $P_{\text{serve}}$. Wider supervision narrows the
+zero-shot L0 and L1 gaps to LESS at modestly higher offline cost. Gaps are
+averaged native points; break-even is the four-task PEFT count past which
+PCU-Select undercuts LESS.}
+\label{tab:supervision-sweep}
+\begin{tabular}{rrrrr}
+\toprule
+$P_{\text{train}}$ & \shortstack{Offline\\GPU-h} & \shortstack{L0 gap\\(zero-shot)} & \shortstack{L1 gap\\(zero-shot)} & Break-even \\
+\midrule
+2 & 129.6 & $-1.21$ & $-3.40$ & 2.10 \\
+3 & 136.8 & $-0.69$ & $-2.63$ & 2.21 \\
+5 & 144.0 & $-0.34$ & $-2.08$ & 2.33 \\
+\bottomrule
+\end{tabular}
+\end{table}

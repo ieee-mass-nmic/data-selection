@@ -21,3 +21,6 @@ runs/
 
 # OS
 .DS_Store
+
+# Local paper-writing context
+paper/project_context.md

@@ -1,33 +1,33 @@
 {
-  "hardware": "8xNVIDIA A100-80GB, bfloat16",
+  "hardware": "8xNVIDIA H20-96GB, bfloat16",
   "gpu_hour_definition": "wall_seconds * gpu_count / 3600",
   "task_count": 4,
   "training_seed_count": 3,
   "t_values": [1, 2, 3, 5, 7, 10, 15],
   "pcu_offline_breakdown_gpu_h": {
-    "feature_extraction": 24.0,
-    "low_fidelity_labels": 2.4,
-    "high_fidelity_labels": 42.0,
-    "scorer_training": 3.6
+    "feature_extraction": 48.0,
+    "low_fidelity_labels": 4.8,
+    "high_fidelity_labels": 84.0,
+    "scorer_training": 7.2
   },
   "online_selection_scope": {
-    "pcu_per_peft_task_gpu_h": 0.18,
-    "pcu_four_task_per_peft_gpu_h": 0.72,
-    "less_datastore_per_peft_gpu_h": 31.0,
-    "less_ranking_per_peft_task_gpu_h": 0.15,
-    "less_four_task_per_peft_gpu_h": 31.6
+    "pcu_per_peft_task_gpu_h": 0.36,
+    "pcu_four_task_per_peft_gpu_h": 1.44,
+    "less_datastore_per_peft_gpu_h": 62.0,
+    "less_ranking_per_peft_task_gpu_h": 0.30,
+    "less_four_task_per_peft_gpu_h": 63.2
   },
-  "shared_target_training_per_run_gpu_h": 6.4,
-  "shared_target_training_note": "One PEFT-task-training-seed run: 1000 steps at about 2.9 s/step on 8 A100 GPUs. Every selector pays this same downstream cost, so the selection-only comparison excludes it.",
+  "shared_target_training_per_run_gpu_h": 12.8,
+  "shared_target_training_note": "One PEFT-task-training-seed run: 1000 steps at about 5.8 s/step on 8 H20 GPUs. Every selector pays this same downstream cost, so the selection-only comparison excludes it.",
   "calibration": {
-    "full_offline_label_wall_seconds_per_triple": 1.89,
-    "deployment_label_wall_seconds_per_triple": 0.4725,
-    "calibration_200_per_peft_task_gpu_h": 0.21,
-    "calibration_500_per_peft_task_gpu_h": 0.525,
-    "calibration_500_four_task_per_peft_gpu_h": 2.1,
+    "full_offline_label_wall_seconds_per_triple": 3.78,
+    "deployment_label_wall_seconds_per_triple": 0.945,
+    "calibration_200_per_peft_task_gpu_h": 0.42,
+    "calibration_500_per_peft_task_gpu_h": 1.05,
+    "calibration_500_four_task_per_peft_gpu_h": 4.2,
     "note": "Deployment calibration uses one anchor and horizon 1, one quarter of the full offline label routine. Prefix and P-Tuning do not have native calibration labels in the reported implementation."
   },
-  "reuse_one_less_note": "Run LESS once on one source PEFT and rank all four task sketches; reuse the resulting task-specific subsets for every target PEFT. One-time cost is 31.6 GPU-hours.",
+  "reuse_one_less_note": "Run LESS once on one source PEFT and rank all four task sketches; reuse the resulting task-specific subsets for every target PEFT. One-time cost is 63.2 GPU-hours.",
   "methods": [
     {
       "method": "Random",
@@ -37,35 +37,35 @@
     {
       "method": "RDS+",
       "offline_gpu_h": 0.0,
-      "per_configuration_selection_gpu_h": 0.16
+      "per_configuration_selection_gpu_h": 0.32
     },
     {
       "method": "Influence",
-      "offline_gpu_h": 24.0,
-      "per_configuration_selection_gpu_h": 0.08
+      "offline_gpu_h": 48.0,
+      "per_configuration_selection_gpu_h": 0.16
     },
     {
       "method": "Reuse-one-LESS",
-      "offline_gpu_h": 31.6,
+      "offline_gpu_h": 63.2,
       "per_configuration_selection_gpu_h": 0.0
     },
     {
       "method": "LESS",
       "offline_gpu_h": 0.0,
-      "per_configuration_selection_gpu_h": 31.6
+      "per_configuration_selection_gpu_h": 63.2
     },
     {
       "method": "PCU-Select",
-      "offline_gpu_h": 72.0,
-      "per_configuration_selection_gpu_h": 0.72
+      "offline_gpu_h": 144.0,
+      "per_configuration_selection_gpu_h": 1.44
     }
   ],
   "five_seen_pefts_gpu_h": {
     "Random": 0.0,
-    "RDS+": 0.8,
-    "Influence": 24.4,
-    "Reuse-one-LESS": 31.6,
-    "LESS": 158.0,
-    "PCU-Select": 75.6
+    "RDS+": 1.6,
+    "Influence": 48.8,
+    "Reuse-one-LESS": 63.2,
+    "LESS": 316.0,
+    "PCU-Select": 151.2
   }
 }

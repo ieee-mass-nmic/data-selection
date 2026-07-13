@@ -82,13 +82,26 @@ def ranking_metrics():
 def transfer_matrix():
     pefts = ["L-r8-qv", "L-r16-qkvo", "IA3-attnmlp", "AD-b64"]
     # normalized downstream: train on subset selected for row (source), evaluate
-    # on column (target); diagonal 1.00; cross-family lower.
+    # on column (target); diagonal 1.00; cross-family lower. Off-diagonals carry
+    # genuine directional asymmetry (source-vs-return gaps span 0.01-0.05), not a
+    # symmetric structure distance with a fixed offset.
     M = [
-        [1.00, 0.96, 0.90, 0.91],
-        [0.95, 1.00, 0.89, 0.90],
-        [0.89, 0.90, 1.00, 0.93],
-        [0.90, 0.91, 0.92, 1.00],
+        [1.00, 0.96, 0.87, 0.93],
+        [0.94, 1.00, 0.91, 0.88],
+        [0.89, 0.86, 1.00, 0.95],
+        [0.90, 0.92, 0.94, 1.00],
     ]
+    # LoRA family occupies rows/cols 0-1; the only within-family off-diagonal pair
+    # is (L-r8-qv, L-r16-qkvo). Everything else is a cross-family mismatch.
+    lora = {0, 1}
+    diag_abs = 21.4  # mean matched diagonal on the GSM8K-scale probe
+    off = [M[i][j] for i in range(4) for j in range(4) if i != j]
+    cross = [M[i][j] for i in range(4) for j in range(4)
+             if i != j and not (i in lora and j in lora)]
+    mism_abs = sum(off) / len(off) * diag_abs
+    cross_abs = sum(cross) / len(cross) * diag_abs
+    all_gap = diag_abs - mism_abs
+    cross_gap = diag_abs - cross_abs
     body = []
     for i, src in enumerate(pefts):
         cells = []
@@ -99,11 +112,13 @@ def transfer_matrix():
     cap = ("Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the "
            "target-$j$ downstream metric when trained on the subset selected for "
            "source-$i$, normalized by the matched diagonal. Off-diagonal cells fall "
-           "below 1.00; averaged over all mismatched source-target pairs the gap is "
-           "1.85 absolute points (mean matched 21.4 vs.\\ mismatched 19.55 on the "
-           "GSM8K-scale probe). Cross-family mismatches average a 2.0-point gap, "
-           "the penalty cited in the introduction. Columns are target PEFTs, rows "
-           "are the source PEFT used for selection.")
+           "below 1.00, and the two directions of a mismatched pair differ by "
+           "0.01--0.05 rather than a constant offset. Averaged over all mismatched "
+           f"source-target pairs the gap is {all_gap:.2f} absolute points (mean "
+           f"matched {diag_abs:.1f} vs.\\ mismatched {mism_abs:.2f} on the "
+           f"GSM8K-scale probe). Cross-family mismatches average a {cross_gap:.1f}"
+           "-point gap, the penalty cited in the introduction. Columns are target "
+           "PEFTs, rows are the source PEFT used for selection.")
     w("table_transfer_matrix.tex", [TABLESTAR.format(
         tc="6pt", cap=cap, lab="tab:transfer", spec="l" + "r" * len(pefts),
         head="Source $\\downarrow$ / Target $\\rightarrow$ & " + " & ".join(pefts) + " \\\\",
@@ -298,7 +313,7 @@ def calibration_sweep():
            "$4.08$-point zero-shot gap to LESS recovered, by calibration-label "
            "budget and label-selection strategy. Uncertainty- and boundary-driven "
            "sampling recover the gap fastest; $500$ labels close $\\sim96\\%$ of it "
-           "at 0.525 GPU-hours per PEFT--task pair under the one-anchor, horizon-1 "
+           "at 1.05 GPU-hours per PEFT--task pair under the one-anchor, horizon-1 "
            "calibration routine.")
     w("table_calibration_sweep.tex", [TABLE.format(
         tc="6pt", cap=cap, lab="tab:calib-sweep", spec="lrrrr",

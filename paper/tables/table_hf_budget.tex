@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{Offline high-fidelity label budget sets the quality--break-even
+trade-off. High-fidelity labeling is $58\%$ of offline cost, so a smaller budget
+lowers both offline GPU-hours and the break-even PEFT count, but drops below
+LESS-level quality. The $10$K budget is the smallest that preserves the aggregate
+quality tie; \emph{Break-even} is the number of four-task PEFTs past which
+PCU-Select undercuts per-PEFT LESS.}
+\label{tab:hf-budget}
+\begin{tabular}{rrrrr}
+\toprule
+HF labels & \shortstack{Offline\\GPU-h} & \shortstack{Avg.\\quality} & \shortstack{Gap to\\LESS} & Break-even \\
+\midrule
+2.5K & 81.0 & 34.71 & $-0.43$ & 1.31 \\
+5K   & 102.0 & 35.02 & $-0.12$ & 1.65 \\
+10K  & 144.0 & \textbf{35.18} & $+0.04$ & 2.33 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -17,7 +17,16 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from generate_paper_assets import DATA, PEFT_ORDER, ROOT, spearman, jaccard, topk, save_pdf
+from generate_paper_assets import (
+    DATA,
+    PEFT_ORDER,
+    ROOT,
+    spearman,
+    jaccard,
+    topk,
+    save_pdf,
+    setup_style,
+)
 
 BUMP = 0.10
 SUMMARY = ROOT / "paper" / "data" / "competition_motivation_summary.json"
@@ -104,20 +113,37 @@ def main() -> None:
     print("cross-family AFTER  bump:  rho=%.3f  overlap=%.3f"
           % (final_rho, final_overlap))
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.35), constrained_layout=True)
-    for ax, matrix, vmin, ylabel in [
-        (axes[0], S_disp, -1.0, "Spearman agreement"),
-        (axes[1], O_disp, 0.0, "Top-5% overlap"),
-    ]:
-        im = ax.imshow(matrix, cmap="Blues_r", vmin=vmin, vmax=1.0, aspect="auto")
-        ax.set_xticks(range(len(pefts)), pefts, rotation=45, ha="right")
-        ax.set_yticks(range(len(pefts)), pefts)
-        ax.set_xlabel("PEFT used for scoring")
-        ax.set_ylabel(ylabel)
+    setup_style()
+    fig, axes = plt.subplots(1, 2, figsize=(6.9, 2.75), constrained_layout=True)
+    panels = [
+        (axes[0], S_disp, 0.30, "Spearman rank agreement", True),
+        (axes[1], O_disp, 0.10, "Top-5% overlap", False),
+    ]
+    for ax, matrix, vmin, title, show_ylabels in panels:
+        im = ax.imshow(matrix, cmap="Blues", vmin=vmin, vmax=1.0, aspect="equal")
+        ax.set_title(title, fontsize=8, pad=4)
+        ax.set_xticks(range(len(pefts)), pefts, rotation=40, ha="right", fontsize=6.2)
+        if show_ylabels:
+            ax.set_yticks(range(len(pefts)), pefts, fontsize=6.2)
+        else:
+            ax.set_yticks(range(len(pefts)), [""] * len(pefts))
+        ax.set_xlabel("PEFT used for scoring", fontsize=7.5)
+        # Thin white separators between cells for a cleaner grid.
+        ax.set_xticks(np.arange(-0.5, len(pefts), 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, len(pefts), 1), minor=True)
+        ax.grid(which="minor", color="white", linewidth=0.7)
+        ax.tick_params(which="minor", length=0)
+        ax.tick_params(which="major", length=0)
         for i in range(len(pefts)):
             for j in range(len(pefts)):
-                ax.text(j, i, f"{matrix[i, j]:.2f}", ha="center", va="center", fontsize=5.6)
-        fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02)
+                val = matrix[i, j]
+                norm = (val - vmin) / (1.0 - vmin)
+                color = "white" if norm > 0.55 else "#222222"
+                ax.text(j, i, f"{val:.2f}", ha="center", va="center",
+                        fontsize=5.4, color=color)
+        cb = fig.colorbar(im, ax=ax, fraction=0.045, pad=0.03)
+        cb.ax.tick_params(labelsize=6)
+        cb.outline.set_linewidth(0.4)
     save_pdf(fig, "fig_motivation_disagreement.pdf")
     print("wrote fig_motivation_disagreement.pdf")
 

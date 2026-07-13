@@ -9,7 +9,13 @@
       "Bash(.venv/bin/python -c \"import pcu_select.pipeline.apply, pcu_select.ood.calibration, pcu_select.selection.adaptive_quota; print\\('imports OK'\\)\")",
       "Bash(latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex)",
       "Bash(awk -F'[\\(]' '{print $2}')",
-      "Bash(python3 plot_competition_config_sensitivity.py)"
+      "Bash(python3 plot_competition_config_sensitivity.py)",
+      "Bash(python3 -c \"import matplotlib; print\\('mpl', matplotlib.__version__\\)\")",
+      "Bash(python3 scripts/paper/revise_cost_figure.py)",
+      "Bash(python scripts/paper/competition_numbers.py)",
+      "Bash(python scripts/paper/competition_supplement.py)",
+      "Bash(python3 scripts/paper/competition_numbers.py)",
+      "Bash(python3 scripts/paper/competition_supplement.py)"
     ]
   }
 }

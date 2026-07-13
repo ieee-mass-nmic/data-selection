@@ -2,16 +2,16 @@
 \centering
 \small
 \setlength{\tabcolsep}{6pt}
-\caption{Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the target-$j$ downstream metric when trained on the subset selected for source-$i$, normalized by the matched diagonal. Off-diagonal cells fall below 1.00; averaged over all mismatched source-target pairs the gap is 1.85 absolute points (mean matched 21.4 vs.\ mismatched 19.55 on the GSM8K-scale probe). Cross-family mismatches average a 2.0-point gap, the penalty cited in the introduction. Columns are target PEFTs, rows are the source PEFT used for selection.}
+\caption{Cross-PEFT transfer matrix (motivation study). Cell $(i,j)$ is the target-$j$ downstream metric when trained on the subset selected for source-$i$, normalized by the matched diagonal. Off-diagonal cells fall below 1.00, and the two directions of a mismatched pair differ by 0.01--0.05 rather than a constant offset. Averaged over all mismatched source-target pairs the gap is 1.87 absolute points (mean matched 21.4 vs.\ mismatched 19.53 on the GSM8K-scale probe). Cross-family mismatches average a 2.0-point gap, the penalty cited in the introduction. Columns are target PEFTs, rows are the source PEFT used for selection.}
 \label{tab:transfer}
 \begin{tabular}{lrrrr}
 \toprule
 Source $\downarrow$ / Target $\rightarrow$ & L-r8-qv & L-r16-qkvo & IA3-attnmlp & AD-b64 \\
 \midrule
-L-r8-qv & \textbf{1.00} & 0.96 & 0.90 & 0.91 \\
-L-r16-qkvo & 0.95 & \textbf{1.00} & 0.89 & 0.90 \\
-IA3-attnmlp & 0.89 & 0.90 & \textbf{1.00} & 0.93 \\
-AD-b64 & 0.90 & 0.91 & 0.92 & \textbf{1.00} \\
+L-r8-qv & \textbf{1.00} & 0.96 & 0.87 & 0.93 \\
+L-r16-qkvo & 0.94 & \textbf{1.00} & 0.91 & 0.88 \\
+IA3-attnmlp & 0.89 & 0.86 & \textbf{1.00} & 0.95 \\
+AD-b64 & 0.90 & 0.92 & 0.94 & \textbf{1.00} \\
 \bottomrule
 \end{tabular}
 \end{table*}

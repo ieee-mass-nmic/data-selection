@@ -33,7 +33,7 @@
 % =========================================================
 % The title must use Title Case.
 % This is a temporary title; you can revise it later.
-\title{Amortized PEFT-Conditioned Data Selection for Cross-PEFT Fine-Tuning}
+\title{PCU-Select: Amortizing Data Selection Across a Registry of PEFT Configurations}
 
 % =========================================================
 % Anonymous Submission
@@ -116,6 +116,34 @@
 % =========================================================
 \clearpage
 \appendix
+
+% =========================================================
+% Appendix float tuning: pack floats at the top of float-only
+% pages instead of vertically justifying them (removes the large
+% inter-float gaps), and let more floats share a page with text so
+% fewer float-only pages are produced.
+% =========================================================
+\makeatletter
+% Top-align floats on float-only pages; fixed separation; slack at bottom.
+\setlength{\@fptop}{0pt}
+\setlength{\@fpsep}{10pt plus 0fil}
+\setlength{\@fpbot}{0pt plus 1fil}
+\setlength{\@dblfptop}{0pt}
+\setlength{\@dblfpsep}{10pt plus 0fil}
+\setlength{\@dblfpbot}{0pt plus 1fil}
+\makeatother
+% Allow denser mixing of floats and text.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\dblfloatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+\setcounter{dbltopnumber}{3}
+
 \input{Sections/08_appendix}
 
 % =========================================================

@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{6pt}
+\caption{The amortization advantage is cross-PEFT, not cross-task. Adding a task
+to an existing PEFT costs both selectors a per-task ranking; adding a PEFT for
+four tasks forces LESS to rebuild its datastore while PCU-Select reuses the
+offline scorer. Selection-stage GPU-hours.}
+\label{tab:cost-axes}
+\begin{tabular}{lrr}
+\toprule
+New registry entry & PCU-Select & LESS \\
+\midrule
+One new task, existing PEFT   & 0.36 & 0.30 \\
+One new PEFT, four tasks       & 1.44 & 63.2 \\
+\bottomrule
+\end{tabular}
+\end{table}

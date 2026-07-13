@@ -14,7 +14,7 @@ PCU-Select replaces the subset oracle with a conditional per-example utility,
   s_{\phi}(x,p,t)\approx u(x,p,t),
   \label{eq:surrogate}
 \end{equation}
-where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes sketch-loss reductions into a rank-normalized short-horizon utility score, as defined in the Method section. Conditioning on $p$ is the core departure from PEFT-agnostic selection. A sample's gradient can be useful in the attention projections trained by LoRA, weak in the residual bottlenecks trained by adapters, and different again under multiplicative (IA)$^3$ gates. The selected subset should therefore change when the trainable subspace changes.
+where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes sketch-loss reductions into a rank-normalized short-horizon utility score, as defined in the Method section. Conditioning on $p$ is the core departure from PEFT-agnostic selection: the selected subset should change when the trainable subspace changes.
 
 \paragraph{Amortization objective.}
 A registry makes cost, not single-target accuracy, the operative criterion. Let $P$ be the number of target PEFT configurations and $Q$ the number of task sketches served from a fixed pool. LESS builds one datastore per PEFT and ranks it against each task, whereas PCU-Select pays one offline cost and one scorer application per PEFT--task pair:
@@ -36,8 +36,8 @@ with $C^{\mathrm{pair}}_{\mathrm{PCU}}\ll C^{\mathrm{data}}_{\mathrm{LESS}}$. Th
 while spending less once $P$ exceeds
 $P^{\star}=C_{\mathrm{offline}}/[C^{\mathrm{data}}_{\mathrm{LESS}}+
 Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})]$.
-Under this criterion a near-tie with LESS is the design target: LESS is the quality reference and PCU-Select is its amortized alternative. Reusing one LESS-selected task subset per task pays one datastore plus $Q$ rankings but removes target-PEFT conditioning, which lowers quality.
+Under this criterion a near-tie with LESS is the design target: LESS is the quality reference and PCU-Select is its amortized alternative.
 
-Task relativity is concrete: a worked-solution arithmetic example receives high utility under the GSM8K sketch but low utility under the TyDiQA sketch, because its gradient aligns with the reasoning task but not with multilingual span extraction; the same example's utility also shifts across PEFTs when the aligned sites are not the ones a given method trains.
+Task relativity is concrete: a worked-solution arithmetic example scores high under the GSM8K sketch but low under TyDiQA, and its utility shifts again across PEFTs when the aligned sites are not the ones a given method trains.
 
 The formulation rests on four requirements. \textbf{PEFT dependence}: the scorer must take $p$ as an explicit input. \textbf{Task relativity}: utility must be defined relative to $V_t$ so that the model does not learn a generic quality score. \textbf{Structural encodability}: PEFT methods must be represented by their sites, operator type, capacity, and recipe, not just by a family name. \textbf{Amortizable cost}: expensive labels and scorer training are paid offline, while applying to a new $(p,t)$ pair uses cached features and forward scoring.

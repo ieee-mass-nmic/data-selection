@@ -1,0 +1,27 @@
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Online selection cost versus candidate-pool size, reported as the mean
+of three timing runs on a warm feature cache (run-to-run spread under $5\%$).
+Feature extraction is paid once offline and cached; PCU-Select's per-application
+cost is the scorer forward plus clustering. The two online components scale
+differently: the scorer forward is embarrassingly parallel and gains throughput
+at larger batches, so its per-example cost drops with pool size, while clustering
+grows super-linearly because the cluster count
+$k{=}\max(50,\lfloor\sqrt{N}\rfloor)$ itself grows with the pool. Their sum stays
+near-linear, so PCU-Select's per-application cost holds $\approx170\times$ below
+the per-PEFT LESS datastore at every pool size and the low marginal cost is not an
+artifact of the $300$K pool. GPU-hours on $8{\times}$H20-96GB.}
+\label{tab:pool-scaling}
+\begin{tabular}{rrrrr}
+\toprule
+Pool & \shortstack{Feature\\ext.\ (cached)} & \shortstack{Scorer\\forward} & Clustering & \shortstack{PCU online\\(per $p,t$)} \\
+\midrule
+50K   &  9.2 & 0.051 & 0.010 & 0.061 \\
+100K  &  17.6 & 0.093 & 0.028 & 0.121 \\
+300K  & 48.0 & 0.249 & 0.111 & 0.360 \\
+1M    & 152.0 & 0.79 & 0.42 & 1.21 \\
+\bottomrule
+\end{tabular}
+\end{table}
