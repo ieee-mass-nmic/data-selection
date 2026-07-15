@@ -15,7 +15,8 @@
       "Bash(python scripts/paper/competition_numbers.py)",
       "Bash(python scripts/paper/competition_supplement.py)",
       "Bash(python3 scripts/paper/competition_numbers.py)",
-      "Bash(python3 scripts/paper/competition_supplement.py)"
+      "Bash(python3 scripts/paper/competition_supplement.py)",
+      "Bash(grep -rniE \"reuse[- ]versus[- ]recompute|reuse-and-recompute|recompute|dilemma|conditional scorer|shared .{0,15}scorer|single .{0,15}scorer\" Sections/ main.tex)"
     ]
   }
 }

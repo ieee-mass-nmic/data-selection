@@ -1,23 +1,25 @@
 \section{Problem Formulation}
 \label{sec:problem}
 
-We formalize \emph{cross-PEFT data-efficient fine-tuning}: selecting a compact training subset whose value depends on the target PEFT configuration and target task. Fix a backbone family and frozen base model $M_0$. A candidate pool $\mathcal{D}=\{x_i\}_{i=1}^{N}$ contains instruction-response examples. A task $t$ provides a small validation sketch $V_t$ drawn from train or development data, never from the test set. A PEFT configuration $p\in\mathcal{P}$ specifies the family, trainable locations, capacity, and training recipe. Given budget $B$, the ideal subset solves
+We formalize \emph{cross-PEFT data-efficient fine-tuning}: selecting a compact training subset whose value depends on both the target PEFT configuration and the task. Fix a backbone family and a frozen base model $M_0$. A candidate pool $\mathcal{D}=\{x_i\}_{i=1}^{N}$ contains instruction-response examples. Each task $t$ provides a small validation sketch $V_t$ from its train or development data, never from its test set. Each PEFT configuration $p\in\mathcal{P}$ specifies a family, trainable locations, capacity, and training recipe. Given budget $B$, the ideal subset solves
 \begin{equation}
   \mathcal{S}^{*}=\arg\max_{\mathcal{S}\subseteq\mathcal{D},\,|\mathcal{S}|\le B}
   \mathrm{Perf}\!\left(\mathrm{Tune}(M_0,p,\mathcal{S}),V_t^{\mathrm{test}}\right).
   \label{eq:selection-objective}
 \end{equation}
-The held-out set $V_t^{\mathrm{test}}$ appears only in this definition of the oracle; it is never used for training or for selection, which see only the sketch $V_t$. Directly optimizing Eq.~\eqref{eq:selection-objective} is infeasible because it requires training and evaluating many subsets for every target $(p,t)$ pair.
+The test set $V_t^{\mathrm{test}}$ appears only in this evaluation oracle and is unavailable to every training, scoring, and selection procedure; these use only the sketch $V_t$. Directly optimizing Eq.~\eqref{eq:selection-objective} would require training and evaluating many subsets for every target $(p,t)$ pair, which is infeasible.
 
 PCU-Select replaces the subset oracle with a conditional per-example utility,
 \begin{equation}
   s_{\phi}(x,p,t)\approx u(x,p,t),
   \label{eq:surrogate}
 \end{equation}
-where $u$ measures how much $x$ helps task $t$ when the trainable parameters are those of $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes sketch-loss reductions into a rank-normalized short-horizon utility score, as defined in the Method section. Conditioning on $p$ is the core departure from PEFT-agnostic selection: the selected subset should change when the trainable subspace changes.
+where $u(x,p,t)$ denotes the utility of training on $x$ for task $t$ when adaptation is restricted to the trainable subspace induced by $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes loss reductions after a few update steps. PCU-Select rank-normalizes these reductions within condition-matched buckets (\S\ref{sec:method}). Conditioning on $p$ is the core departure from PEFT-agnostic selection: a change in the trainable subspace may change the selected subset.
+
+Utility is relative to the task as well as the configuration. A worked-solution arithmetic example scores high under the GSM8K sketch but low under TyDiQA, and its utility shifts again across PEFTs that do not train the aligned sites.
 
 \paragraph{Amortization objective.}
-A registry makes cost, not single-target accuracy, the operative criterion. Let $P$ be the number of target PEFT configurations and $Q$ the number of task sketches served from a fixed pool. LESS builds one datastore per PEFT and ranks it against each task, whereas PCU-Select pays one offline cost and one scorer application per PEFT--task pair:
+A registry makes total cost, together with quality, the operative criterion. Let $P$ denote the number of target PEFT configurations and $Q$ the number of task sketches served from a fixed pool. LESS builds one datastore per PEFT and ranks it against each task. PCU-Select instead pays one shared offline cost and one online scoring-and-selection pass per PEFT--task pair:
 \begin{equation}
   \begin{aligned}
   C_{\mathrm{LESS}}(P,Q)
@@ -28,16 +30,15 @@ A registry makes cost, not single-target accuracy, the operative criterion. Let 
   \end{aligned}
   \label{eq:cost}
 \end{equation}
-with $C^{\mathrm{pair}}_{\mathrm{PCU}}\ll C^{\mathrm{data}}_{\mathrm{LESS}}$. The goal is \emph{quality-preserving amortization}: match the per-PEFT selector's downstream quality,
+Here $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one gradient datastore per PEFT, $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task, and $C^{\mathrm{pair}}_{\mathrm{PCU}}$ runs one online scoring-and-selection pass, with $C^{\mathrm{pair}}_{\mathrm{PCU}}\ll C^{\mathrm{data}}_{\mathrm{LESS}}$. We call the target \emph{quality-preserving amortization}: reuse the expensive work across configurations while matching the downstream quality of a per-PEFT selector within a small tolerance $\epsilon$,
 \begin{equation}
-  \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}}\approx 0,
+  \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}},
+  \qquad \lvert\Delta_{\mathrm{quality}}\rvert\le\epsilon,
   \label{eq:quality-tie}
 \end{equation}
-while spending less once $P$ exceeds
+and reduce total cost once $P$ exceeds
 $P^{\star}=C_{\mathrm{offline}}/[C^{\mathrm{data}}_{\mathrm{LESS}}+
 Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})]$.
-Under this criterion a near-tie with LESS is the design target: LESS is the quality reference and PCU-Select is its amortized alternative.
+The objective is to preserve LESS-level quality while replacing repeated per-configuration computation with a shared offline investment, not to outperform LESS.
 
-Task relativity is concrete: a worked-solution arithmetic example scores high under the GSM8K sketch but low under TyDiQA, and its utility shifts again across PEFTs when the aligned sites are not the ones a given method trains.
-
-The formulation rests on four requirements. \textbf{PEFT dependence}: the scorer must take $p$ as an explicit input. \textbf{Task relativity}: utility must be defined relative to $V_t$ so that the model does not learn a generic quality score. \textbf{Structural encodability}: PEFT methods must be represented by their sites, operator type, capacity, and recipe, not just by a family name. \textbf{Amortizable cost}: expensive labels and scorer training are paid offline, while applying to a new $(p,t)$ pair uses cached features and forward scoring.
+The formulation yields four requirements. \textbf{PEFT conditioning}: the scorer must take $p$ as an explicit input. \textbf{Task relativity}: the sketch $V_t$ must define utility, preventing the scorer from learning only generic example quality. \textbf{Structural representation}: the representation of $p$ must encode its intervention sites, operator type, capacity, and training recipe more precisely than a family name. \textbf{Amortizable execution}: the offline stage must pay for expensive labels and scorer training, while a new $(p,t)$ pair uses cached features and forward scoring. PCU-Select meets these requirements with shared module-output coordinates, task-relative labels, and a PEFT-conditioned scorer. The next section turns these pieces into a reusable selection pipeline.

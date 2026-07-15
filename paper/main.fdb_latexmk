@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1783703839.02251 "main.aux" "main.bbl" "main" 1783704022.04021 0
+["bibtex main"] 1784059117.62493 "main.aux" "main.bbl" "main" 1784059118.36275 0
   "./aaai2027.bib" 1783678815.95751 21597 f2564d5de32d320aca65d7ab46a64fca ""
   "./aaai2027.bst" 1782704500 30207 bd248dfe461b9b2fc7481a44feafe197 ""
-  "main.aux" 1783704021.83842 6793 3b9ddd77018b6c1757bf0645e9878f7c "pdflatex"
+  "main.aux" 1784059118.16223 6793 bc8db722c6eb5566b9c27f85bfd9c884 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1783704021.43471 "main.tex" "main.pdf" "main" 1783704022.04033 0
+["pdflatex"] 1784059117.75377 "main.tex" "main.pdf" "main" 1784059118.36286 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1698694482 2914 fdbc4a54b9bc76f4551b5303f2737d33 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -119,18 +119,18 @@
   "Figures/fig_motivation_disagreement.pdf" 1783688969.63389 46607 f499faeadc0dc984687ab333dec7d1fc ""
   "Figures/fig_ood_calibration.pdf" 1783679204.15791 29396 f6424c2b9a48cee8ee2321f8b7ee0e18 ""
   "Figures/image.png" 1783697626.18696 1274908 99e74aa1e69dd0e60afbc80476b4d15c ""
-  "Sections/00_abstract.tex" 1783702714.99625 1356 c34cb2dbf8ec240c678f8ec41b859a97 ""
-  "Sections/01_introduction.tex" 1783702553.51274 6147 36d0a40a45aa0ae9ddadcc00c9411928 ""
-  "Sections/02_related_work.tex" 1783701434.4493 3933 cc0fee4facab74e247778a864bd74291 ""
-  "Sections/03_problem_formulation.tex" 1783692488.09742 3853 4852e819f9728e211358e8b6635716a5 ""
-  "Sections/04_method.tex" 1783704016.09843 9516 c4f1d1e66905e2b273fd6d13ca645709 ""
-  "Sections/05_experiments.tex" 1783703834.78036 5640 6cd0c084ce221fb4f7a62dc50af94e91 ""
-  "Sections/06_analysis.tex" 1783700149.18937 2968 35498d41edf8b767b35e63597cfd8983 ""
-  "Sections/07_conclusion.tex" 1783696550.90079 583 beb48e9efbbad9e0b38aca63ace367c0 ""
+  "Sections/00_abstract.tex" 1783934840.05075 1576 286689cb5044d6a789a8c45acd5639fe ""
+  "Sections/01_introduction.tex" 1784050879.7634 6797 50ae4b5f24d11a991dbbd62e4d77b1f1 ""
+  "Sections/02_related_work.tex" 1784052148.97544 4264 7ca2e34870fe0374a7e881ca44ea2de5 ""
+  "Sections/03_problem_formulation.tex" 1784052677.07721 4621 e3b9f353d2f285cd1be18776340a4701 ""
+  "Sections/04_method.tex" 1784056117.81896 12414 90ae87478b51dd98c6578ad26a0561d2 ""
+  "Sections/05_experiments.tex" 1783919106.68658 6031 911abd02c5b3ee9c982ff4e2697e576c ""
+  "Sections/06_analysis.tex" 1783919106.77412 3635 0cdc170e0278321a67c1b4a0fdea1246 ""
+  "Sections/07_conclusion.tex" 1783918742.19282 705 b19e75401b5729b58e4ff7b3e8957dd5 ""
   "Sections/08_appendix.tex" 1783701108.5028 32387 914db0376216648314401328ac93a04a ""
   "aaai2027.sty" 1782704500 16915 1b1c792e2acfbbd8b672259e267b95d8 ""
-  "main.aux" 1783704021.83842 6793 3b9ddd77018b6c1757bf0645e9878f7c "pdflatex"
-  "main.bbl" 1783703839.09833 12160 5fff813617e24760be1a171c75259e4a "bibtex main"
+  "main.aux" 1784059118.16223 6793 bc8db722c6eb5566b9c27f85bfd9c884 "pdflatex"
+  "main.bbl" 1784059117.75128 12160 5fff813617e24760be1a171c75259e4a "bibtex main"
   "main.tex" 1783700719.75699 5526 2dff3de1cb9fecd970862c5947ae6ce8 ""
   "tables/table_ablations.tex" 1783700020.49905 1131 d4e8ae6f2538d349769b3f0a4bc9a6c8 ""
   "tables/table_cost_axes.tex" 1783696263.21619 579 cd5de6165b2a6bc7ca16bb7fbe3e7b2e ""
