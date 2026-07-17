@@ -1,20 +1,20 @@
 \section{Problem Formulation}
 \label{sec:problem}
 
-We formalize \emph{cross-PEFT data-efficient fine-tuning}: selecting a compact training subset whose value depends on both the target PEFT configuration and the task. Fix a backbone family and a frozen base model $M_0$. A candidate pool $\mathcal{D}=\{x_i\}_{i=1}^{N}$ contains instruction-response examples. Each task $t$ provides a small validation sketch $V_t$ from its train or development data, never from its test set. Each PEFT configuration $p\in\mathcal{P}$ specifies a family, trainable locations, capacity, and training recipe. Given budget $B$, the ideal subset solves
+We formalize \emph{cross-PEFT data-efficient fine-tuning}: selecting a compact training subset whose value depends on both the target PEFT configuration and the task. Fix a backbone family and a frozen base model $M_0$. A candidate pool $\mathcal{D}=\{x_i\}_{i=1}^{N}$ contains instruction-response examples. Each task $t$ provides a small task sketch $V_t$ from its train or development data, never from its test set. Each PEFT configuration $p\in\mathcal{P}$ specifies a family, trainable locations, capacity, and training recipe. Given budget $B$, the ideal subset solves
 \begin{equation}
   \mathcal{S}^{*}=\arg\max_{\mathcal{S}\subseteq\mathcal{D},\,|\mathcal{S}|\le B}
   \mathrm{Perf}\!\left(\mathrm{Tune}(M_0,p,\mathcal{S}),V_t^{\mathrm{test}}\right).
   \label{eq:selection-objective}
 \end{equation}
-The test set $V_t^{\mathrm{test}}$ appears only in this evaluation oracle and is unavailable to every training, scoring, and selection procedure; these use only the sketch $V_t$. Directly optimizing Eq.~\eqref{eq:selection-objective} would require training and evaluating many subsets for every target $(p,t)$ pair, which is infeasible.
+The test set $V_t^{\mathrm{test}}$ appears only in this evaluation oracle. Every training, scoring, and selection procedure uses only the task sketch $V_t$. Directly optimizing Eq.~\eqref{eq:selection-objective} would require training and evaluating many subsets for every target $(p,t)$ pair, which is infeasible.
 
-PCU-Select replaces the subset oracle with a conditional per-example utility,
+PCU-Select replaces the subset oracle with a conditional per-example utility. It learns the surrogate
 \begin{equation}
   s_{\phi}(x,p,t)\approx u(x,p,t),
   \label{eq:surrogate}
 \end{equation}
-where $u(x,p,t)$ denotes the utility of training on $x$ for task $t$ when adaptation is restricted to the trainable subspace induced by $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes loss reductions after a few update steps. PCU-Select rank-normalizes these reductions within condition-matched buckets (\S\ref{sec:method}). Conditioning on $p$ is the core departure from PEFT-agnostic selection: a change in the trainable subspace may change the selected subset.
+Here $u(x,p,t)$ denotes the utility of training on $x$ for task $t$ under the trainable subspace induced by $p$. Concretely, $u(x,p,t)\in[0,1]$ summarizes loss reductions after a few update steps. PCU-Select rank-normalizes these reductions within condition-matched buckets (\S\ref{sec:method}). Conditioning on $p$ is the core departure from PEFT-agnostic selection: a change in the trainable subspace may change the selected subset.
 
 Utility is relative to the task as well as the configuration. A worked-solution arithmetic example scores high under the GSM8K sketch but low under TyDiQA, and its utility shifts again across PEFTs that do not train the aligned sites.
 
@@ -30,15 +30,16 @@ A registry makes total cost, together with quality, the operative criterion. Let
   \end{aligned}
   \label{eq:cost}
 \end{equation}
-Here $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one gradient datastore per PEFT, $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task, and $C^{\mathrm{pair}}_{\mathrm{PCU}}$ runs one online scoring-and-selection pass, with $C^{\mathrm{pair}}_{\mathrm{PCU}}\ll C^{\mathrm{data}}_{\mathrm{LESS}}$. We call the target \emph{quality-preserving amortization}: reuse the expensive work across configurations while matching the downstream quality of a per-PEFT selector within a small tolerance $\epsilon$,
+The three terms separate reusable work from target-specific work. $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one gradient datastore for a PEFT, and $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task. $C^{\mathrm{pair}}_{\mathrm{PCU}}$ runs one online scoring-and-selection pass. This online pass costs much less than rebuilding a LESS datastore. We call the target \emph{quality-preserving amortization}. It reuses expensive work across configurations while keeping the quality gap from a per-PEFT selector within a small tolerance $\epsilon$:
 \begin{equation}
   \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}},
   \qquad \lvert\Delta_{\mathrm{quality}}\rvert\le\epsilon,
   \label{eq:quality-tie}
 \end{equation}
-and reduce total cost once $P$ exceeds
+It also reduces total cost once $P$ exceeds
 $P^{\star}=C_{\mathrm{offline}}/[C^{\mathrm{data}}_{\mathrm{LESS}}+
 Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})]$.
-The objective is to preserve LESS-level quality while replacing repeated per-configuration computation with a shared offline investment, not to outperform LESS.
+The objective is LESS-level quality with a shared offline investment that replaces repeated per-configuration computation.
 
-The formulation yields four requirements. \textbf{PEFT conditioning}: the scorer must take $p$ as an explicit input. \textbf{Task relativity}: the sketch $V_t$ must define utility, preventing the scorer from learning only generic example quality. \textbf{Structural representation}: the representation of $p$ must encode its intervention sites, operator type, capacity, and training recipe more precisely than a family name. \textbf{Amortizable execution}: the offline stage must pay for expensive labels and scorer training, while a new $(p,t)$ pair uses cached features and forward scoring. PCU-Select meets these requirements with shared module-output coordinates, task-relative labels, and a PEFT-conditioned scorer. The next section turns these pieces into a reusable selection pipeline.
+\paragraph{Design requirements.}
+The formulation yields four requirements. \textbf{PEFT conditioning} makes $p$ an explicit scorer input. \textbf{Task relativity} ties utility to the task sketch $V_t$, preventing the scorer from learning only generic example quality. \textbf{Structural representation} encodes intervention sites, operator type, capacity, and training recipe instead of using only a family name. \textbf{Amortizable execution} moves expensive label construction and scorer training offline, so a new $(p,t)$ pair uses cached features and forward scoring. PCU-Select meets these requirements with shared module-output coordinates, task-relative labels, and a PEFT-conditioned scorer. The next section turns them into a reusable selection pipeline.

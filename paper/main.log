@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  15 JUL 2026 03:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  16 JUL 2026 17:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -389,8 +389,8 @@ LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 10.0pt on input line 57.
 
 (./Sections/00_abstract.tex)
-Underfull \hbox (badness 1406) in paragraph at lines 1--59
-\T1/ntxtlf/m/n/9 and influence-based data se-lec-tors can pro-duce strong
+Underfull \hbox (badness 3471) in paragraph at lines 1--59
+[]\T1/ntxtlf/m/n/9 A machine-learning plat-form of-ten main-tains sev-eral
  []
 
 (./Sections/01_introduction.tex
@@ -430,73 +430,60 @@ LaTeX Font Info:    Font shape `TS1/ntxtlf/m/n' will be
 (./Sections/02_related_work.tex [2{/usr/local/texlive/2026/texmf-dist/fonts/enc
 /dvips/tex-gyre/q-ts1.enc} <./Figures/fig_motivation_disagreement.pdf>])
 (./Sections/03_problem_formulation.tex
-Underfull \hbox (badness 6204) in paragraph at lines 38--43
-\T1/ntxtlf/m/n/10 and re-duce to-tal cost once $\OML/cmm/m/it/10 P$ \T1/ntxtlf/
-m/n/10 ex-ceeds $\OML/cmm/m/it/10 P[] \OT1/cmr/m/n/10 =
+Underfull \hbox (badness 2158) in paragraph at lines 38--43
+\T1/ntxtlf/m/n/10 It also re-duces to-tal cost once $\OML/cmm/m/it/10 P$ \T1/nt
+xtlf/m/n/10 ex-ceeds $\OML/cmm/m/it/10 P[] \OT1/cmr/m/n/10 =
  []
 
-[3]) (./Sections/04_method.tex
-<Figures/image.png, id=40, 1497.595pt x 1057.9525pt>
+) (./Sections/04_method.tex [3]
+<Figures/image.png, id=40, 1678.27pt x 944.52875pt>
 File: Figures/image.png Graphic file (type png)
 <use Figures/image.png>
 Package pdftex.def Info: Figures/image.png  used on input line 8.
-(pdftex.def)             Requested size: 505.89pt x 357.3745pt.
+(pdftex.def)             Requested size: 505.89pt x 284.71556pt.
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 10.95pt on input line 13.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 10.95pt on input line 13.
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 35
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 39
 .
 
 (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
-Underfull \hbox (badness 1394) in paragraph at lines 35--36
-\T1/ntxtlf/m/n/10 The shared sites now pro-vide a com-mon co-or-di-nate
- []
-
-
-Underfull \hbox (badness 1728) in paragraph at lines 35--36
-\T1/ntxtlf/m/n/10 sys-tem for sam-ples, tasks, and PEFT con-fig-u-ra-tions.
- []
-
-
-Underfull \hbox (badness 1509) in paragraph at lines 35--36
-\T1/ntxtlf/m/n/10 dif-fi-culty and for-mat statis-tics, and a 64-dimensional
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 35--36
+Underfull \hbox (badness 10000) in paragraph at lines 39--40
 \T1/pcr/m/n/10 sentence-transformers/all-mpnet-base-v2
  []
 
 [4{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc}] [5 <./Figur
-es/image.png (PNG copy)>]) (./Sections/05_experiments.tex
-(./tables/table_main_results.tex
+es/image.png>]) (./Sections/05_experiments.tex (./tables/table_main_results.tex
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 7.0pt on input line 11.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 9.0pt on input line 14.
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 7.0pt on input line 14.
-) [6] (./tables/table_quality_cost_headline.tex)
+) (./tables/table_quality_cost_headline.tex) [6]
 Underfull \hbox (badness 1796) in paragraph at lines 33--34
 []\T1/ntxtlf/m/n/10 Equation [] gives a break-even point of $\OML/cmm/m/it/10 P
 [] \OT1/cmr/m/n/10 =
  []
 
 ) (./Sections/06_analysis.tex
-<Figures/fig_ood_calibration.pdf, id=54, 229.01068pt x 154.24126pt>
+<Figures/fig_ood_calibration.pdf, id=56, 229.01068pt x 154.24126pt>
 File: Figures/fig_ood_calibration.pdf Graphic file (type pdf)
 <use Figures/fig_ood_calibration.pdf>
 Package pdftex.def Info: Figures/fig_ood_calibration.pdf  used on input line 10
 .
 (pdftex.def)             Requested size: 167.57533pt x 112.86816pt.
- [7]) (./Sections/07_conclusion.tex) (./main.bbl
-[8 <./Figures/fig_ood_calibration.pdf>] [9]) [10
 
-] (./Sections/08_appendix.tex
-(./tables/table_per_task_compact.tex)
+Underfull \vbox (badness 3849) has occurred while \output is active []
+
+ [7])
+(./Sections/07_conclusion.tex) (./main.bbl [8 <./Figures/fig_ood_calibration.pd
+f>] [9]) [10
+
+] (./Sections/08_appendix.tex (./tables/table_per_task_compact.tex)
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 5.0pt on input line 67.
 
@@ -506,20 +493,30 @@ n-er-a-
  []
 
 
-Underfull \hbox (badness 1715) in paragraph at lines 110--114
-\T1/ntxtlf/m/n/10 each bench-mark. The task-native eval-u-a-tors are sup-
+Underfull \hbox (badness 1888) in paragraph at lines 109--113
+[]\T1/ntxtlf/m/n/10 These pro-to-cols fol-low the stan-dard pub-lic se-tups
+ []
+
+
+Underfull \hbox (badness 1997) in paragraph at lines 109--113
+\T1/ntxtlf/m/n/10 for each bench-mark. An eval-u-a-tion adapter sup-plies
+ []
+
+
+Underfull \hbox (badness 1776) in paragraph at lines 109--113
+\T1/ntxtlf/m/n/10 the task-native eval-u-a-tors to the run-ner through the
  []
 
 [11
 
-] [12]
-Underfull \hbox (badness 1325) in paragraph at lines 224--234
+]
+Underfull \hbox (badness 1325) in paragraph at lines 223--233
  \T1/ntxtlf/b/n/10 Bench-mark de-con-tam-i-na-tion. \T1/ntxtlf/m/n/10 We de-con
 -tam-i-nate the
  []
 
-
-Underfull \hbox (badness 1057) in paragraph at lines 304--319
+[12]
+Underfull \hbox (badness 1057) in paragraph at lines 303--318
 \T1/ntxtlf/m/n/10 space $\OT1/cmr/m/n/10 
 $ \T1/ntxtlf/m/n/10 has $\OT1/cmr/m/n/10 24$ \T1/ntxtlf/m/n/10 sites: $\OT1/cmr
 /m/n/10 8$ \T1/ntxtlf/m/n/10 lay-ers $\OMS/cmsy/m/n/10 ^^B \OT1/cmr/m/n/10 3$ \
@@ -527,47 +524,23 @@ T1/ntxtlf/m/n/10 per-layer mod-
  []
 
 
-Underfull \hbox (badness 1286) in paragraph at lines 304--319
+Underfull \hbox (badness 1286) in paragraph at lines 303--318
 \T1/ntxtlf/m/n/10 ers are cho-sen uni-formly by depth; for the 32-layer
  []
 
 [13]
-Underfull \hbox (badness 10000) in paragraph at lines 388--388
-[]\T1/ntxtlf/m/n/9 near-support same
- []
-
-
-Underfull \hbox (badness 6032) in paragraph at lines 389--390
+Underfull \hbox (badness 3449) in paragraph at lines 392--393
 []\T1/ntxtlf/m/n/9 200--500 la-bels (0.42--1.06
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 391--391
-[]\T1/ntxtlf/m/n/9 L2-
- []
-
-
-Underfull \hbox (badness 5681) in paragraph at lines 397--407
- \T1/ntxtlf/b/n/10 Multi-fidelity la-bels. \T1/ntxtlf/m/n/10 High-fidelity su-p
-er-vi-sion uses
- []
-
-
-Underfull \hbox (badness 2547) in paragraph at lines 411--415
-\T1/ntxtlf/m/n/10 with weights $\OML/cmm/m/it/10 w[][]\OT1/cmr/m/n/10 0\OML/cmm
-/m/it/10 :\OT1/cmr/m/n/10 4\OML/cmm/m/it/10 ;  w[][]\OT1/cmr/m/n/10 0\OML/cmm/m
-/it/10 :\OT1/cmr/m/n/10 6$ \T1/ntxtlf/m/n/10 and an-chors $\OML/cmm/m/it/10 A \
-OT1/cmr/m/n/10 =
- []
-
-
-Underfull \hbox (badness 2181) in paragraph at lines 417--432
+Underfull \hbox (badness 2181) in paragraph at lines 421--436
  \T1/ntxtlf/b/n/10 Cost model and seeds. \T1/ntxtlf/m/n/10 We mea-sure all cost
 s on
  []
 
 
-Underfull \hbox (badness 1831) in paragraph at lines 417--432
+Underfull \hbox (badness 1831) in paragraph at lines 421--436
 \OT1/cmr/m/n/10 8[]$\T1/ntxtlf/m/n/10 NVIDIA H20-96GB (SXM, bfloat16, NVLink) a
 s
  []
@@ -575,14 +548,14 @@ s
 [14] (./tables/table_cost_axes.tex) (./tables/table_hf_budget.tex)
 (./tables/table_pool_scaling.tex)
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
-(Font)              scaled to size 6.0pt on input line 498.
- [15] (./tables/table_ablations.tex)
+(Font)              scaled to size 6.0pt on input line 505.
+ (./tables/table_ablations.tex [15])
 (./tables/table_transfer_matrix.tex)
-<Figures/fig_config_sensitivity.pdf, id=96, 504.20322pt x 197.05571pt>
+<Figures/fig_config_sensitivity.pdf, id=98, 504.20322pt x 197.05571pt>
 File: Figures/fig_config_sensitivity.pdf Graphic file (type pdf)
 <use Figures/fig_config_sensitivity.pdf>
 Package pdftex.def Info: Figures/fig_config_sensitivity.pdf  used on input line
- 533.
+ 540.
 (pdftex.def)             Requested size: 505.89pt x 197.71973pt.
  (./tables/table_ood_levels.tex) [16
 
@@ -594,13 +567,13 @@ L3 programming layer <2020/03/25>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 7766 strings out of 467525
- 126914 string characters out of 5418982
- 554058 words of memory out of 5000000
- 36488 multiletter control sequences out of 15000+600000
- 677953 words of font info for 81 fonts, out of 8000000 for 9000
+ 7782 strings out of 467525
+ 127111 string characters out of 5418982
+ 555058 words of memory out of 5000000
+ 36500 multiletter control sequences out of 15000+600000
+ 681044 words of font info for 93 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,13n,117p,1634b,591s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,13n,117p,1284b,593s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
 </usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></
@@ -620,10 +593,10 @@ exmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2026/texmf-dis
 t/fonts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts/t
 ype1/public/newtx/ztmr.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/publ
 ic/newtx/ztmri.pfb>
-Output written on main.pdf (17 pages, 1755208 bytes).
+Output written on main.pdf (17 pages, 2051156 bytes).
 PDF statistics:
- 207 PDF objects out of 1000 (max. 8388607)
- 124 compressed objects within 2 object streams
+ 209 PDF objects out of 1000 (max. 8388607)
+ 125 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
