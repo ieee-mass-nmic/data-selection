@@ -1,24 +1,24 @@
 \section{Method: PCU-Select}
 \label{sec:method}
 
-PCU-Select learns the surrogate in Eq.~\eqref{eq:surrogate} and uses it to select a budgeted subset for a target PEFT and task. Figure~\ref{fig:architecture} shows two stages. Offline, PCU-Select extracts reusable sample and task signals, constructs gradient-proxy and short-update labels, and trains the scorer. Online, it encodes a target $(p^{*},t^{*})$ and measures its structural support from the training registry. It then scores the pool and allocates the budget across semantic clusters. Algorithms~\ref{alg:offline} and~\ref{alg:online} in the appendix specify both stages.
+PCU-Select learns the conditional utility surrogate in Eq.~\eqref{eq:surrogate} and selects a budgeted subset for a target PEFT--task pair. Figure~\ref{fig:architecture} summarizes two stages. Offline, it extracts reusable sample and task signals, constructs two types of utility label, and trains one scorer. Online, it combines cached sample features with a target $(p^{*},t^{*})$, scores the pool, and distributes budget across semantic clusters. Algorithms~\ref{alg:offline} and~\ref{alg:online} specify both stages.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{Figures/image.png}
-\caption{PCU-Select separates reusable offline supervision from online PEFT--task scoring. An intervention site is a selected module output that provides a common coordinate across PEFT families. The 24 sites in $\Omega$ connect sample gradients, task sketches, and PEFT configurations. The deterministic 128-dimensional PEFT code contains a 96-dimensional site/operator mask, 16 capacity dimensions, and 16 recipe dimensions. The figure calls the gradient proxy low fidelity and the short-update measurements high fidelity.}
+\includegraphics[width=\textwidth]{Figures/image.jpg}
+\caption{PCU-Select separates reusable offline supervision from online PEFT--task scoring. Its shared coordinate system $\Omega$ contains 24 intervention sites, or selected module outputs. Sample and task-sketch gradients use these site indices, while the PEFT code identifies the sites affected by each configuration. The 128-dimensional PEFT code comprises a 96-dimensional site/operator mask, 16 capacity dimensions, and 16 recipe dimensions. Low-fidelity gradient proxies provide broad coverage; high-fidelity short updates provide direct, costlier supervision.}
 \label{fig:architecture}
 \end{figure*}
 
 \subsection{Shared Intervention Sites Enable Cross-PEFT Reuse}
 
-PEFT families expose parameter tensors with different shapes and roles, which prevents a shared raw-gradient cache. PCU-Select instead compares them at \emph{intervention sites}: selected module outputs through which PEFT updates affect the backbone. In plain terms, a site records how a sample or task pushes an intermediate activation. This signal remains comparable across PEFT parameter shapes.
+PEFT families expose parameter tensors with different shapes and roles, so their raw gradients cannot share one cache~\cite{hu2022lora,houlsby2019adapters,liu2022ia3}. PCU-Select instead uses a fixed set $\Omega$ of \emph{intervention sites}. Each site is a selected module output through which a PEFT update affects the backbone. The set $\Omega$ is a shared coordinate system because sample gradients, task gradients, and each PEFT's map of affected sites all use the same index $\omega$.
 
-PCU-Select hooks attention, MLP, and post-residual outputs at eight evenly spaced Transformer layers, giving $|\Omega|=24$. By the chain rule, PEFT-parameter gradients factor through the upstream gradients at the module outputs they modify. A site gradient therefore provides a shared proxy coordinate without reconstructing any full PEFT-parameter gradient. These coordinates avoid shape mismatches between fused and split projections. The post-residual coordinate also places adapters alongside LoRA and (IA)$^3$.
+PCU-Select hooks attention, MLP, and post-residual outputs at eight evenly spaced Transformer layers, giving $|\Omega|=24$. A site's response-loss gradient describes how a sample or task pushes that activation. By the chain rule, PEFT-parameter gradients factor through gradients at the module outputs they modify. Site gradients therefore avoid both full PEFT-parameter reconstruction and shape mismatches between fused and split projections. Post-residual sites place adapters in the same index space as LoRA and (IA)$^3$.
 
-The site mask records \emph{where} a configuration acts. Separate operator and capacity features record \emph{how} strongly and by what mechanism it acts. This factorization lets all configurations reuse one sample signature without treating additive, multiplicative, and bottleneck updates as interchangeable.
+A site index records only \emph{where} a configuration acts. PCU-Select separately encodes operator and capacity features to record \emph{how} it acts and how much it can update. This factorization reuses one sample signature without treating additive, multiplicative, and bottleneck updates as equivalent.
 
-Each PEFT configuration maps to a site mask and an operator type. Attention LoRA and (IA)$^3$-attention touch attention-output sites; MLP LoRA and (IA)$^3$-FFN touch MLP-output sites; adapters touch block-residual sites; and prefix tuning touches attention-output sites. The code represents BitFit as a bias shift. PCU-Select assigns each site a normalized PEFT weight
+Each configuration maps to a site mask and operator type. Attention LoRA and (IA)$^3$-attention map to attention-output sites. MLP LoRA and (IA)$^3$-FFN map to MLP-output sites, while adapters map to block-residual sites. Prefix tuning maps to attention-output sites; BitFit maps to a bias shift. These mappings define each normalized site weight:
 \begin{equation}
   \begin{aligned}
   w_p^{\omega}
@@ -30,62 +30,64 @@ Each PEFT configuration maps to a site mask and an operator type. Attention LoRA
   \end{aligned}
   \label{eq:site-weight}
 \end{equation}
-Untouched sites receive zero weight, while capacity raises the weight of touched sites. Appendix Table~\ref{tab:capacity} maps LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, and BitFit bias count to a trainable-parameter scale. The $\tanh$ limits the influence of high-capacity configurations. PCU-Select encodes operator type separately in $z_p$ because a family-wide scalar would cancel under the normalization in Eq.~\eqref{eq:site-weight}.
+Here $\mathrm{mask}(p,\omega)$ is zero at untouched sites, and $\mathrm{cap}(p,\omega)$ measures trainable capacity. The width $d_{\mathrm{model}}$ normalizes capacity, $\eta$ controls saturation through $\tanh$, and $\varepsilon_w$ keeps the denominator nonzero. Thus, $\tilde{w}_p^{\omega}$ distributes unit weight over the sites used by $p$. Appendix Table~\ref{tab:capacity} maps LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, and BitFit bias count to this scale. Operator type remains separate in $z_p$ because a family-wide scalar would cancel under Eq.~\eqref{eq:site-weight}'s normalization.
 
 \subsection{Shared Representations Preserve Target Specificity}
 
-The three representations answer different questions: what the example contains, what the task needs, and where the PEFT can act. PCU-Select expresses all three in the shared site coordinate system before constructing utility labels.
+Shared site indices make signals comparable, but the scorer must still distinguish each sample, task, and PEFT. PCU-Select uses three fixed-length vectors: the sample representation describes the example, the task representation describes the target need, and the PEFT representation describes where and how training acts. Site gradients supply separate label-construction signals.
 
-The sample representation $z_x=[e_x;d_x;a_x]\in\mathbb{R}^{848}$ combines semantic content, difficulty, format, and activation behavior. Its 768-dimensional semantic vector is the frozen \texttt{sentence-transformers/all-mpnet-base-v2} embedding of the instruction and response~\cite{song2020mpnet,reimers2019sentencebert}. We do not train this encoder on the candidate pool or target benchmarks. A 16-dimensional vector records length, response-LM loss, entropy, and format features. A 64-dimensional activation signature summarizes response-token hidden states at the eight sampled layers.
+The sample representation $z_x=[e_x;d_x;a_x]\in\mathbb{R}^{848}$ combines semantic, descriptive, and activation features. The 768-dimensional $e_x$ is the frozen \texttt{sentence-transformers/all-mpnet-base-v2} embedding of the instruction and response~\cite{song2020mpnet,reimers2019sentencebert}. This encoder remains frozen during pool and target-benchmark processing. The 16-dimensional $d_x$ records length, response-LM loss, entropy, and format. The 64-dimensional $a_x$ summarizes response-token hidden states at the eight sampled layers.
 
-The task representation $z_t\in\mathbb{R}^{848}$ describes what the target task needs. PCU-Select mean-pools $z_x$ over the 32 examples in the task sketch. It also averages their per-site gradients into $g_t^{\omega}$ for the gradient-proxy label. These $24\times256$ gradients remain separate from $z_t$.
+Utility is task-relative, so PCU-Select forms $z_t\in\mathbb{R}^{848}$ by mean-pooling $z_x$ over the task sketch's 32 examples. For proxy labels, it separately averages their site gradients into $g_t^{\omega}$. These $24\times256$ values remain outside $z_t$ and serve only label construction.
 
-The PEFT representation $z_p=[m_p;c_p;r_p]\in\mathbb{R}^{128}$ describes where and how the target configuration acts. A $24\times4$ site/operator mask ($m_p$, 96 dimensions) marks active sites, additive updates, multiplicative scaling, and prefix-style control. Two 16-dimensional vectors encode capacity ($c_p$) and the training recipe ($r_p$). At the 24-site resolution, q/v and q/k/v/o LoRA touch the same attention-output sites. The capacity and recipe vectors preserve their projection-level distinction.
+The PEFT representation records the target trainable subspace. In $z_p=[m_p;c_p;r_p]\in\mathbb{R}^{128}$, the $24\times4$ mask $m_p$ contributes 96 dimensions. Its channels mark active sites, additive updates, multiplicative scaling, and prefix-style control. Two 16-dimensional vectors encode capacity $c_p$ and training recipe $r_p$. At this site resolution, q/v and q/k/v/o LoRA share attention-output sites, while capacity and recipe preserve their projection-level distinction.
 
-Prefix, P-Tuning, and BitFit use the same deterministic site, operator, capacity, and recipe rules as the seen families. The model uses only these structural features; it has no learned family lookup or operator centroid. Here, \emph{zero-shot} means scoring a new configuration without target-specific short-update labels. When a PEFT family provides such labels, the residual head described below can calibrate the score.
+Prefix, P-Tuning, and BitFit use the same deterministic encoding rules as seen families. The scorer has no learned family lookup or operator centroid. The support policy below decides whether a target uses direct scoring, calibrated scoring, or a per-target selector.
 
-PCU-Select trains from two complementary label sources. Gradient-proxy labels cheaply cover the full candidate pool. Short-update labels measure the effect of actual PEFT updates on fewer examples. Together they provide broad ranking structure and correct it near consequential selection decisions.
+Training these representations requires labels for many $(x,p,t)$ triples, but measuring every PEFT update would defeat amortization. PCU-Select instead uses \emph{multi-fidelity supervision}, which combines labels with different costs and directness. A low-fidelity gradient proxy cheaply covers the pool. High-fidelity short updates directly measure sketch-loss reduction for fewer triples. Together, they learn broad ranking structure and correct errors near the subset cutoff.
 
-The \emph{gradient-proxy label} measures alignment between each sample and the task sketch at sites used by the target PEFT:
+The \emph{gradient-proxy label} measures alignment between a sample and the task sketch at sites used by the target PEFT:
 \begin{equation}
   u^{\mathrm{lo}}(x,p,t)=\sum_{\omega\in\Omega}\tilde{w}_p^{\omega}
   \cos\!\left(g_x^{\omega},g_t^{\omega}\right).
   \label{eq:ulo}
 \end{equation}
-Here $g_x^{\omega}$ derives from the response-token loss gradient at site $\omega$. A unit-normalized Johnson--Lindenstrauss random projection~\cite{johnson1984jl} compresses it to a fixed length while approximately preserving its geometry. The sketch mean gives $g_t^{\omega}$. All task sketches use response-token cross-entropy for these signatures. PCU-Select reserves task-native metrics such as option likelihood, Pass@1, and F1 for downstream evaluation. Because the cosine proxy can be negative, PCU-Select replaces raw values with their ranks inside each $(p,t)$ bucket before proxy distillation and ranking. Once it caches sample signatures, this proxy cheaply labels many $(x,p,t)$ triples.
+Here $g_x^{\omega}$ is the response-token loss gradient at site $\omega$. A Johnson--Lindenstrauss random projection~\cite{johnson1984jl} compresses it to 256 dimensions and unit-normalizes the result. The task-sketch mean gives $g_t^{\omega}$. Equation~\eqref{eq:ulo} therefore measures alignment only at sites used by $p$. All sketches use response-token cross-entropy for these signatures; task-native metrics such as option likelihood, Pass@1, and F1 remain downstream evaluation metrics. Because cosine values can be negative, PCU-Select rank-normalizes them within each $(p,t)$ bucket before proxy distillation and ranking. Cached sample signatures then label many $(x,p,t)$ triples without new gradient extraction.
 
-The \emph{short-update label} checks what happens after actual PEFT updates. It corrects the proxy near the selection boundary. For each sampled triple, PCU-Select starts from two checkpoints: the base model and a warm checkpoint after adaptation has begun. It forms a mini-batch $\mathcal{B}(x)$ from the sampled example and seven in-bucket fillers. PCU-Select performs a short PEFT update on this batch, then measures the reduction in sketch loss:
+The \emph{short-update label} measures realized sketch-loss reduction near the subset cutoff. For each sampled triple, PCU-Select uses two anchors $\theta_a$: the base model and a warm checkpoint after adaptation has begun. The horizon $h$ is the number of short-update steps. A mini-batch $\mathcal{B}(x)$ contains the sampled example and seven condition-matched fillers. PCU-Select applies PEFT $p$ for $h$ steps and measures
 \begin{equation}
   \Delta(x,p,t,a,h)=L_{V_t}(\theta_a)-
   L_{V_t}\!\left(\mathrm{Adapt}^{h}_{p}(\mathcal{B}(x);\theta_a)\right).
   \label{eq:delta}
 \end{equation}
-Rank-normalized reductions after $h\in\{1,4\}$ update steps from both anchors define $u^{\mathrm{hi}}$. The mini-batch $\mathcal{B}(x)$ estimates a stable mini-batch marginal instead of an isolated single-example gradient. PCU-Select allocates the 10K short-update labels in three stages. Coverage sampling first spreads labels across the registry and needs no scorer.
+Thus, $\Delta$ is the task-sketch loss before the update minus its loss afterward. Rank-normalized reductions for $h\in\{1,4\}$ from both anchors define $u^{\mathrm{hi}}$. The fillers make this mini-batch effect more stable than a single-example update. PCU-Select allocates 10K short-update labels in three stages. Coverage sampling first spreads labels across the registry without a scorer.
 
-PCU-Select then trains a provisional scorer on the coverage labels and the gradient proxy. The provisional model supplies rank estimates and an uncertainty scale. Uncertainty sampling targets triples with large predicted uncertainty. Boundary sampling targets disagreements between predicted and observed ranks near selection decisions. Every rank normalization compares labels from the same PEFT, task, anchor, and horizon bucket.
+Coverage labels and the proxy then train a provisional scorer. It predicts ranks and a per-triple uncertainty scale, an estimate of prediction noise. Uncertainty sampling selects triples with large scales. Boundary sampling selects large predicted--observed rank disagreements near the cutoff. Every rank normalization compares labels within one PEFT, task, anchor, and horizon bucket.
 
-The two label sources serve complementary roles. The gradient proxy cheaply orders the full pool for many PEFT--task pairs. Short-update labels measure realized sketch-loss reduction near the selection boundary. The base and warm checkpoints test whether utility persists after adaptation begins. Two horizons reduce dependence on a single update length. Bucket-wise ranking compares the signals without assuming a shared raw-loss scale across tasks or configurations.
+The proxy cheaply orders the full pool, while short updates target consequential ranking errors. Two anchors test whether utility persists after adaptation begins; two horizons reduce dependence on one update length. Ranking within condition-matched buckets avoids assuming a shared raw-loss scale across tasks or configurations.
 
 \subsection{Conditional Scoring Produces Target-Specific Subsets}
 
-The scorer combines the three representations and predicts a utility mean and uncertainty scale, $(\hat{\mu},\hat{\sigma})=s_{\phi}(z_x,z_p,z_t)$. Separate encoders first map $z_x$, $z_p$, and $z_t$ into hidden vectors. FiLM modulation~\cite{perez2018film} then uses the PEFT and task codes to rescale and shift the sample features. In concrete terms, the target configuration and task determine which sample features receive more emphasis. A bilinear term directly models compatibility between sample and PEFT features.
+The scorer consumes $(z_x,z_p,z_t)$ and predicts $(\hat{\mu},\hat{\sigma})=s_{\phi}(z_x,z_p,z_t)$. Here $\hat{\mu}$ gives predicted mean utility, while $\hat{\sigma}$ gives a positive, input-dependent uncertainty scale. Separate encoders map the three inputs into hidden vectors. FiLM modulation~\cite{perez2018film} uses the PEFT and task codes to rescale and shift sample features. A bilinear term represents sample--PEFT compatibility.
 
-Training combines ranking and regression on short-update labels, distillation from the gradient proxy, and a heteroscedastic uncertainty loss. The uncertainty loss allows different triples to have different predicted noise levels. Stage A learns broad conditional structure from the gradient proxy. Stage B enables all losses and selects a checkpoint on held-out PEFT--task pairs. Before downstream evaluation, we fix the sketch size, label allocation, anchors, horizons, and scalar selection hyperparameters on these held-out pairs.
+Stage A distills gradient-proxy ranks to learn broad conditional structure. Stage B continues proxy distillation and adds ranking and regression on short-update labels plus a heteroscedastic uncertainty loss. Here \emph{heteroscedastic} means that predicted noise can differ across triples. PCU-Select selects the Stage B checkpoint on held-out PEFT--task pairs. It also fixes the sketch size, label allocation, anchors, horizons, and scalar selection hyperparameters on these pairs before downstream evaluation.
 
-At application time, PCU-Select ranks examples by a conservative score that subtracts a fraction of the predicted uncertainty scale:
+A target's structural support level determines whether PCU-Select applies the scorer directly or calibrates it. Relative to the seen registry, L0 resembles a seen configuration, L1 makes a larger shift within a seen family, and L2 introduces an unseen family. Seen targets use the trained scorer directly. L0 targets run \emph{zero-shot}: PCU-Select scores a new configuration without target-specific short-update labels. L1 and L2 targets use calibrated scoring when compatible labels exist and a per-target selector otherwise.
+
+After any required calibration, PCU-Select converts the two scorer outputs into a conservative ranking score:
 \begin{equation}
   q(x)=\hat{\mu}(x,p^{*},t^{*})-\lambda\hat{\sigma}(x,p^{*},t^{*}),\qquad \lambda=0.2.
   \label{eq:qscore}
 \end{equation}
-The scale acts as a ranking penalty, not a confidence interval. Pure top-$k$ ranking can over-select near-duplicates. PCU-Select therefore clusters examples in semantic space. It allocates budget across $K$ clusters indexed by $k\in\{1,\ldots,K\}$:
+The uncertainty scale reduces the rank of examples whose predicted utility is noisy. It serves as a ranking penalty, not a confidence interval.
+
+Ranking by $q$ alone can over-select near-duplicates, so PCU-Select clusters examples in semantic space before assigning the budget. It allocates budget $B$ across $K$ clusters $C_k$, where $k\in\{1,\ldots,K\}$:
 \begin{equation}
   b_k=\mathrm{round}\!\left(
   B\frac{(v_k^{+})^{\gamma}|C_k|^{1-\gamma}}
   {\sum_j(v_j^{+})^{\gamma}|C_j|^{1-\gamma}}\right),\qquad \gamma=0.6.
   \label{eq:quota}
 \end{equation}
-Here $v_k$ is the mean conservative score among the top 10\% of examples in cluster $C_k$, and $v_k^{+}=\max(v_k,0)$. For the 300K pool, $K=\max(50,\lfloor\sqrt{N}\rfloor)$ produces 547 clusters with about 548 examples each. The reported 0.36 GPU-hours per PEFT--task application includes clustering. The final subset takes the top-$b_k$ examples by $q$ within each cluster. Clusters with non-positive value receive no budget. Deterministic remainder handling makes the quotas sum to $B$.
+Here $v_k$ is the mean conservative score among the top 10\% of examples in $C_k$, and $v_k^{+}=\max(v_k,0)$. The factors $v_k^{+}$ and $|C_k|$ balance cluster value and size. For the 300K pool, $K=\max(50,\lfloor\sqrt{N}\rfloor)$ produces 547 clusters of about 548 examples. The reported 0.36 GPU-hours per PEFT--task application includes clustering. PCU-Select takes the top-$b_k$ examples by $q$ within each cluster. Non-positive clusters receive no budget; deterministic remainder handling makes the quotas sum to $B$.
 
-The registry assigns each unseen configuration to one of three support levels. Near-support targets (L0) resemble a seen configuration, far-support targets (L1) make larger shifts within a seen family, and unseen-family targets form L2. Far-support targets use an optional residual calibration head when their PEFT family provides short-update labels. The residual head is a small linear layer that corrects the scorer.
-
-For seen and near-support targets, PCU-Select performs all gradient extraction and label construction offline, and the online path uses only cached features and scorer forward passes. Far-support targets may add a small calibration set, but never rebuild a target-specific gradient datastore. The evaluation next tests whether this reuse preserves LESS-level quality, reduces registry cost, and transfers to unseen configurations.
+For seen and L0 targets, all gradient extraction and label construction occur offline; online selection uses cached features and scorer forward passes. L1 and calibratable L2 targets add a small label set without rebuilding a target-specific gradient datastore. The evaluation next tests whether this reuse preserves LESS-level quality, reduces registry cost, and transfers across support levels.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot the paired unseen-configuration gaps from the canonical JSON summary."""
+"""Plot positive performance drops for unseen PEFT configurations."""
 
 from __future__ import annotations
 
@@ -30,13 +30,13 @@ def main() -> None:
 
     plt.rcParams.update(
         {
-            "font.size": 8,
+            "font.size": 11,
             "font.family": "serif",
             "font.serif": ["Times New Roman", "Times", "DejaVu Serif"],
-            "axes.labelsize": 8,
-            "xtick.labelsize": 7,
-            "ytick.labelsize": 7,
-            "legend.fontsize": 7,
+            "axes.labelsize": 11,
+            "xtick.labelsize": 10,
+            "ytick.labelsize": 10,
+            "legend.fontsize": 10,
             "pdf.fonttype": 42,
             "ps.fonttype": 42,
             "axes.spines.top": False,
@@ -45,33 +45,37 @@ def main() -> None:
     )
 
     x = np.arange(len(groups), dtype=float)
-    width = 0.23
-    fig, ax = plt.subplots(figsize=(3.35, 2.30))
-    for offset, mode in zip((-1, 0, 1), modes):
-        first = True
+    group_offsets = []
+    for group in groups:
+        available = [mode for mode in modes if group["modes"][mode] is not None]
+        positions = np.linspace(-0.24, 0.24, len(available)) if len(available) > 1 else [0.0]
+        group_offsets.append(dict(zip(available, positions)))
+    fig, ax = plt.subplots(figsize=(3.35, 1.80))
+    for mode in modes:
+        xs = []
+        drops = []
         for idx, group in enumerate(groups):
             value = group["modes"][mode]
             if value is None:
                 continue
-            ax.bar(
-                x[idx] + offset * width,
-                value["gap"],
-                width,
-                yerr=value["std"],
-                capsize=2,
-                color=colors[mode],
-                label=labels[mode] if first else None,
-            )
-            first = False
+            xs.append(x[idx] + group_offsets[idx][mode])
+            drops.append(-value["gap"])
+        ax.bar(
+            xs,
+            drops,
+            width=0.22,
+            color=colors[mode],
+            label=labels[mode],
+        )
 
-    ax.axhline(0.0, color="black", linewidth=0.8)
     ax.set_xticks(
         x,
-        ["near\nLESS", "far\nLESS", "BitFit\nLESS", "Prefix/PT\nRDS+"],
+        ["L0 near\n(LESS)", "L1 far\n(LESS)", "L2 BitFit\n(LESS)", "L2 Prefix/PT\n(RDS+)"],
     )
-    ax.set_ylabel("gap to reference (points)")
-    ax.set_ylim(-8.2, 0.9)
-    ax.legend(frameon=False, ncol=3, loc="lower left")
+    ax.set_ylabel("Drop from reference (points)")
+    ax.set_ylim(0.0, 8.2)
+    ax.set_yticks([0, 2, 4, 6, 8])
+    ax.legend(frameon=False, ncol=1, loc="upper left", handletextpad=0.4, labelspacing=0.2)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUTPUT, bbox_inches="tight", pad_inches=0.03)
     plt.close(fig)

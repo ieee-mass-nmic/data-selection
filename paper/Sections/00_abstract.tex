@@ -1,1 +1,18 @@
-A machine-learning platform often maintains several parameter-efficient fine-tuning (PEFT) configurations for different tasks and deployment budgets. Gradient-based data selectors preserve target specificity, but they rebuild a gradient datastore whenever the PEFT configuration changes. Reusing one subset avoids this computation but loses quality because different trainable subspaces value different examples. We present PCU-Select, which amortizes data selection across a PEFT registry. PCU-Select represents every supported PEFT family at 24 shared intervention sites: Transformer outputs through which PEFT updates affect the model. It caches reusable sample and task signals at these sites, then combines them with a code that describes the target PEFT. After a one-time offline stage, a single scorer ranks candidates for any supported PEFT--task pair without rebuilding gradients. On Llama-2-7B across four tasks and five seen PEFTs, PCU-Select achieves 35.18 average quality, nearly tying per-PEFT LESS at 35.14. Onboarding a new four-task PEFT costs 1.44 GPU-hours instead of 63.2, a 44-fold reduction. PCU-Select thus preserves the quality of per-PEFT selection while reducing its marginal cost at registry scale.
+A large language model (LLM) serving system typically maintains a registry of
+fine-tuning configurations for diverse tasks and deployment budgets. These
+configurations vary in which modules are trained and how they are updated. This
+diversity poses a challenge to gradient-based data selection: the selector must rebuild a
+target-specific gradient datastore for every configuration, making cost scale
+linearly with registry size. Reusing one subset avoids this cost but can reduce
+quality because different configurations favor different examples. PCU-Select
+reuses expensive selection computations while producing a distinct subset for
+each PEFT--task pair. The key insight is to map different PEFT methods onto a common
+set of 24 transformer outputs through which PEFT updates affect the backbone. We
+cache reusable sample and task features at these outputs and combine them with a
+compact encoding of the target configuration. After a one-time offline stage, a
+single scorer ranks candidates for any supported PEFT--task pair without
+rebuilding gradients. On Llama-2-7B across four tasks and five PEFT
+configurations, PCU-Select lowers the cost of adding a new four-task
+configuration from 63.2 to 1.44 GPU-hours, a $44\times$ reduction, and cuts the
+five-configuration selection cost from 316.0 to 151.2 GPU-hours. It maintains average downstream quality comparable to LESS. PCU-Select thus replaces
+repeated per-configuration computation with reusable offline processing.

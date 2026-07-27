@@ -2,13 +2,6 @@
 \centering
 \small
 \setlength{\tabcolsep}{5pt}
-\caption{The offline short-update label budget sets the quality--break-even
-trade-off. Short-update labeling is $58\%$ of offline cost, so a smaller budget
-lowers both offline GPU-hours and the break-even PEFT count, but drops below
-LESS-level quality. The $10$K budget is the smallest that preserves the aggregate
-quality tie; \emph{Break-even} is the number of four-task PEFTs past which
-PCU-Select undercuts per-PEFT LESS.}
-\label{tab:hf-budget}
 \begin{tabular}{rrrrr}
 \toprule
 Labels & \shortstack{Offline\\GPU-h} & \shortstack{Avg.\\quality} & \shortstack{Gap to\\LESS} & Break-even \\
@@ -18,4 +11,11 @@ Labels & \shortstack{Offline\\GPU-h} & \shortstack{Avg.\\quality} & \shortstack{
 10K  & 144.0 & \textbf{35.18} & $+0.04$ & 2.33 \\
 \bottomrule
 \end{tabular}
+\caption{The offline short-update label budget sets the quality--break-even
+trade-off. Short-update labeling is $58\%$ of offline cost, so a smaller budget
+lowers both offline GPU-hours and the break-even PEFT count, but drops below
+LESS-level quality. The $10$K budget is the smallest that preserves the aggregate
+quality tie; \emph{Break-even} is the number of four-task PEFTs past which
+PCU-Select undercuts per-PEFT LESS.}
+\label{tab:hf-budget}
 \end{table}

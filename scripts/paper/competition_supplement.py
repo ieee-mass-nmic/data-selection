@@ -127,7 +127,7 @@ def transfer_matrix():
 
 # ---------------------------------------------------------------- OOD levels
 def ood_levels():
-    """Emit the paired-gap table from the same JSON used by Figure 4."""
+    """Emit the positive-drop table from the same JSON used by Figure 3."""
     payload = json.loads(
         (ROOT / "paper" / "data" / "competition_ood_summary.json").read_text()
     )
@@ -138,7 +138,7 @@ def ood_levels():
             if value is None:
                 return "--"
             return (
-                f"{value['gap']:+.2f}{{\\scriptsize$\\pm$"
+                f"{-value['gap']:.2f}{{\\scriptsize$\\pm$"
                 + f"{value['std']:.2f}}}"
             )
 
@@ -148,12 +148,11 @@ def ood_levels():
             f"{cell('zero-shot')} & {cell('cal200')} & {cell('cal500')} \\\\"
         )
     cap = (
-        "Transfer to unseen configurations over GSM8K, HumanEval, and MMLU. "
-        "Each entry is PCU-Select minus the named target-specific reference, "
-        "reported as paired mean$\\pm$sample SD over three target-training seeds. "
-        "Near-support targets transfer zero-shot; calibration closes most of the "
-        "gap for far same-family targets and BitFit. Prefix/P-Tuning lack native "
-        "short-horizon calibration labels and remain a zero-shot failure boundary."
+        "Performance drop from the named reference across GSM8K, HumanEval, and "
+        "MMLU (reference minus PCU-Select; paired mean$\\pm$sample SD over three "
+        "target-training seeds). Lower is better; zero denotes parity. L0 uses "
+        "zero-shot only. Calibration reduces far same-family and BitFit drops. "
+        "Prefix/P-Tuning lack compatible labels."
     )
     w("table_ood_levels.tex", [TABLESTAR.format(
         tc="4pt", cap=cap, lab="tab:ood-levels", spec="lllrrr",

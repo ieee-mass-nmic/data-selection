@@ -1,21 +1,10 @@
-\begin{table*}[t]
+\begin{table}[t]
 \centering
 \small
-\setlength{\tabcolsep}{6pt}
-\caption{Central quality--cost result over four tasks and five seen PEFT
-configurations. Costs are selection-stage GPU-hours; the shared downstream
-tuning run (12.8 GPU-hours per PEFT--task--seed) is identical across selectors and
-excluded. \emph{Fixed/shared} is paid once regardless of registry size;
-\emph{marginal} is the cost of onboarding one additional four-task PEFT;
-\emph{total} serves all five. \emph{Gap} is the paired difference from per-PEFT
-LESS in averaged task-native points. PEFT-agnostic selectors are cheaper but lose
-quality; PCU-Select is the quality-preserving amortized point---its
-\textbf{marginal} cost of a new PEFT is $63.2/1.44\approx44\times$ below LESS.
-Boldface marks the best average quality.}
-\label{tab:quality-cost-headline}
+\setlength{\tabcolsep}{2pt}
 \begin{tabular}{lrrrrr}
 \toprule
-Method & \shortstack{Fixed/shared\\cost} & \shortstack{Marg.\ cost\\/ new PEFT} & \shortstack{Total cost\\(5 PEFTs)} & \shortstack{Avg.\\quality} & \shortstack{Gap to\\LESS} \\
+Method & Fixed & Marg. & Total & Quality & Gap \\
 \midrule
 Random          &  0.0 &  0.0 &   0.0 & 32.29 & $-2.85$ \\
 RDS+            &  1.6 &  0.0 &   1.6 & 34.44 & $-0.70$ \\
@@ -26,4 +15,8 @@ Per-PEFT LESS   &  0.0 & 63.2 & 316.0 & 35.14 & $\phantom{+}0.00$ \\
 PCU-Select      & 144.0 & \textbf{1.44} &  151.2 & \textbf{35.18} & $+0.04$ \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\caption{Quality and selection cost across five seen PEFTs. Costs are GPU-hours
+and exclude downstream tuning; \emph{Gap} is the paired difference from per-PEFT
+LESS in task-native points. Boldface marks the best quality and marginal cost.}
+\label{tab:quality-cost-headline}
+\end{table}

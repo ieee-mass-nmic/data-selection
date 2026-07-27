@@ -2,16 +2,16 @@
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\caption{Transfer to unseen configurations over GSM8K, HumanEval, and MMLU. Each entry is PCU-Select minus the named target-specific reference, reported as paired mean$\pm$sample SD over three target-training seeds. Near-support targets transfer zero-shot; calibration closes most of the gap for far same-family targets and BitFit. Prefix/P-Tuning lack compatible short-update labels and remain a zero-shot failure boundary.}
-\label{tab:ood-levels}
 \begin{tabular}{lllrrr}
 \toprule
 Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\
 \midrule
-L0 & L-r32-qkvo, AD-b16 & LESS & -0.34{\scriptsize$\pm$0.41} & -- & -- \\
-L1 & L-r64-all, AD-b256, L-r8-highlayers & LESS & -2.08{\scriptsize$\pm$0.44} & -0.91{\scriptsize$\pm$0.29} & -0.30{\scriptsize$\pm$0.36} \\
-L2-BF & BF & LESS & -4.08{\scriptsize$\pm$0.70} & -0.65{\scriptsize$\pm$0.26} & -0.23{\scriptsize$\pm$0.42} \\
-L2-Prompt & PRE-l16, PT-l32 & RDS+ & -6.97{\scriptsize$\pm$0.34} & -- & -- \\
+L0 & L-r32-qkvo, AD-b16 & LESS & 0.34$\pm$0.41 & -- & -- \\
+L1 & L-r64-all, AD-b256, L-r8-highlayers & LESS & 2.08$\pm$0.44 & 0.91$\pm$0.29 & 0.30$\pm$0.36 \\
+L2-BF & BF & LESS & 4.08$\pm$0.70 & 0.65$\pm$0.26 & 0.23$\pm$0.42 \\
+L2-Prompt & PRE-l16, PT-l32 & RDS+ & 6.97$\pm$0.34 & -- & -- \\
 \bottomrule
 \end{tabular}
+\caption{Performance drop from the named reference across GSM8K, HumanEval, and MMLU (reference minus PCU-Select; paired mean$\pm$sample SD over three target-training seeds). Lower is better; zero denotes parity. L0 uses zero-shot only. Calibration reduces far same-family and BitFit drops. Prefix/P-Tuning lack compatible labels.}
+\label{tab:ood-levels}
 \end{table*}

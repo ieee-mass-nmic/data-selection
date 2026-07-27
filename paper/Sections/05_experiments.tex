@@ -1,37 +1,87 @@
 \section{Experiments}
 \label{sec:experiments}
 
-The evaluation tests three claims. PCU-Select should match per-PEFT influence selection on downstream quality, amortize selection cost across a PEFT registry, and support new configurations according to their structural distance from the training registry.
+The evaluation tests whether PCU-Select preserves per-PEFT LESS's average downstream quality, reduces the marginal cost of adding a PEFT, and transfers to new configurations according to their structural support in the training registry. After establishing quality and cost, we examine whether conditioning produces target-specific subsets and identify which components sustain the reusable scorer.
 
 \subsection{Setup}
 
-We evaluate on GSM8K, HumanEval, MMLU, and TyDiQA~\cite{cobbe2021gsm8k,chen2021humaneval,hendrycks2021mmlu,clark2020tydiqa}. We use each task's native metric: exact match, Pass@1, accuracy, or F1. The candidate pool contains 300K mixed instruction examples, and every selector chooses 10\%. Each method uses the same target backbone, PEFT recipe, number of steps, and evaluation protocol. Only the selected subset changes. For the main table, we vary target-training seeds 0, 1, and 2 while fixing selector, scorer, sketch, and pool state at seed 0. Appendix Table~\ref{tab:appendix-peft-registry} lists the full 17-configuration registry.
+We evaluate Llama-2-7B~\cite{touvron2023llama2} on GSM8K, HumanEval, MMLU, and TyDiQA~\cite{cobbe2021gsm8k,chen2021humaneval,hendrycks2021mmlu,clark2020tydiqa}, using exact match, Pass@1, accuracy, and F1, respectively. We express these scores as percentages and use their equal-weight macro-average only as a registry-level summary. Per-task results appear in Appendix Table~\ref{tab:per-task-compact}. From a decontaminated pool of 300K mixed instruction examples, every selector chooses 10\% (Appendix~\ref{sec:appendix-repro}).
 
-This protocol isolates selection quality from optimization noise. Matched seeds give every selector the same target-training randomness. Cell-wise differences therefore reflect the subset instead of initialization or data order. Because we fix the sketch and selector state, the intervals describe variation across evaluated PEFT--task cells. They do not capture uncertainty from retraining the scorer or resampling the pool.
+The main comparison covers five configurations seen during scorer training: attention and MLP LoRA, (IA)$^3$, and adapters. The transfer study holds out configurations that vary rank, placement, learning rate, or family. Appendix Table~\ref{tab:appendix-peft-registry} lists the full 17-configuration registry.
 
-The five seen configurations cover attention and MLP LoRA, (IA)$^3$, and adapters. Held-out tests vary rank, placement, learning rate, and family. We compare Random, RDS+, and two gradient baselines, Influence and LESS; Appendix~\ref{sec:appendix-baselines} gives full specifications. \textbf{RDS+} ranks frozen external semantic embeddings against the task-sketch mean and ignores the PEFT configuration. \textbf{Influence} uses projected base-model gradients in one shared datastore. \textbf{LESS} is our per-PEFT implementation of gradient-influence selection~\cite{xia2024less}. It warms up each target adapter, builds a target-specific Adam-preconditioned gradient datastore, and ranks examples by sketch influence. PCU-Select uses its default conditional scorer, uncertainty penalty, and adaptive quotas.
+The four baselines differ in target specificity. \textbf{Random} uses neither task nor PEFT information. \textbf{RDS+}, our representation-similarity baseline, ranks frozen semantic embeddings by similarity to the task-sketch mean but ignores the PEFT configuration. \textbf{Influence}, our shared-datastore gradient baseline, ranks projected base-model gradients from one PEFT-agnostic datastore. \textbf{LESS}, our per-PEFT implementation of gradient-influence selection~\cite{xia2024less}, warms up each target adapter, builds an Adam-preconditioned gradient datastore, and ranks examples by sketch influence. PCU-Select uses its conditional scorer, uncertainty penalty, and adaptive semantic-cluster quotas. Appendix~\ref{sec:appendix-baselines} gives full specifications.
 
-\subsection{PCU-Select Matches Per-PEFT LESS}
+We hold the backbone, PEFT recipe, training steps, and evaluation protocol constant, so only the selected subset changes. The main table varies target-training seeds 0, 1, and 2 while fixing the selector, scorer, sketch, and pool at seed 0. Matched seeds give every selector the same training randomness. We obtain each descriptive 95\% interval by resampling the evaluated PEFT--task cells under this fixed selection pipeline.
+
+\subsection{PCU-Select Near-Ties Per-PEFT LESS}
+\label{sec:quality}
 
 \input{tables/table_main_results}
 
-PCU-Select averages 35.18, compared with 32.29 for Random, 34.44 for RDS+, 34.68 for Influence, and 35.14 for LESS. Across 20 PEFT$\times$task cells, PCU-Select gains 0.74 points over RDS+ and wins 17 cells. Its 95\% fixed-state interval is $[+0.38,+1.06]$. This interval resamples the evaluated cells while keeping the selector, scorer, sketch, and pool fixed. Against Influence, PCU-Select gains 0.50 points, with interval $[+0.21,+0.75]$ and 18 wins. Its 0.04-point gap to LESS has interval $[-0.26,+0.33]$ and 10 wins. Resampling separately within each task yields $[-0.15,+0.22]$. These intervals describe variation across the evaluated cells; they do not include uncertainty from retraining the complete selection pipeline.
+Table~\ref{tab:main-results} shows that PCU-Select improves on the PEFT-agnostic baselines and remains close to target-specific LESS. It gains 0.74 points over RDS+ and wins 17 of 20 PEFT$\times$task cells, with descriptive interval $[+0.38,+1.06]$. It gains 0.50 points over Influence and wins 18 cells, with interval $[+0.21,+0.75]$. Its mean is 0.04 points above LESS, with interval $[-0.26,+0.33]$ and 10 wins in 20 cells.
 
-The LESS comparison varies by task. PCU-Select gains on MMLU, stays within seed dispersion on GSM8K and HumanEval, and trails on TyDiQA and MLP-only LoRA. Appendix Table~\ref{tab:per-task-compact} reports the per-task view. \textbf{Takeaway.} Reusable supervision improves on PEFT-agnostic selection while preserving the average quality of per-PEFT LESS.
+The LESS comparison varies across tasks. PCU-Select leads on MMLU, has task-level descriptive intervals that cross zero on GSM8K and HumanEval, and trails on TyDiQA and MLP-only LoRA. Task-grouped resampling yields $[-0.15,+0.22]$ for the aggregate gap (Appendix Table~\ref{tab:per-task-compact}).
 
-\subsection{Amortization Cuts Marginal Cost by 44$\times$}
+\noindent\textbf{Takeaway.}
+Across the evaluated registry, PCU-Select improves on both PEFT-agnostic baselines and differs from per-PEFT LESS by $+0.04$ points, with descriptive interval $[-0.26,+0.33]$.
+
+\subsection{Amortization Cuts Four-Task PEFT Onboarding Cost by 44$\times$}
 \label{sec:reuse}
 
 \input{tables/table_quality_cost_headline}
 
-Registry benefit depends on cost as well as quality. Table~\ref{tab:quality-cost-headline} therefore separates the two cost axes that a registry pays: a \emph{fixed} cost once and a \emph{marginal} cost for each new PEFT. PCU-Select and per-PEFT LESS are the only methods that preserve gradient-selection quality, averaging 35.18 and 35.14. They pay for that quality on different axes. LESS has no fixed cost, but every configuration incurs 63.2 GPU-hours to rebuild a target-specific datastore. PCU-Select spends 144.0 GPU-hours once on reusable supervision. Each new four-task PEFT then costs 1.44 GPU-hours, \textbf{44$\times$ below LESS's marginal cost}.
+Table~\ref{tab:quality-cost-headline} separates \emph{fixed/shared} cost, paid once, from \emph{marginal} cost, paid for each new PEFT. All selector costs exclude the shared 12.8 GPU-hour downstream run. PCU-Select and per-PEFT LESS have near-tied average quality but distribute selection cost differently. LESS has no fixed cost and spends 63.2 GPU-hours per four-task configuration. PCU-Select pays 144.0 GPU-hours once, then 1.44 GPU-hours per new configuration: a $44\times$ lower marginal cost.
 
-The marginal axis determines how cost grows with the registry. Adding a task to an existing PEFT costs both selectors one ranking pass: 0.36 GPU-hours for PCU-Select and 0.30 for LESS. Adding a PEFT, however, forces LESS to rebuild its datastore while PCU-Select reuses the offline scorer (Appendix Table~\ref{tab:cost-axes}). The amortization is therefore cross-PEFT, not cross-task: new configurations drive the cost difference.
+The gap comes from configuration reuse. Adding a task to an existing PEFT costs one ranking pass: 0.36 GPU-hours for PCU-Select and 0.30 for LESS. Adding a PEFT forces LESS to rebuild its datastore, whereas PCU-Select reuses the scorer (Appendix Table~\ref{tab:cost-axes}). The cost benefit therefore comes from cross-PEFT reuse.
 
-The cheap reuse shortcut sacrifices quality. Reusing one LESS subset across all five targets (\textbf{Reuse-one-LESS}) costs 63.2 GPU-hours but averages 34.24, below PEFT-agnostic RDS+ at 34.44. A subset optimized for one trainable subspace mismatches the others and discards the condition that made it valuable. PCU-Select instead produces a distinct subset for each target and retains LESS-level average quality.
+The fixed-subset shortcut trades away quality. \textbf{Reuse-one-LESS} applies one LESS subset to all five targets; it costs 63.2 GPU-hours but averages 34.24, below RDS+ at 34.44. Reusing a subset selected for one trainable subspace removes the target condition. PCU-Select produces a distinct subset for each target and retains LESS-level average quality.
 
-Equation~\eqref{eq:cost} gives a break-even point of $P^\star=144.0/[62.0+4(0.30-0.36)]=2.33$ configurations. Beyond it, PCU-Select costs less than LESS, and each added configuration widens the gap. Serving the five-PEFT registry costs 151.2 GPU-hours with PCU-Select and 316.0 with LESS, a $2.09\times$ reduction. The unseen-configuration study optionally uses 500 reduced calibration labels from one warm anchor and one update step. This procedure costs 1.05 GPU-hours per $(p,t)$, one quarter of the $\approx4.2$ GPU-hours required by the full label routine. It shifts the worst-case break-even point to 2.50 configurations. Prefix/P-Tuning cannot use this path because they lack native calibration labels. We exclude the shared 12.8 GPU-hour downstream run from every selector.
+Equation~\eqref{eq:cost} gives a break-even point of $P^\star=144.0/[62.0+4(0.30-0.36)]=2.33$ configurations. Beyond this point, PCU-Select costs less than LESS, and each added configuration widens the gap. Serving the five-PEFT registry costs 151.2 GPU-hours with PCU-Select and 316.0 with LESS, a $2.09\times$ reduction.
 
-\textbf{Takeaway.} PCU-Select occupies the quality-preserving amortized point. PEFT-agnostic selectors remain cheaper when users accept a small quality loss. When the registry requires LESS-level quality, PCU-Select onboards each new configuration at $44\times$ lower cost.
+For targets far from the training registry, optional calibration uses 500 \emph{reduced calibration labels}: target-specific short-update labels from one warm anchor and one update step. This procedure costs 1.05 GPU-hours per $(p,t)$, one quarter of the $\approx4.2$ GPU-hours for the full routine, and shifts the worst-case break-even point to 2.50 configurations.
 
-The main results establish the quality--cost trade-off. We next isolate why conditioning changes the selected subsets, which components matter, and where transfer fails.
+\noindent\textbf{Takeaway.}
+For a supported four-task configuration that requires no calibration, PCU-Select's marginal selection cost is $44\times$ lower than per-PEFT LESS.
+
+\subsection{PEFT Conditioning Produces Target-Specific Subsets}
+\label{sec:conditioning}
+
+The LoRA scan tests whether conditioning changes the subset with the target configuration. Selecting for the target configuration beats reusing another configuration's subset by 1.45 points (21.25 versus 19.79; Appendix Figure~\ref{fig:config-sensitivity}).
+
+Subset changes follow the same structural pattern. Across 21 unordered pairs, PCU-Select's mean Jaccard overlap---the intersection divided by the union---is 0.427; RDS+ has overlap 1.000 because it ignores PEFT. The descriptive Spearman correlation between configuration distance and selection difference is $\rho=0.969$. Distance equals the absolute log$_2$-rank gap plus one indicator each for placement and module-set differences. Leave-one-configuration-out correlations span $[0.947,0.972]$. We report this correlation descriptively because the pairs reuse configurations (Appendix Figure~\ref{fig:config-sensitivity}).
+
+\noindent\textbf{Takeaway.}
+Larger structural changes produce larger subset changes, supporting PEFT-conditioned utility without rebuilding gradients.
+
+\subsection{Reduced Calibration Narrows the L1 and BitFit Gaps}
+\label{sec:transfer}
+
+We next test whether the structural code guides transfer beyond seen targets. Before evaluation, we fix three support levels: L0 resembles a seen configuration, L1 makes a larger shift within a seen family, and L2 introduces an unseen family. Appendix Table~\ref{tab:appendix-peft-registry} lists the registry.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=.70\columnwidth]{Figures/fig_ood_calibration.pdf}
+\caption{Bars show the three-seed mean of reference minus PCU-Select on GSM8K, HumanEval, and MMLU; Appendix Table~\ref{tab:ood-levels} reports SD. Lower is better; the horizontal axis marks parity. LESS is the reference except for Prefix/P-Tuning (RDS+); L0 is zero-shot only.}
+\label{fig:ood-calibration}
+\end{figure}
+
+Against LESS, the zero-shot drop grows with structural distance from L0 through L1 to BitFit (Figure~\ref{fig:ood-calibration}; Appendix Table~\ref{tab:ood-levels}). L0 trails LESS by 0.34 points zero-shot. Adding 500 reduced calibration labels decreases the L1 drop from 2.08 to 0.30 points and the BitFit drop from 4.08 to 0.23. We compare Prefix/P-Tuning with RDS+ because compatible calibration labels are unavailable; their zero-shot score is 6.97 points lower.
+
+The 500-label reduced-calibration setting costs 1.05 GPU-hours per PEFT--task pair, one quarter of the offline routine.
+
+\noindent\textbf{Takeaway.}
+Zero-shot covers near-support targets; reduced calibration nearly closes the tested L1 and BitFit mean drops when labels are compatible.
+
+\subsection{Ablations Identify the Useful Components}
+\label{sec:ablation}
+
+The ablations test GSM8K and HumanEval with two representative PEFTs (Appendix Table~\ref{tab:ablations}). NDCG measures held-out ranking quality by rewarding high-utility examples near the top. Removing the PEFT code causes the largest downstream drop, 1.37 points, and lowers NDCG from 0.702 to 0.526. A family-only one-hot loses 0.68 points, showing that structured features beyond family identity add information. Removing the task sketch loses 0.82 points.
+
+Using only gradient-proxy or only short-update labels loses 0.85 and 0.36 points, respectively. Adaptive semantic-cluster quotas beat global top-$k$---the highest scores overall---by 1.08 points and uniform cluster quotas by 0.51. Uniform quotas have slightly higher NDCG (0.709) but lower downstream quality.
+
+\noindent\textbf{Takeaway.}
+On the evaluated two-task, two-PEFT slice, structured PEFT conditioning, the task sketch, both label sources, and adaptive semantic coverage each improve downstream quality.
+
+\subsection{Limitations}
+
+Our evaluation covers one backbone family, four tasks, and a finite registry; short-update labels approximate contribution after full training. The current method falls back to a per-target selector for Prefix/P-Tuning because compatible calibration labels are unavailable. Its cost advantage begins after 2.33 four-task configurations for direct scoring and 2.50 under the reported worst-case calibration cost, and it applies when the registry requires LESS-level selection quality.
