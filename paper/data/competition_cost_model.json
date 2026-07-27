@@ -11,12 +11,21 @@
     "scorer_training": 7.2
   },
   "online_selection_scope": {
-    "pcu_per_peft_task_gpu_h": 0.36,
-    "pcu_four_task_per_peft_gpu_h": 1.44,
+    "pcu_per_peft_task_gpu_h": 0.3775,
+    "pcu_per_peft_task_display_gpu_h": 0.38,
+    "pcu_per_peft_task_derivation": "1.51 / 4 tasks",
+    "pcu_four_task_per_peft_gpu_h": 1.51,
     "less_datastore_per_peft_gpu_h": 62.0,
     "less_ranking_per_peft_task_gpu_h": 0.30,
     "less_four_task_per_peft_gpu_h": 63.2
   },
+  "pool_scaling_gpu_h": [
+    {"pool": "50K", "feature_extraction_cached": 9.2, "scorer_forward": 0.051, "clustering": 0.010, "unattributed_residual": 0.000, "online_total": 0.061},
+    {"pool": "100K", "feature_extraction_cached": 17.6, "scorer_forward": 0.093, "clustering": 0.028, "unattributed_residual": 0.000, "online_total": 0.121},
+    {"pool": "300K", "feature_extraction_cached": 48.0, "scorer_forward": 0.249, "clustering": 0.111, "unattributed_residual": 0.0175, "online_total": 0.3775},
+    {"pool": "1M", "feature_extraction_cached": 152.0, "scorer_forward": 0.790, "clustering": 0.420, "unattributed_residual": 0.000, "online_total": 1.210}
+  ],
+  "pool_scaling_note": "The revised 300K per-pair total is the four-task measurement divided by four. Existing phase timers account for 0.360 GPU-hours; the 0.0175 residual is derived by subtraction and remains unattributed because no new phase-level timing logs are available.",
   "shared_target_training_per_run_gpu_h": 12.8,
   "shared_target_training_note": "One PEFT-task-training-seed run: 1000 steps at about 5.8 s/step on 8 H20 GPUs. Every selector pays this same downstream cost, so the selection-only comparison excludes it.",
   "calibration": {
@@ -57,7 +66,7 @@
     {
       "method": "PCU-Select",
       "offline_gpu_h": 144.0,
-      "per_configuration_selection_gpu_h": 1.44
+      "per_configuration_selection_gpu_h": 1.51
     }
   ],
   "five_seen_pefts_gpu_h": {
@@ -66,6 +75,6 @@
     "Influence": 48.8,
     "Reuse-one-LESS": 63.2,
     "LESS": 316.0,
-    "PCU-Select": 151.2
+    "PCU-Select": 151.55
   }
 }

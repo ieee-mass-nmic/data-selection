@@ -1,4 +1,5 @@
 {
+  "result_status": "TEMPORARY: L2-LN values retain the prior BitFit run and must be replaced after the LN-Tuning E5 run.",
   "tasks": ["gsm8k", "humaneval", "mmlu"],
   "dispersion": "sample standard deviation of the paired seed-level mean over target-training seeds 0, 1, and 2",
   "groups": [
@@ -25,9 +26,9 @@
       }
     },
     {
-      "id": "L2-BF",
-      "label": "unseen-family BitFit",
-      "targets": ["BF"],
+      "id": "L2-LN",
+      "label": "unseen-family LN Tuning",
+      "targets": ["LN"],
       "reference": "LESS",
       "modes": {
         "zero-shot": {"gap": -4.08, "std": 0.70},

@@ -1,3 +1,4 @@
+% TODO(RESULT): L2-LN values retain the prior BitFit run; replace after E5.
 \begin{table*}[t]
 \centering
 \small
@@ -8,10 +9,10 @@ Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\
 \midrule
 L0 & L-r32-qkvo, AD-b16 & LESS & 0.34$\pm$0.41 & -- & -- \\
 L1 & L-r64-all, AD-b256, L-r8-highlayers & LESS & 2.08$\pm$0.44 & 0.91$\pm$0.29 & 0.30$\pm$0.36 \\
-L2-BF & BF & LESS & 4.08$\pm$0.70 & 0.65$\pm$0.26 & 0.23$\pm$0.42 \\
+L2-LN & LN & LESS & 4.08$\pm$0.70 & 0.65$\pm$0.26 & 0.23$\pm$0.42 \\
 L2-Prompt & PRE-l16, PT-l32 & RDS+ & 6.97$\pm$0.34 & -- & -- \\
 \bottomrule
 \end{tabular}
-\caption{Performance drop from the named reference across GSM8K, HumanEval, and MMLU (reference minus PCU-Select; paired mean$\pm$sample SD over three target-training seeds). Lower is better; zero denotes parity. L0 uses zero-shot only. Calibration reduces far same-family and BitFit drops. Prefix/P-Tuning lack compatible labels.}
+\caption{Performance drop from the named reference across GSM8K, HumanEval, and MMLU (reference minus PCU-Select; paired mean$\pm$sample SD over three target-training seeds). Lower is better; zero denotes parity. L0 uses zero-shot only. Calibration reduces far same-family and LN-Tuning drops. Prefix/P-Tuning lack compatible labels.}
 \label{tab:ood-levels}
 \end{table*}

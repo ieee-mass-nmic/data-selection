@@ -1,27 +1,21 @@
 \begin{table}[t]
 \centering
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{rrrrr}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{rrrrrr}
 \toprule
-Pool & \shortstack{Feature\\ext.\ (cached)} & \shortstack{Scorer\\forward} & Clustering & \shortstack{PCU online\\(per $p,t$)} \\
+Pool & \shortstack{Feature\\ext.\ (cached)} & \shortstack{Scorer\\forward} & Clustering & Residual & \shortstack{PCU online\\(per $p,t$)} \\
 \midrule
-50K   &  9.2 & 0.051 & 0.010 & 0.061 \\
-100K  &  17.6 & 0.093 & 0.028 & 0.121 \\
-300K  & 48.0 & 0.249 & 0.111 & 0.360 \\
-1M    & 152.0 & 0.79 & 0.42 & 1.21 \\
+50K & 9.2 & 0.051 & 0.010 & 0.000 & 0.061 \\
+100K & 17.6 & 0.093 & 0.028 & 0.000 & 0.121 \\
+300K & 48.0 & 0.249 & 0.111 & 0.018 & 0.378 \\
+1M & 152.0 & 0.790 & 0.420 & 0.000 & 1.210 \\
 \bottomrule
 \end{tabular}
-\caption{Online selection cost versus candidate-pool size, reported as the mean
-of three timing runs on a warm feature cache (run-to-run spread under $5\%$).
-Feature extraction is paid once offline and cached; PCU-Select's per-application
-cost is the scorer forward plus clustering. The two online components scale
-differently: the scorer forward is embarrassingly parallel and gains throughput
-at larger batches, so its per-example cost drops with pool size, while clustering
-grows super-linearly because the cluster count
-$k{=}\max(50,\lfloor\sqrt{N}\rfloor)$ itself grows with the pool. Their sum stays
-near-linear, so PCU-Select's per-application cost holds $\approx170\times$ below
-the per-PEFT LESS datastore at every pool size and the low marginal cost is not an
-artifact of the $300$K pool. GPU-hours on $8{\times}$H20-96GB.}
+\caption{Online selection cost versus candidate-pool size on $8{\times}$H20-96GB.
+Feature extraction is cached. Scorer and clustering columns report existing
+phase timers. Residual is total minus these timers; at 300K, the revised
+four-task measurement gives 0.3775 per pair, while phase timers account for
+0.360, leaving 0.0175 pending attribution. Online columns show three decimals.}
 \label{tab:pool-scaling}
 \end{table}

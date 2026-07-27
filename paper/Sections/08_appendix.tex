@@ -1,10 +1,46 @@
 \section{Technical Appendix}
 \label{sec:appendix}
 
+\subsection{Quality Criterion and Break-Even Derivation}
+\label{sec:appendix-break-even}
+
+The main paper compares PCU-Select with per-PEFT LESS under an explicit quality
+criterion. Let $\mathrm{Perf}_{\mathrm{PCU}}$ and
+$\mathrm{Perf}_{\mathrm{LESS}}$ denote their downstream scores and $\epsilon$
+the acceptable difference:
+\begin{equation}
+  \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}},
+  \qquad \lvert\Delta_{\mathrm{quality}}\rvert\le\epsilon.
+  \label{eq:quality-tie}
+\end{equation}
+
+For a fixed number of tasks $Q$, PCU-Select becomes cheaper when its shared
+offline cost plus its per-pair cost falls below LESS's repeated datastore and
+ranking costs. Solving the cost inequality from the main paper gives
+\begin{equation}
+  P > P^{\star}=
+  \frac{C_{\mathrm{offline}}}
+  {C^{\mathrm{data}}_{\mathrm{LESS}}+
+  Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})},
+  \label{eq:break-even}
+\end{equation}
+provided that the denominator is positive. For the four-task workload,
+$C^{\mathrm{pair}}_{\mathrm{PCU}}=1.51/4=0.3775$ GPU-hours, which the tables
+display as 0.38. LESS costs 63.2 GPU-hours per configuration, while PCU-Select
+pays 144.0 GPU-hours offline plus 1.51 GPU-hours per configuration. Therefore,
+\begin{equation}
+  P^{\star}=\frac{144.0}{63.2-1.51}=2.33.
+  \label{eq:break-even-measured}
+\end{equation}
+PCU-Select costs less from the third integer-valued configuration onward. With
+500 reduced calibration labels for each of four tasks, its marginal cost becomes
+$1.51+4(1.05)=5.71$ GPU-hours and the worst-case threshold becomes
+$144.0/(63.2-5.71)=2.50$ configurations.
+
 \subsection{Per-Task Results Behind the Main Table}
 \label{sec:appendix-per-task}
 
-Table~\ref{tab:main-results} summarizes four task-native metrics after scaling
+Table~1 in the main paper summarizes four task-native metrics after scaling
 each to a percentage: GSM8K exact match, HumanEval Pass@1, MMLU accuracy, and
 TyDiQA F1. Because these metrics have different scales, ceilings, and seed
 variances, their average can hide task-level differences.
@@ -21,7 +57,7 @@ excludes zero on MMLU ($+0.67$ Acc, $[+0.24,+1.08]$). It includes zero on GSM8K
 ($+0.29$ EM, $[-0.04,+0.58]$) and HumanEval ($-0.04$ Pass@1,
 $[-0.44,+0.31]$). On TyDiQA, it excludes zero in the negative direction
 ($-0.77$ F1, $[-1.18,-0.43]$). Averaging over tasks yields the near-zero
-aggregate gap in Table~\ref{tab:main-results}. PCU-Select and per-PEFT LESS are
+aggregate gap in Table~1 of the main paper. PCU-Select and per-PEFT LESS are
 therefore near-tied on the seen registry, while PCU-Select provides amortized
 selection cost.
 
@@ -258,10 +294,12 @@ disjointness. We enforce it identically across methods.
 Table~\ref{tab:appendix-peft-registry} lists all 17 PEFT configurations:
 five seen, nine unseen same-family configurations, and three unseen families.
 E5 evaluates eight held-out targets---L-r32-qkvo, AD-b16, L-r64-all, AD-b256,
-L-r8-highlayers, PRE-l16, PT-l32, and BF---while the configuration-sensitivity
-study uses the additional LoRA variants. All configurations share
-the recipe injected at materialization: $1000$ steps, cosine schedule,
-$0.03$ warmup ratio; the learning rate is per configuration.
+L-r8-highlayers, PRE-l16, PT-l32, and LN---while the configuration-sensitivity
+study uses the additional LoRA variants. All use $1000$ steps, a cosine
+schedule, and $0.03$ warmup; learning rates vary by configuration.
+The LN configuration trains the \texttt{input\_layernorm} and
+\texttt{post\_attention\_layernorm} scale parameters in every Transformer
+block and excludes the final model-level RMSNorm.
 
 \begin{table*}[t]
 \centering
@@ -289,14 +327,15 @@ IA3-attnonly   & IA$^3$    & k, v                       & --        & --  & 5e-4
 \midrule
 PRE-l16        & Prefix    & attention                  & len${=}16$& --  & 2e-4 & ood-family \\
 PT-l32         & P-Tuning  & attention                  & len${=}32$& --  & 2e-4 & ood-family \\
-BF             & BitFit    & biases                     & --        & --  & 2e-4 & ood-family \\
+LN             & LN Tuning & input/post-attn RMSNorm    & 2 scales/layer & -- & 2e-4 & ood-family \\
 \bottomrule
 \end{tabular}
 \caption{Full PEFT registry (all 17 configurations). ``LoRA scaling'' is the
 LoRA $\alpha$ hyperparameter and is distinct from the intervention-site weight
-$\tilde{w}_p^\omega$ of Eq.~\eqref{eq:site-weight}; it applies only to LoRA rows.
+$\tilde{w}_p^\omega$ defined in the main paper; it applies only to LoRA rows.
 Adapters are single post-block residual bottlenecks (one per layer); IA$^3$
-scales the listed activations. Learning rates for the three OOD-family targets
+scales the listed activations. LN Tuning updates per-block RMSNorm scales~\cite{wang2022lntuning,touvron2023llama2}.
+Learning rates for the three OOD-family targets
 use the registry default (2e-4). Layer placement is all layers unless noted;
 low/high-third placements use the bottom/top $\lceil n/3 \rceil$ layers of the
 32-layer backbone.}
@@ -385,14 +424,14 @@ $u^{\mathrm{hi}}_{\mathrm{cal}}$ labels for the OOD study.
 The structural support levels state how safely PCU-Select can apply a PEFT code
 that differs from its training registry. The reported
 $z_p\in\mathbb{R}^{128}$ contains only the site/operator mask, capacity, and
-recipe vectors. Prefix, P-Tuning, and BitFit use the same
+recipe vectors. Prefix, P-Tuning, and LN Tuning use the same
 deterministic encoding rules as the seen families; no centroid, learned family
 lookup, or functional fingerprint enters the reported model. E5 fixes its
 registry taxonomy before evaluation. \textbf{L0} contains near-support
 same-family targets (L-r32-qkvo and AD-b16). \textbf{L1} contains farther
 same-family shifts (L-r64-all, AD-b256, and L-r8-highlayers). \textbf{L2}
-contains unseen families (PRE-l16, PT-l32, and BF). These levels define
-registry-relative structural support. BitFit supports reduced calibration, while
+contains unseen families (PRE-l16, PT-l32, and LN). These levels define
+registry-relative structural support. LN Tuning supports reduced calibration, while
 Prefix/P-Tuning use a per-target selector.
 
 \begin{table}[t]
@@ -405,11 +444,11 @@ Level & Definition & Recommended action \\
 \midrule
 L0 & near-support & zero-shot selection \\
 L1 & far-support & 200--500 labels (0.42--1.06 GPU-h) \\
-L2-BF & unseen family; labels available & calibrate before use \\
+L2-LN & unseen family; labels available & calibrate before use \\
 L2-Prompt & Prefix/P-Tuning & use a per-target selector \\
 \bottomrule
 \end{tabular}
-\caption{Deployment protocol for each registry-defined support level. Costs are per PEFT--task pair, in addition to 0.36 GPU-hours for online selection.}
+\caption{Deployment protocol for each registry-defined support level. Costs are per PEFT--task pair, in addition to 0.38 GPU-hours for online selection.}
 \label{tab:protocol}
 \end{table}
 
@@ -433,21 +472,22 @@ final label aggregates the rank-normalized reductions across horizons and anchor
 \end{equation}
 It uses weights $w_1{=}0.4,\ w_4{=}0.6$ and anchors
 $A=\{\text{base},\text{warm}\}$. The term $\widetilde{\Delta}_{a,h}$ is the
-reduction from Eq.~\eqref{eq:delta}, rank-normalized within its PEFT, task,
+reduction defined by the main paper's short-update equation, rank-normalized within its PEFT, task,
 anchor, and horizon bucket.
 
 \paragraph{Cost model and seeds.}
 We measure all costs on $8{\times}$NVIDIA H20-96GB (SXM, bfloat16, NVLink)
 as $(\text{wall seconds} \times \text{GPU count}) / 3600$. PCU-Select pays
 144.0 GPU-hours once: 48.0 for feature extraction, 4.8 for gradient-proxy
-labels, 84.0 for short-update labels, and 7.2 for scorer training. It then costs
-0.36 GPU-hours per PEFT--task application, or 1.44 for four tasks. LESS costs
+labels, 84.0 for short-update labels, and 7.2 for scorer training. Dividing the
+1.51 GPU-hour four-task measurement by four gives an exact average per-task cost
+of 0.3775 GPU-hours, displayed as 0.38. LESS costs
 62.0 per PEFT datastore plus 0.30 per task ranking, hence 63.2 for four tasks.
-Onboarding a new four-task PEFT therefore costs 1.44 GPU-hours for PCU-Select
-versus 63.2 for LESS, a $44\times$ marginal-cost reduction. The shared 12.8
+Onboarding a new four-task PEFT therefore costs 1.51 GPU-hours for PCU-Select
+versus 63.2 for LESS, a $42\times$ marginal-cost reduction. The shared 12.8
 GPU-hour downstream cost applies to each PEFT--task--seed run, so the selection
 comparison excludes it. For four tasks, break-even is
-$P^\star=144.0/[62.0+4(0.30-0.36)]=2.33$ configurations.
+$P^\star=144.0/[62.0+4(0.30-0.3775)]=2.33$ configurations.
 The pipeline fixes selector-scorer training, task-sketch sampling, and pool
 ordering at seed 0. Reported SDs vary target-training seeds ($0,1,2$) with the
 selector and scorer pipeline fixed. The canonical table generator
@@ -458,10 +498,12 @@ Two supplementary tables bound the cost claim. Table~\ref{tab:hf-budget} varies
 the offline short-update label budget. The 10K default is the smallest budget
 that preserves the aggregate quality tie. Smaller budgets reduce offline cost and
 the break-even point but also reduce quality. The offline investment is therefore
-a tunable trade-off. Table~\ref{tab:pool-scaling} shows that PCU-Select's
-per-application cost stays $\approx170\times$ below the per-PEFT LESS datastore
-across pool sizes from 50K to 1M. This persistence extends the marginal-cost
-result beyond the 300K pool.
+a tunable trade-off. Table~\ref{tab:pool-scaling} separates the online timing
+components. At 300K, the scorer and clustering timers sum to 0.360 GPU-hours;
+the revised 0.3775 total leaves a 0.0175 residual that the available phase logs
+do not attribute. We report this residual separately instead of assigning it to
+either phase. Across pool sizes, the end-to-end cost remains approximately
+$170\times$ below the scaled per-PEFT LESS datastore cost.
 
 \input{tables/table_cost_axes}
 \input{tables/table_hf_budget}
@@ -482,9 +524,9 @@ amortizes the expensive gradient and label construction.
 \STATE \textbf{Input:} pool $\mathcal{D}$, seen PEFTs $\mathcal{P}_{\text{seen}}$, tasks with sketches $\{V_t\}$
 \STATE Extract sample signatures $z_x$ and site gradients $g_x^\omega$; cache them \COMMENT{$O(|\mathcal{D}|)$ forward+backward}
 \FORALL{$(p,t)\in\mathcal{P}_{\text{seen}}\times\text{tasks}$}
-  \STATE Compute gradient-proxy $u^{\mathrm{lo}}(x,p,t)$ by Eq.~\eqref{eq:ulo} from cache
+  \STATE Compute gradient-proxy $u^{\mathrm{lo}}(x,p,t)$ using the main-paper definition
 \ENDFOR
-\STATE Sample $10$K triples (coverage/uncertainty/boundary); label $u^{\mathrm{hi}}$ by Eq.~\eqref{eq:delta}
+\STATE Sample $10$K triples (coverage/uncertainty/boundary); label $u^{\mathrm{hi}}$ by short updates
 \STATE Train $s_\phi$: Stage A proxy pretrain, Stage B joint; keep best held-out-NDCG checkpoint
 \STATE \textbf{Output:} scorer $s_\phi$, cached features
 \end{algorithmic}
@@ -500,7 +542,7 @@ amortizes the expensive gradient and label construction.
   \STATE Fit calibration residual head from 200 or 500 reduced $u^{\mathrm{hi}}_{\mathrm{cal}}$ labels (single warm anchor, horizon 1)
 \ENDIF
 \STATE $(\hat\mu,\hat\sigma)\gets s_\phi(z_x,z_{p^{*}},z_{t^{*}})$; $q(x)\gets\hat\mu-\lambda\hat\sigma$ for all $x$
-\STATE Cluster the pool; allocate quotas $b_k$ by Eq.~\eqref{eq:quota}
+\STATE Cluster the pool; allocate quotas $b_k$ by the main-paper definition
 \STATE \textbf{Output:} subset $\mathcal{S}=\bigcup_k \{\text{top-}b_k \text{ by } q \text{ in } C_k\}$
 \end{algorithmic}
 \end{algorithm}
@@ -509,7 +551,7 @@ amortizes the expensive gradient and label construction.
 \label{sec:appendix-capacity}
 
 Table~\ref{tab:capacity} defines the per-family capacity used inside the site
-weight of Eq.~\eqref{eq:site-weight}. We map each family's size knob to a
+weight from the main paper. We map each family's size knob to a
 trainable-parameter count at the touched sites, normalize it by
 $d_{\text{model}}$, and pass it through $\tanh(\eta\log(1+\mathrm{cap}/d_{\text{model}}))$
 so that capacity is monotone but saturating.
@@ -526,7 +568,7 @@ LoRA      & rank $r$        & $r\,(d_{\text{in}}+d_{\text{out}})$ \\
 Adapter   & bottleneck $b$  & $2\,d_{\text{model}}\,b$ \\
 (IA)$^3$  & (per-vector)    & \#scaled activations \\
 Prefix    & length $L$      & $L\,d_{\text{model}}$ \\
-BitFit    & (per-bias)      & \#bias parameters \\
+LN Tuning & (per-scale)     & \#RMSNorm scale parameters \\
 \bottomrule
 \end{tabular}
 \caption{Per-family capacity mapping. Capacity is the trainable-parameter count
@@ -563,8 +605,8 @@ PEFT-agnostic RDS+ remains exactly $1.000$.
 \end{figure*}
 
 \paragraph{Unseen-configuration transfer.}
-Table~\ref{tab:ood-levels} is the paired source for
-Figure~\ref{fig:ood-calibration}. Near-support targets transfer zero-shot.
-Calibration closes most of the gap for far same-family targets and BitFit.
+Table~\ref{tab:ood-levels} is the paired source for Figure~3 in the main paper.
+Near-support targets transfer zero-shot.
+Calibration closes most of the gap for far same-family targets and LN Tuning.
 
 \input{tables/table_ood_levels}

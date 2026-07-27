@@ -30,16 +30,7 @@ A registry changes the cost objective because it serves multiple PEFT configurat
 \end{equation}
 Equation~\eqref{eq:cost} separates four costs. $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one PEFT-specific datastore, and $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task. $C_{\mathrm{offline}}$ extracts reusable signals and trains PCU-Select once. $C^{\mathrm{pair}}_{\mathrm{PCU}}$ scores and selects data for one target pair. The first expression repeats datastore construction $P$ times, whereas the second pays the offline cost once. Section~\ref{sec:reuse} measures each cost term.
 
-Lower cost matters only if the selected subset preserves target-specific quality. We express the quality difference from per-PEFT LESS as
-\begin{equation}
-  \Delta_{\mathrm{quality}}=\mathrm{Perf}_{\mathrm{PCU}}-\mathrm{Perf}_{\mathrm{LESS}},
-  \qquad \lvert\Delta_{\mathrm{quality}}\rvert\le\epsilon,
-  \label{eq:quality-tie}
-\end{equation}
-where $\mathrm{Perf}_{\mathrm{PCU}}$ and $\mathrm{Perf}_{\mathrm{LESS}}$ denote their downstream scores and $\epsilon$ is the acceptable difference. The cost equations also identify when the shared offline investment pays off. For a fixed $Q$, PCU-Select costs less once $P$ exceeds
-$P^{\star}=C_{\mathrm{offline}}/[C^{\mathrm{data}}_{\mathrm{LESS}}+
-Q(C^{\mathrm{rank}}_{\mathrm{LESS}}-C^{\mathrm{pair}}_{\mathrm{PCU}})]$,
-assuming the denominator is positive. The objective is therefore to retain per-PEFT LESS quality while replacing repeated datastore construction with shared offline work.
+The objective is to retain per-PEFT LESS quality while replacing repeated datastore construction with shared offline work. The supplementary material formalizes the quality criterion and derives the break-even point; Section~\ref{sec:reuse} reports the measured result.
 
-\paragraph{Design requirements.}
-The formulation yields four design requirements. \textbf{PEFT conditioning} includes $p$ so the example ranking can change with the target configuration. \textbf{Task conditioning} uses $V_t$ so the model learns task-specific value instead of generic example quality. \textbf{Structured PEFT code} records where and how each PEFT updates the model in a form shared across families. \textbf{Reusable execution} moves gradient extraction, label construction, and scorer training offline, leaving cached-feature scoring for each new $(p,t)$ pair.
+% Equation 4 (the quality criterion) appears in the supplementary material.
+\setcounter{equation}{4}

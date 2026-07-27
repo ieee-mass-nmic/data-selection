@@ -6,13 +6,14 @@
 \toprule
 New registry entry & PCU-Select & LESS \\
 \midrule
-One new task, existing PEFT   & 0.36 & 0.30 \\
-One new PEFT, four tasks       & 1.44 & 63.2 \\
+One new task, existing PEFT   & 0.38 & 0.30 \\
+One new PEFT, four tasks       & 1.51 & 63.2 \\
 \bottomrule
 \end{tabular}
 \caption{The amortization advantage is cross-PEFT, not cross-task. Adding a task
-to an existing PEFT costs both selectors a per-task ranking; adding a PEFT for
+to an existing PEFT costs each selector one online-selection pass; adding a PEFT for
 four tasks forces LESS to rebuild its datastore while PCU-Select reuses the
-offline scorer. Selection-stage GPU-hours.}
+offline scorer. Selection-stage GPU-hours; PCU-Select's per-task entry rounds
+the exact average $1.51/4=0.3775$.}
 \label{tab:cost-axes}
 \end{table}

@@ -1,13 +1,5 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{32}
 \providecommand{\natexlab}[1]{#1}
-
-\bibitem[{Ben~Zaken, Goldberg, and Ravfogel(2022)}]{zaken2022bitfit}
-Ben~Zaken, E.; Goldberg, Y.; and Ravfogel, S. 2022.
-\newblock {BitFit}: Simple Parameter-efficient Fine-tuning for
-  Transformer-based Masked Language-models.
-\newblock In \emph{Proceedings of the 60th Annual Meeting of the Association
-  for Computational Linguistics (Volume 2: Short Papers)}, 1--9. Association
-  for Computational Linguistics.
 
 \bibitem[{Bukharin et~al.(2023)Bukharin, Li, Wang, Yang, Yin, Li, Zhang, Zhao,
   and Jiang}]{bukharin2023diversity}
@@ -44,12 +36,6 @@ Cobbe, K.; Kosaraju, V.; Bavarian, M.; Chen, M.; Jun, H.; Kaiser, L.; Plappert,
   M.; Tworek, J.; Hilton, J.; Nakano, R.; Hesse, C.; and Schulman, J. 2021.
 \newblock Training Verifiers to Solve Math Word Problems.
 \newblock \emph{arXiv preprint arXiv:2110.14168}.
-
-\bibitem[{Dao(2024)}]{dao2024flashattention2}
-Dao, T. 2024.
-\newblock {FlashAttention-2}: Faster Attention with Better Parallelism and Work
-  Partitioning.
-\newblock In \emph{International Conference on Learning Representations}.
 
 \bibitem[{Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and
   Zettlemoyer}]{dettmers2023qlora}
@@ -204,12 +190,6 @@ Reimers, N.; and Gurevych, I. 2019.
   Natural Language Processing}, 3982--3992. Association for Computational
   Linguistics.
 
-\bibitem[{Sculley(2010)}]{sculley2010minibatch}
-Sculley, D. 2010.
-\newblock Web-Scale K-Means Clustering.
-\newblock In \emph{Proceedings of the 19th International Conference on World
-  Wide Web}, 1177--1178. ACM.
-
 \bibitem[{Song et~al.(2020)Song, Tan, Qin, Lu, and Liu}]{song2020mpnet}
 Song, K.; Tan, X.; Qin, T.; Lu, J.; and Liu, T.-Y. 2020.
 \newblock {MPNet}: Masked and Permuted Pre-training for Language Understanding.
@@ -228,6 +208,12 @@ Wang, P.; Shen, Y.; Guo, Z.; Stallone, M.; Kim, Y.; Golland, P.; and Panda, R.
 \newblock Diversity Measurement and Subset Selection for Instruction Tuning
   Datasets.
 \newblock \emph{arXiv preprint arXiv:2402.02318}.
+
+\bibitem[{Wang et~al.(2022)Wang, Ruan, Zuo, and Li}]{wang2022lntuning}
+Wang, Q.; Ruan, Y.-P.; Zuo, Y.; and Li, T. 2022.
+\newblock Parameter-Efficient Tuning on Layer Normalization for Pre-trained
+  Language Models.
+\newblock \emph{arXiv preprint arXiv:2211.08682}.
 
 \bibitem[{Xia et~al.(2024)Xia, Malladi, Gururangan, Arora, and
   Chen}]{xia2024less}

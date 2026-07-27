@@ -30,15 +30,17 @@ sources for the published tables or figures.
   interval [-0.26,+0.33]; 10/20 wins.
 - PCU-Select vs RDS+: +0.74 points, interval [+0.38,+1.06], 17/20 wins.
 - PCU-Select vs Influence: +0.50 points, interval [+0.21,+0.75], 18/20 wins.
-- Selection cost for five PEFTs over four tasks: PCU-Select 75.6 GPU-hours,
-  LESS 158.0 GPU-hours; ratio 2.09x; break-even 2.33 configurations.
-- Calibration cost: 0.525 GPU-hours per PEFT-task pair, or 2.1 per four-task PEFT.
+- Selection cost: PCU-Select averages exactly 0.3775 GPU-hours per PEFT-task pair
+  (displayed as 0.38), 1.51 per four-task PEFT, and 151.6 for five PEFTs. LESS
+  uses 316.0 GPU-hours for five PEFTs; ratio 2.09x; break-even 2.33 configurations.
+- Calibration cost: 1.05 GPU-hours per PEFT-task pair, or 4.2 per four-task PEFT.
 - Configuration sensitivity: 21 unordered pairs, mean PCU Jaccard 0.426919,
   RDS+ Jaccard exactly 1.000, descriptive Spearman 0.969 with leave-one-config
   range [0.947,0.972].
 - Structural transfer tiers: L0 zero-shot gap -0.34 vs LESS; L1 -2.08 zero-shot
-  and -0.30 after 500 labels; BitFit -4.08 and -0.23; Prefix/P-Tuning -6.97
-  zero-shot vs RDS+ and no native calibration path.
+  and -0.30 after 500 labels; LN Tuning -4.08 and -0.23; Prefix/P-Tuning -6.97
+  zero-shot vs RDS+ and no native calibration path. The LN-Tuning values
+  temporarily retain the prior BitFit run and must be replaced after revised E5.
 
 ## Statistical and scope constraints
 

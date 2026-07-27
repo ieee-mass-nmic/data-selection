@@ -13,6 +13,8 @@ compact encoding of the target configuration. After a one-time offline stage, a
 single scorer ranks candidates for any supported PEFT--task pair without
 rebuilding gradients. On Llama-2-7B across four tasks and five PEFT
 configurations, PCU-Select lowers the cost of adding a new four-task
-configuration from 63.2 to 1.44 GPU-hours, a $44\times$ reduction, and cuts the
-five-configuration selection cost from 316.0 to 151.2 GPU-hours. It maintains average downstream quality comparable to LESS. PCU-Select thus replaces
-repeated per-configuration computation with reusable offline processing.
+configuration from 63.2 to 1.51 GPU-hours, a $42\times$ reduction, and cuts the
+five-configuration selection cost from 316.0 to 151.6 GPU-hours. Alongside
+these cost reductions, PCU-Select maintains average downstream quality
+comparable to LESS. Overall, it replaces repeated per-configuration
+computation with reusable offline processing.

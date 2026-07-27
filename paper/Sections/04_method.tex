@@ -1,12 +1,12 @@
 \section{Method: PCU-Select}
 \label{sec:method}
 
-PCU-Select learns the conditional utility surrogate in Eq.~\eqref{eq:surrogate} and selects a budgeted subset for a target PEFT--task pair. Figure~\ref{fig:architecture} summarizes two stages. Offline, it extracts reusable sample and task signals, constructs two types of utility label, and trains one scorer. Online, it combines cached sample features with a target $(p^{*},t^{*})$, scores the pool, and distributes budget across semantic clusters. Algorithms~\ref{alg:offline} and~\ref{alg:online} specify both stages.
+PCU-Select learns the conditional utility surrogate in Eq.~\eqref{eq:surrogate} and selects a budgeted subset for a target PEFT--task pair. Figure~\ref{fig:architecture} summarizes two stages. Offline, it extracts reusable sample and task signals, constructs two types of utility label, and trains one scorer. Online, it combines cached sample features with a target $(p^{*},t^{*})$, scores the pool, and distributes budget across semantic clusters. Supplementary Algorithms~S1 and~S2 specify both stages.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{Figures/image.jpg}
-\caption{PCU-Select separates reusable offline supervision from online PEFT--task scoring. Its shared coordinate system $\Omega$ contains 24 intervention sites, or selected module outputs. Sample and task-sketch gradients use these site indices, while the PEFT code identifies the sites affected by each configuration. The 128-dimensional PEFT code comprises a 96-dimensional site/operator mask, 16 capacity dimensions, and 16 recipe dimensions. Low-fidelity gradient proxies provide broad coverage; high-fidelity short updates provide direct, costlier supervision.}
+\caption{PCU-Select learns from reusable site-level signals and scores each PEFT--task target online. A 24-site coordinate system aligns sample and task gradients with a 128-dimensional structured PEFT code; proxy and short-update labels provide complementary supervision.}
 \label{fig:architecture}
 \end{figure*}
 
@@ -18,7 +18,7 @@ PCU-Select hooks attention, MLP, and post-residual outputs at eight evenly space
 
 A site index records only \emph{where} a configuration acts. PCU-Select separately encodes operator and capacity features to record \emph{how} it acts and how much it can update. This factorization reuses one sample signature without treating additive, multiplicative, and bottleneck updates as equivalent.
 
-Each configuration maps to a site mask and operator type. Attention LoRA and (IA)$^3$-attention map to attention-output sites. MLP LoRA and (IA)$^3$-FFN map to MLP-output sites, while adapters map to block-residual sites. Prefix tuning maps to attention-output sites; BitFit maps to a bias shift. These mappings define each normalized site weight:
+Each configuration maps to a site mask and operator type. Attention LoRA and (IA)$^3$-attention map to attention-output sites. MLP LoRA and (IA)$^3$-FFN map to MLP-output sites, while adapters map to block-residual sites. Prefix tuning maps to attention-output sites. LN Tuning updates Llama-2's per-block RMSNorm scales~\cite{wang2022lntuning,touvron2023llama2}: input-normalization scales map to attention-output sites, and post-attention-normalization scales map to MLP-output sites. The configuration excludes the final model-level RMSNorm. Both site types use the multiplicative operator channel. These mappings define each normalized site weight:
 \begin{equation}
   \begin{aligned}
   w_p^{\omega}
@@ -30,7 +30,7 @@ Each configuration maps to a site mask and operator type. Attention LoRA and (IA
   \end{aligned}
   \label{eq:site-weight}
 \end{equation}
-Here $\mathrm{mask}(p,\omega)$ is zero at untouched sites, and $\mathrm{cap}(p,\omega)$ measures trainable capacity. The width $d_{\mathrm{model}}$ normalizes capacity, $\eta$ controls saturation through $\tanh$, and $\varepsilon_w$ keeps the denominator nonzero. Thus, $\tilde{w}_p^{\omega}$ distributes unit weight over the sites used by $p$. Appendix Table~\ref{tab:capacity} maps LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, and BitFit bias count to this scale. Operator type remains separate in $z_p$ because a family-wide scalar would cancel under Eq.~\eqref{eq:site-weight}'s normalization.
+Here $\mathrm{mask}(p,\omega)$ is zero at untouched sites, and $\mathrm{cap}(p,\omega)$ measures trainable capacity. The width $d_{\mathrm{model}}$ normalizes capacity, $\eta$ controls saturation through $\tanh$, and $\varepsilon_w$ keeps the denominator nonzero. Thus, $\tilde{w}_p^{\omega}$ distributes unit weight over the sites used by $p$. Supplementary Table~S8 maps LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, and LN-Tuning scale count to this quantity. Operator type remains separate in $z_p$ because a family-wide scalar would cancel under Eq.~\eqref{eq:site-weight}'s normalization.
 
 \subsection{Shared Representations Preserve Target Specificity}
 
@@ -42,7 +42,7 @@ Utility is task-relative, so PCU-Select forms $z_t\in\mathbb{R}^{848}$ by mean-p
 
 The PEFT representation records the target trainable subspace. In $z_p=[m_p;c_p;r_p]\in\mathbb{R}^{128}$, the $24\times4$ mask $m_p$ contributes 96 dimensions. Its channels mark active sites, additive updates, multiplicative scaling, and prefix-style control. Two 16-dimensional vectors encode capacity $c_p$ and training recipe $r_p$. At this site resolution, q/v and q/k/v/o LoRA share attention-output sites, while capacity and recipe preserve their projection-level distinction.
 
-Prefix, P-Tuning, and BitFit use the same deterministic encoding rules as seen families. The scorer has no learned family lookup or operator centroid. The support policy below decides whether a target uses direct scoring, calibrated scoring, or a per-target selector.
+Prefix, P-Tuning, and LN Tuning use the same deterministic encoding rules as seen families. The scorer has no learned family lookup or operator centroid. The support policy below decides whether a target uses direct scoring, calibrated scoring, or a per-target selector.
 
 Training these representations requires labels for many $(x,p,t)$ triples, but measuring every PEFT update would defeat amortization. PCU-Select instead uses \emph{multi-fidelity supervision}, which combines labels with different costs and directness. A low-fidelity gradient proxy cheaply covers the pool. High-fidelity short updates directly measure sketch-loss reduction for fewer triples. Together, they learn broad ranking structure and correct errors near the subset cutoff.
 
@@ -88,6 +88,6 @@ Ranking by $q$ alone can over-select near-duplicates, so PCU-Select clusters exa
   {\sum_j(v_j^{+})^{\gamma}|C_j|^{1-\gamma}}\right),\qquad \gamma=0.6.
   \label{eq:quota}
 \end{equation}
-Here $v_k$ is the mean conservative score among the top 10\% of examples in $C_k$, and $v_k^{+}=\max(v_k,0)$. The factors $v_k^{+}$ and $|C_k|$ balance cluster value and size. For the 300K pool, $K=\max(50,\lfloor\sqrt{N}\rfloor)$ produces 547 clusters of about 548 examples. The reported 0.36 GPU-hours per PEFT--task application includes clustering. PCU-Select takes the top-$b_k$ examples by $q$ within each cluster. Non-positive clusters receive no budget; deterministic remainder handling makes the quotas sum to $B$.
+Here $v_k$ is the mean conservative score among the top 10\% of examples in $C_k$, and $v_k^{+}=\max(v_k,0)$. The factors $v_k^{+}$ and $|C_k|$ balance cluster value and size. For the 300K pool, $K=\max(50,\lfloor\sqrt{N}\rfloor)$ produces 547 clusters of about 548 examples. The reported end-to-end cost is 0.38 GPU-hours per PEFT--task application and includes clustering. PCU-Select takes the top-$b_k$ examples by $q$ within each cluster. Non-positive clusters receive no budget; deterministic remainder handling makes the quotas sum to $B$.
 
 For seen and L0 targets, all gradient extraction and label construction occur offline; online selection uses cached features and scorer forward passes. L1 and calibratable L2 targets add a small label set without rebuilding a target-specific gradient datastore. The evaluation next tests whether this reuse preserves LESS-level quality, reduces registry cost, and transfers across support levels.
