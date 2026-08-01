@@ -11,11 +11,11 @@ One shortcut is to reuse a single LESS subset for every configuration. This reus
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{Figures/fig_motivation_disagreement.pdf}
-\caption{Short-update utility rankings depend on the PEFT configuration. Independent same-PEFT runs average $\rho=0.79$ and $0.32$ Top-5\% overlap, while cross-family pairs fall to $0.36$ and $0.17$.}
+\caption{Left: Spearman rank agreement between PEFT-conditioned utility rankings. Right: Top-5\% overlap between the corresponding selected examples; lower off-diagonal values indicate stronger configuration dependence.}
 \label{fig:motivation-disagreement}
 \end{figure*}
 
-The configuration dependence affects downstream performance as well as the rankings. Figure~\ref{fig:motivation-disagreement} shows that independent runs for the same configuration agree more closely than runs across configurations. Changes within one PEFT family preserve more of the ranking, while cross-family changes produce the largest disagreement. When selection and training use the same PEFT, the resulting subsets outperform cross-family mismatched selection by 2.0 points on average (Supplementary Table~S10). The same pattern appears within LoRA configurations, where matched selection improves performance by 1.45 points (\S\ref{sec:conditioning}).
+The configuration dependence affects downstream performance as well as the rankings. Figure~\ref{fig:motivation-disagreement} shows that independent runs for the same configuration agree more closely than runs across configurations. Changes within one PEFT family preserve more of the ranking, while cross-family changes produce the largest disagreement. Matched selection improves performance by 2.0 points over cross-family reuse and by 1.45 points within LoRA configurations (Supplementary Table~S10 and Figure~S1).
 
 These observations motivate \emph{PEFT-conditioned utility}: the value of training on example $x$ for task $t$ under PEFT configuration $p$. We denote this value by $u(x,p,t)$. A task-only selector omits $p$ and must assign the same ranking to every configuration. Per-PEFT influence selection includes $p$ but recomputes gradients for each target. Our goal is to predict $u(x,p,t)$ while sharing the expensive computations used to learn these scores.
 
@@ -25,7 +25,7 @@ A conditional scorer turns the shared signals into a target-specific ranking. It
 
 These design choices amortize target-specific selection across a PEFT registry. We make three contributions:
 \begin{itemize}
-    \item \textbf{PEFT-conditioned utility.} We formulate data value as $u(x,p,t)$ and show that both data-value rankings and downstream subset quality depend on the PEFT configuration (Figure~\ref{fig:motivation-disagreement}; Supplementary Table~S10).
-    \item \textbf{Intervention-site amortization.} PCU-Select represents different PEFT parameterizations through the same 24 module-output sites. A structured code preserves each target's update locations, type, capacity, and recipe without rebuilding a gradient datastore. Removing the PEFT code or task sketch reduces downstream performance by 1.37 or 0.82 points, respectively (Supplementary Table~S9).
-    \item \textbf{Registry-scale quality and cost.} Across four tasks and five seen PEFTs on Llama-2-7B~\cite{touvron2023llama2}, PCU-Select gains 0.74 points over the PEFT-agnostic representation baseline RDS+ and differs from per-PEFT LESS by $+0.04$. It reduces the selection cost of adding one four-task PEFT by $42\times$ (1.51 versus 63.2 GPU-hours; Tables~\ref{tab:main-results} and~\ref{tab:quality-cost-headline}).
+    \item \textbf{PEFT-conditioned utility.} We define data value as a candidate example's usefulness for a given task and PEFT configuration. We show that both rankings and downstream subset quality change with the target configuration.
+    \item \textbf{Intervention-site amortization.} PCU-Select maps different PEFT parameterizations to 24 shared module-output sites. A structured code retains each target's update structure and recipe, enabling configuration-specific rankings without rebuilding gradient datastores; ablations validate both PEFT and task conditioning.
+    \item \textbf{Registry-scale quality and cost.} Across four tasks and five seen PEFTs on Llama-2-7B~\cite{touvron2023llama2}, PCU-Select gains 0.74 points over RDS+ and matches per-PEFT LESS within $+0.04$, while cutting four-task PEFT onboarding by $42\times$, from 63.2 to 1.51 GPU-hours.
 \end{itemize}

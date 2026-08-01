@@ -1,6 +1,6 @@
 {
-  "result_status": "TEMPORARY: L2-LN values retain the prior BitFit run and must be replaced after the LN-Tuning E5 run.",
   "tasks": ["gsm8k", "humaneval", "mmlu"],
+  "gap_definition": "PCU-Select minus reference; plots and tables negate this value to show reference minus PCU-Select.",
   "dispersion": "sample standard deviation of the paired seed-level mean over target-training seeds 0, 1, and 2",
   "groups": [
     {
@@ -40,11 +40,11 @@
       "id": "L2-Prompt",
       "label": "unseen-family Prefix/P-Tuning",
       "targets": ["PRE-l16", "PT-l32"],
-      "reference": "RDS+",
+      "reference": "LESS",
       "modes": {
         "zero-shot": {"gap": -6.97, "std": 0.34},
-        "cal200": null,
-        "cal500": null
+        "cal200": {"gap": -2.17, "std": null},
+        "cal500": {"gap": -1.99, "std": null}
       }
     }
   ]

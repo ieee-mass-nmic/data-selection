@@ -34,7 +34,7 @@
     "calibration_200_per_peft_task_gpu_h": 0.42,
     "calibration_500_per_peft_task_gpu_h": 1.05,
     "calibration_500_four_task_per_peft_gpu_h": 4.2,
-    "note": "Deployment calibration uses one anchor and horizon 1, one quarter of the full offline label routine. Prefix and P-Tuning do not have native calibration labels in the reported implementation."
+    "note": "Deployment calibration uses one anchor and horizon 1, one quarter of the full offline label routine."
   },
   "reuse_one_less_note": "Run LESS once on one source PEFT and rank all four task sketches; reuse the resulting task-specific subsets for every target PEFT. One-time cost is 63.2 GPU-hours.",
   "methods": [

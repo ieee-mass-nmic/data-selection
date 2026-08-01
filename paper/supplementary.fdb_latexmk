@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex supplementary"] 1785170716.60308 "supplementary.aux" "supplementary.bbl" "supplementary" 1785170952.37741 0
+["bibtex supplementary"] 1785207944.07124 "supplementary.aux" "supplementary.bbl" "supplementary" 1785211542.56983 0
   "./aaai2027.bib" 1785170671.19043 21370 8e5381e06fc26cb7a008b72a3d2b1709 ""
   "./aaai2027.bst" 1782704500 30207 bd248dfe461b9b2fc7481a44feafe197 ""
-  "supplementary.aux" 1785170952.14841 2924 7b7ba75782a3c6d1e90be4ef2f97604c "pdflatex"
+  "supplementary.aux" 1785211542.30556 2897 7ea0d8b4293c94fb58a1719cd3503c34 "pdflatex"
   (generated)
   "supplementary.bbl"
   "supplementary.blg"
   (rewritten before read)
-["pdflatex"] 1785170951.72867 "supplementary.tex" "supplementary.pdf" "supplementary" 1785170952.37756 0
+["pdflatex"] 1785211541.50696 "supplementary.tex" "supplementary.pdf" "supplementary" 1785211542.56994 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1698694482 2914 fdbc4a54b9bc76f4551b5303f2737d33 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -115,16 +115,16 @@
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1782738481 3636769 d68c8d030107c2771cb2a3e432ba7b2f ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "Figures/fig_config_sensitivity.pdf" 1783679199.36091 62671 d86ddbfa2cecf48ae250db93694981b8 ""
-  "Sections/08_appendix.tex" 1785170940.48906 34500 946285b50143ea02fa4bfe1954b07a60 ""
+  "Sections/08_appendix.tex" 1785211427.47369 34777 0d1b2829af1b4089d3817cda34a7d884 ""
   "aaai2027.sty" 1782704500 16915 1b1c792e2acfbbd8b672259e267b95d8 ""
-  "supplementary.aux" 1785170952.14841 2924 7b7ba75782a3c6d1e90be4ef2f97604c "pdflatex"
-  "supplementary.bbl" 1785170716.69372 3452 0b60ff538943cbdd0453cb44ff032f68 "bibtex supplementary"
-  "supplementary.tex" 1785151474.17279 1150 2039bd69368727df0049d44f8e2bad18 ""
-  "tables/table_ablations.tex" 1785124635.53699 1014 a43be7d6e82041df5fad7cfe85d56533 ""
+  "supplementary.aux" 1785211542.30556 2897 7ea0d8b4293c94fb58a1719cd3503c34 "pdflatex"
+  "supplementary.bbl" 1785207944.2018 3452 0b60ff538943cbdd0453cb44ff032f68 "bibtex supplementary"
+  "supplementary.tex" 1785180042.47506 1150 7dd91384e030f4a7b8ef321e7e599e14 ""
+  "tables/table_ablations.tex" 1785211525.20181 1014 a43be7d6e82041df5fad7cfe85d56533 ""
   "tables/table_cost_axes.tex" 1785159457.39169 655 90baec39801544ecd5dad89e9f88b2f8 ""
   "tables/table_hf_budget.tex" 1785124585.17424 832 3da737d5d65c89b631240e4dc5471603 ""
-  "tables/table_ood_levels.tex" 1785170747.38523 928 4aebd4cd813d4b029fb3efbfb5743565 ""
-  "tables/table_per_task_compact.tex" 1785124584.98656 958 6815f3c3def1f9fff5959cdb9bcdf6dc ""
+  "tables/table_ood_levels.tex" 1785208835.41587 877 af4b8161c14f462ed0e9a0038c8cf98a ""
+  "tables/table_per_task_compact.tex" 1785211525.29009 1065 67c87ccd7fb554ae024e5881ae1457e0 ""
   "tables/table_pool_scaling.tex" 1785159457.3921 883 a3f3b3be42e1c41d083c4d49234c7cba ""
   "tables/table_transfer_matrix.tex" 1785124635.62833 1089 ccc086e91004212e497065fb26cf8579 ""
   (generated)

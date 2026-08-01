@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  28 JUL 2026 00:49
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  28 JUL 2026 12:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -499,23 +499,26 @@ s
 LaTeX Font Info:    Font shape `T1/ntxtlf/b/n' will be
 (Font)              scaled to size 9.0pt on input line 11.
 )
-(./tables/table_pool_scaling.tex) [5]
+(./tables/table_pool_scaling.tex)
+Underfull \vbox (badness 6995) has occurred while \output is active []
+
+ [5]
 LaTeX Font Info:    Font shape `T1/ntxtlf/m/n' will be
 (Font)              scaled to size 6.0pt on input line 569.
- (./tables/table_ablations.tex)
-(./tables/table_transfer_matrix.tex)
+
+(./tables/table_ablations.tex) (./tables/table_transfer_matrix.tex)
 <Figures/fig_config_sensitivity.pdf, id=35, 504.20322pt x 197.05571pt>
 File: Figures/fig_config_sensitivity.pdf Graphic file (type pdf)
 <use Figures/fig_config_sensitivity.pdf>
 Package pdftex.def Info: Figures/fig_config_sensitivity.pdf  used on input line
  604.
 (pdftex.def)             Requested size: 505.89pt x 197.71973pt.
- (./tables/table_ood_levels.tex)) [6]
-[7
 
- <./Figures/fig_config_sensitivity.pdf>] [8] (./supplementary.bbl) [9
+(./tables/table_ood_levels.tex)) [6] [7 <./Figures/fig_config_sensitivity.pdf>]
+[8] (./supplementary.bbl
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
+) [9
 
 ]
 (./supplementary.aux)
@@ -527,7 +530,7 @@ L3 programming layer <2020/03/25>
 Here is how much of TeX's memory you used:
  7572 strings out of 467525
  121557 string characters out of 5418982
- 553109 words of memory out of 5000000
+ 559082 words of memory out of 5000000
  36324 multiletter control sequences out of 15000+600000
  675086 words of font info for 80 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -550,7 +553,7 @@ e/2026/texmf-dist/fonts/type1/public/tex-gyre/qtmr.pfb></usr/local/texlive/2026
 ist/fonts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts
 /type1/public/newtx/ztmr.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/pu
 blic/newtx/ztmri.pfb>
-Output written on supplementary.pdf (9 pages, 372168 bytes).
+Output written on supplementary.pdf (9 pages, 373000 bytes).
 PDF statistics:
  149 PDF objects out of 1000 (max. 8388607)
  90 compressed objects within 1 object stream

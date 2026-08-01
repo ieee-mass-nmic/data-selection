@@ -24,6 +24,10 @@ OUTPUT = ROOT / "paper" / "Figures" / "fig_ood_calibration.pdf"
 def main() -> None:
     payload = json.loads(SOURCE.read_text())
     groups = payload["groups"]
+    references = {group["reference"] for group in groups}
+    if len(references) != 1:
+        raise ValueError(f"Figure 3 requires one shared reference, found: {sorted(references)}")
+    reference = references.pop()
     modes = ["zero-shot", "cal200", "cal500"]
     labels = {"zero-shot": "zero-shot", "cal200": "cal-200", "cal500": "cal-500"}
     colors = {"zero-shot": "#4C78A8", "cal200": "#F58518", "cal500": "#54A24B"}
@@ -68,16 +72,15 @@ def main() -> None:
             label=labels[mode],
         )
 
-    ax.set_xticks(
-        x,
-        ["L0 near\n(LESS)", "L1 far\n(LESS)", "L2 BitFit\n(LESS)", "L2 Prefix/PT\n(RDS+)"],
-    )
-    ax.set_ylabel("Drop from reference (points)")
+    tick_labels = ["L0 near", "L1 far", "L2 LN", "L2 Prefix/PT"]
+    ax.set_xticks(x, tick_labels)
+    ax.tick_params(axis="x", labelsize=10)
+    ax.set_ylabel(f"Drop from {reference} (points)")
     ax.set_ylim(0.0, 8.2)
     ax.set_yticks([0, 2, 4, 6, 8])
     ax.legend(frameon=False, ncol=1, loc="upper left", handletextpad=0.4, labelspacing=0.2)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUTPUT, bbox_inches="tight", pad_inches=0.03)
+    fig.savefig(OUTPUT, bbox_inches="tight", pad_inches=0.06)
     plt.close(fig)
     print(f"wrote {OUTPUT}")
 

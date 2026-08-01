@@ -1,0 +1,534 @@
+            PCU-Select: Amortizing Target-Specific Data Selection Across PEFT
+                                     Configurations
+
+                                                       Anonymous submission
+
+
+
+
+                             Abstract                                   the subspace can change which examples the selector should
+                                                                        prioritize.
+  A large language model (LLM) serving system typically main-              Most data selectors ignore this interaction. Quality fil-
+  tains a registry of fine-tuning configurations for diverse tasks
+  and deployment budgets. These configurations vary in which
+                                                                        ters, diversity heuristics, and proxy-model scores produce
+  modules are trained and how they are updated. This diver-             one ranking for a task and reuse it across PEFT configu-
+  sity poses a challenge to gradient-based data selection: the          rations. We call such a ranking PEFT-agnostic because the
+  selector must rebuild a target-specific gradient datastore for        selector does not receive the target configuration. Yet com-
+  every configuration, making cost scale linearly with registry         mon PEFT methods permit different updates: LoRA adds
+  size. Reusing one subset avoids this cost but can reduce qual-        low-rank changes to selected projections (Hu et al. 2022);
+  ity because different configurations favor different examples.        adapters insert trainable bottlenecks (Houlsby et al. 2019);
+  PCU-Select reuses expensive selection computations while              and (IA)3 scales selected activations (Liu et al. 2022). The
+  producing a distinct subset for each PEFT–task pair. The key          same example can therefore produce different updates, and
+  insight is to map different PEFT methods onto a common set            hence have different value, under different configurations.
+  of 24 transformer outputs through which PEFT updates affect
+  the backbone. We cache reusable sample and task features                 Gradient-based selectors capture this dependence but in-
+  at these outputs and combine them with a compact encoding             cur repeated computation. LESS (Xia et al. 2024) first builds
+  of the target configuration. After a one-time offline stage, a        a target-specific gradient datastore, a cache containing a
+  single scorer ranks candidates for any supported PEFT–task            training gradient for each candidate example. It then ranks
+  pair without rebuilding gradients. In our experiments, PCU-           the candidates against a task sketch, a small set of training
+  Select reduces the cost of onboarding a new configuration by          or development examples that represents the target task. Be-
+  42× compared to LESS, from 63.2 to 1.51 GPU-hours, while              cause each PEFT configuration exposes different trainable
+  maintaining downstream quality within a negligible margin             parameters, LESS must rebuild the cache for every config-
+  of the baseline. By amortizing per-configuration computation          uration. Its selection cost therefore grows linearly with the
+  into a one-time offline stage, PCU-Select makes gradient-level
+  data selection practical at registry scale.
+                                                                        registry.
+                                                                           One shortcut is to reuse a single LESS subset for ev-
+                                                                        ery configuration. This reuse avoids repeated computation
+                         Introduction                                   but removes the configuration information that makes gra-
+                                                                        dient selection useful. In our evaluation, the shortcut per-
+Large language model platforms must adapt one backbone to
+                                                                        forms worse than a PEFT-agnostic representation baseline
+different tasks and resource limits. Parameter-efficient fine-
+                                                                        (Table 2). Existing methods thus force a choice: recompute
+tuning (PEFT) reduces adaptation cost by updating only a
+                                                                        a target-specific ranking for every configuration or reuse a
+small set of model parameters, allowing a platform to main-
+                                                                        ranking that ignores the configuration.
+tain a registry of configurations that differ in method, train-
+able modules, capacity, or training recipe. These trainable pa-            The configuration dependence affects downstream perfor-
+rameters determine a configuration’s trainable subspace: the            mance as well as the rankings. Figure 1 shows that indepen-
+update directions available during fine-tuning. Each training           dent runs for the same configuration agree more closely than
+example can affect the model only through the directions that           runs across configurations. Changes within one PEFT family
+the target configuration exposes. Data selection reduces cost           preserve more of the ranking, while cross-family changes
+along a complementary axis by choosing a compact subset                 produce the largest disagreement. Matched selection im-
+whose examples produce useful task updates. Its decisions               proves performance by 2.0 points over cross-family reuse and
+therefore depend on the target trainable subspace: changing             by 1.45 points within LoRA configurations (Supplementary
+                                                                        Table S10 and Figure S1).
+This is an anonymized submission for review purposes only. Dis-            These observations motivate PEFT-conditioned utility: the
+tribution, citation, or public sharing of this manuscript is strictly   value of training on example x for task t under PEFT con-
+prohibited. Copyright and publication details will appear in the        figuration p. We denote this value by u(x, p, t). A task-only
+final version if accepted.                                              selector omits p and must assign the same ranking to every
+                    Spearman rank agreement                                                            Top-5% overlap
+                                                                   1.0                                                                       1.0
+       L-r8-qv 1.00 0.50 0.37 0.38 0.76 0.56 0.57 0.57                                    1.00 0.17 0.15 0.24 0.33 0.25 0.18 0.23
+                                                                                                                                             0.9
+                                                                   0.9
+      L-r8-mlp 0.50 1.00 0.36 0.36 0.48 0.56 0.53 0.59                                    0.17 1.00 0.14 0.18 0.20 0.26 0.33 0.23
+                                                                                                                                             0.8
+                                                                   0.8
+   IA3-attnmlp 0.37 0.36 1.00 0.40 0.36 0.39 0.38 0.41                                    0.15 0.14 1.00 0.15 0.15 0.17 0.18 0.20
+                                                                                                                                             0.7
+
+       AD-b64   0.38 0.36 0.40 1.00 0.30 0.31 0.34 0.35            0.7                    0.24 0.18 0.15 1.00 0.15 0.17 0.15 0.20            0.6
+
+       L-r4-qv 0.76 0.48 0.36 0.30 1.00 0.54 0.55 0.53             0.6                    0.33 0.20 0.15 0.15 1.00 0.26 0.21 0.23            0.5
+
+    L-r32-qkvo 0.56 0.56 0.39 0.31 0.54 1.00 0.55 0.59                                    0.25 0.26 0.17 0.17 0.26 1.00 0.26 0.24            0.4
+                                                                   0.5
+                                                                                                                                             0.3
+ L-r8-lowlayers 0.57 0.53 0.38 0.34 0.55 0.55 1.00 0.62                                   0.18 0.33 0.18 0.15 0.21 0.26 1.00 0.28
+                                                                   0.4
+                                                                                                                                             0.2
+L-r8-highlayers 0.57 0.59 0.41 0.35 0.53 0.59 0.62 1.00                                   0.23 0.23 0.20 0.20 0.23 0.24 0.28 1.00
+                                                                   0.3                                                                       0.1
+                   v
+                 -q -m l
+                          p   lp    64 -qv kvo ers ers                                       v
+                                                                                           -q -m l
+                                                                                                    p   lp    64 -qv kvo ers ers
+              r8            nm D - b - r 4         q      y
+                                                        la hla
+                                                               y                        r8            nm D - b - r 4         q      y
+                                                                                                                                  la hla
+                                                                                                                                         y
+            L- L-r8 -att        A     L        2-                                     L- L-r8 -att        A     L        2-
+                        3                  - r3 -low hig                                          3                  - r3 -low hig
+                     IA                   L                -                                   IA                   L                -
+                                                  r8    r8                                                                  r8    r8
+                                               L-    L-                                                                  L-    L-
+                         PEFT used for scoring                                                     PEFT used for scoring
+
+Figure 1: Left: Spearman rank agreement between PEFT-conditioned utility rankings. Right: Top-5% overlap between the
+corresponding selected examples; lower off-diagonal values indicate stronger configuration dependence.
+
+
+configuration. Per-PEFT influence selection includes p but                • Intervention-site amortization. PCU-Select maps dif-
+recomputes gradients for each target. Our goal is to predict                ferent PEFT parameterizations to 24 shared module-
+u(x, p, t) while sharing the expensive computations used to                 output sites. A structured code retains each target’s up-
+learn these scores.                                                         date structure and recipe, enabling configuration-specific
+   PCU-Select (PEFT-Conditional Utility) enables this shar-                 rankings without rebuilding gradient datastores; ablations
+ing through a common representation. It maps every sup-                     validate both PEFT and task conditioning.
+ported configuration to 24 intervention sites: selected Trans-            • Registry-scale quality and cost. Across four tasks and
+former module outputs through which PEFT updates affect                     five seen PEFTs on Llama-2-7B (Touvron et al. 2023),
+the backbone. These outputs remain comparable even when                     PCU-Select gains 0.74 points over RDS+ and matches
+PEFT methods train parameter tensors with different shapes.                 per-PEFT LESS within +0.04, while cutting four-task
+PCU-Select caches sample and task signals at the sites. A                   PEFT onboarding by 42×, from 63.2 to 1.51 GPU-hours.
+structured PEFT code records which sites a configuration
+affects, its update type, its capacity, and its training recipe.                                  Related Work
+Supplying this code at scoring time preserves configuration              Instruction-data selection. Instruction-data selectors usu-
+information while keeping the cached signals reusable.                   ally estimate quality or diversity independently of the target
+   A conditional scorer turns the shared signals into a target-          PEFT configuration. LIMA supports instruction tuning with
+specific ranking. Its prediction depends on the candidate                1,000 curated examples (Zhou et al. 2023). Model-based
+example, task sketch, and PEFT code. It learns from two                  filters instead use judgments or instruction properties: Alpa-
+complementary signals: inexpensive labels based on gradient              Gasus filters Alpaca examples with LLM judgments (Chen
+alignment cover the full candidate pool, while short-update              et al. 2024), InsTag measures semantic diversity and com-
+labels measure task-sketch loss reductions for a smaller sam-            plexity through instruction tags (Lu et al. 2023), and DEITA
+ple. At deployment, the scorer ranks the cached examples                 combines quality, complexity, and diversity (Liu et al. 2024).
+for a target configuration and task. PCU-Select then spreads             Other methods select for explicit diversity through quality–
+the budget across groups of semantically similar examples                diversity trade-offs, log-determinant objectives, or partition-
+to limit near-duplicates. This pipeline moves gradient extrac-           aware sampling (Bukharin et al. 2023; Wang et al. 2024; Rao
+tion and label construction offline while retaining a distinct           et al. 2024). These methods improve data efficiency, but their
+subset for each target.                                                  rankings omit the target PEFT’s trainable parameters.
+   These design choices amortize target-specific selection
+across a PEFT registry. We make three contributions:                     Proxy-model and influence selection. Proxy-model se-
+                                                                         lectors provide reusable rankings without computing gra-
+ • PEFT-conditioned utility. We define data value as a can-              dients for every target PEFT. Cherry LLM uses instruction-
+   didate example’s usefulness for a given task and PEFT                 following difficulty (Li et al. 2023); Superfiltering studies
+   configuration. We show that both rankings and down-                   when weak models can rank data for stronger models (Li
+   stream subset quality change with the target configura-               et al. 2024); and SmallToLarge transfers training-trajectory
+   tion.                                                                 information from small models to larger targets (Yang et al.
+2024). Because these scores encode only example and task          Vttest defines this ideal objective but never enters training,
+information, a PEFT change leaves the ranking unchanged.          scoring, or selection; those procedures use only Vt . Directly
+   Influence-based selectors model training effects more di-      solving Eq. (1) would require training and evaluating many
+rectly, but their gradients tie the score to a target param-      subsets for every target (p, t) pair.
+eterization. Classical influence functions use second-order          PCU-Select avoids this search by assigning each example
+approximations (Koh and Liang 2017), while TracIn accu-           a conditional utility: its benefit for task t when training uses
+mulates gradient similarities across checkpoints (Pruthi et al.   configuration p. Its mean prediction approximates this utility:
+2020). LESS builds a low-dimensional gradient datastore
+                                                                                     bϕ (x, p, t) ≈ u(x, p, t).
+                                                                                     µ                                        (2)
+for instruction selection (Xia et al. 2024), and DataInf spe-
+cializes influence approximation for LoRA-tuned generative        The target u(x, p, t) ∈ [0, 1] summarizes task-sketch loss re-
+models (Kwon et al. 2024). Preserving configuration speci-        ductions after a few PEFT update steps. PCU-Select rank-
+ficity therefore requires rebuilding PEFT-dependent gradi-        normalizes these reductions within groups that share the
+ents when the target changes. PCU-Select instead conditions       same PEFT, task, and measurement setting (see “Method:
+one scorer on a structured PEFT code, combining reusable          PCU-Select”). Including p allows the ranking to change with
+sample signals with a target-specific ranking. Our evaluation     the trainable subspace; omitting p would force every config-
+compares PCU-Select with both a per-PEFT LESS imple-              uration to share one task-specific ranking. The task sketch
+mentation and an Influence baseline that uses one shared          Vt identifies the desired task behavior, while p identifies the
+datastore.                                                        updates available to the model. Utility is therefore relative to
+                                                                  both the task and the PEFT configuration.
+Parameter-efficient fine-tuning. PEFT methods expose
+different trainable subspaces through bottlenecks, low-rank       Amortization objective. A registry changes the cost ob-
+updates, activation or normalization scaling, and continuous      jective because it serves multiple PEFT configurations and
+controls (Houlsby et al. 2019; Pfeiffer et al. 2021; Hu et al.    tasks from one candidate pool. Let P be the number of tar-
+2022; Dettmers et al. 2023; Liu et al. 2022; Wang et al. 2022;    get configurations and Q the number of task sketches. LESS
+Li and Liang 2021; Lester, Al-Rfou, and Constant 2021).           builds one gradient datastore for each configuration and ranks
+Prior work compares their accuracy and efficiency with fixed      that datastore once for each task. PCU-Select instead pays one
+training data; we test whether configurations induce different    shared offline cost, followed by one scoring-and-selection
+rankings over one candidate pool.                                 pass for every PEFT–task pair:
+Joint data- and parameter-efficient adaptation. The                                           data       rank
+                                                                            CLESS (P, Q) = P CLESS + P QCLESS ,
+closest methods use PEFT gradients for data selection, but                                                pair
+                                                                                                                              (3)
+their utility estimates remain specific to one target config-                CPCU (P, Q) = Coffline + P QCPCU  .
+uration. DataInf and LESS compute selection signals from                                                data
+                                                                  Equation (3) separates four costs. CLESS    builds one PEFT-
+LoRA-style training (Kwon et al. 2024; Xia et al. 2024).                                    rank
+                                                                  specific datastore, and CLESS   ranks it for one task. Coffline
+Geometry-aware targeted selection further shows that use-                                                                  pair
+ful data depends on the directions available to PEFT op-          extracts reusable signals and trains PCU-Select once. CPCU
+timization (Min et al. 2026). These methods must regener-         scores and selects data for one target pair. LESS builds P
+ate configuration-dependent signals when the target changes.      datastores and performs P Q rankings, whereas PCU-Select
+PCU-Select instead describes each configuration by its inter-     pays the offline cost once. The onboarding-cost experiment
+vention sites, update type, capacity, and training recipe. This   measures each cost term.
+representation lets one scorer reuse sample and task signals         The objective is to retain per-PEFT LESS quality while
+while still producing a different ranking for each configura-     replacing repeated datastore construction with shared of-
+tion.                                                             fline work. Solving the two cost equations gives a break-even
+                                                                  registry size; the onboarding-cost experiment substitutes the
+                                                                  measured costs.
+                Problem Formulation
+We study cross-PEFT data-efficient fine-tuning: selecting a                        Method: PCU-Select
+small training subset for a target task and PEFT configuration
+while reusing selection work across configurations. We fix a      PCU-Select learns the conditional utility surrogate in Eq. (2)
+backbone family and a frozen base model M0 . The candidate        and selects a budgeted subset for a target PEFT–task pair.
+pool D = {xi }N                                                   Figure 2 summarizes two stages. Offline, it extracts reusable
+                 i=1 contains N instruction–response exam-
+ples. Each task t provides a task sketch Vt , a small set from    sample and task signals, constructs two types of utility label,
+its training or development data. Each PEFT configuration         and trains one scorer. Online, it combines cached sample fea-
+p ∈ P specifies a method, trainable locations, capacity, and      tures with a target (p∗ , t∗ ), scores the pool, and distributes
+training recipe. For a selection budget B, the ideal subset       budget across semantic clusters. Both stages use determinis-
+maximizes held-out task performance:                              tic cluster quotas and the same cached representations.
+
+   S ∗ = arg max Perf Tune(M0 , p, S), Vttest . (1)               Shared Intervention Sites Enable Cross-PEFT
+                                                       
+             S⊆D, |S|≤B                                           Reuse
+Here Tune adapts M0 with configuration p and subset S,            PEFT families expose parameter tensors with different
+and Perf evaluates the adapted model. The held-out test set       shapes and roles, so their raw gradients cannot share one
+Figure 2: PCU-Select learns from reusable site-level signals and scores each PEFT–task target online. A 24-site coordinate
+system aligns sample and task gradients with a 128-dimensional structured PEFT code; proxy and short-update labels provide
+complementary supervision.
+
+
+cache (Hu et al. 2022; Houlsby et al. 2019; Liu et al. 2022).    channel. These mappings define each normalized site weight:
+PCU-Select instead uses a fixed set Ω of intervention sites.
+Each site is a selected module output through which a PEFT                 wpω = mask(p, ω) κ(p, ω),
+update affects the backbone. The set Ω is a shared coordinate          κ(p, ω) = tanh(η log(1 + cap(p, ω)/dmodel )) ,
+system because sample gradients, task gradients, and each                                        X ′                       (4)
+PEFT’s map of affected sites all use the same index ω.                     w̃pω = wpω / max(εw ,  wpω ).
+                                                                                                  ω′
+   PCU-Select hooks attention, MLP, and post-residual out-
+puts at eight evenly spaced Transformer layers, giving |Ω| =     Here mask(p, ω) is zero at untouched sites, and cap(p, ω)
+24. A site’s response-loss gradient describes how a sam-         measures trainable capacity. The width dmodel normalizes
+ple or task pushes that activation. By the chain rule, PEFT-     capacity, η controls saturation through tanh, and εw keeps
+parameter gradients factor through gradients at the module       the denominator nonzero. Thus, w̃pω distributes unit weight
+outputs they modify. Site gradients therefore avoid both full    over the sites used by p. Capacity corresponds to LoRA
+PEFT-parameter reconstruction and shape mismatches be-           rank, adapter width, (IA)3 vector count, prefix length, or
+tween fused and split projections. Post-residual sites place     LN-Tuning scale count. Operator type remains separate in zp
+adapters in the same index space as LoRA and (IA)3 .             because a family-wide scalar would cancel under Eq. (4)’s
+                                                                 normalization.
+   A site index records only where a configuration acts. PCU-
+Select separately encodes operator and capacity features to      Shared Representations Preserve Target Specificity
+record how it acts and how much it can update. This factor-
+ization reuses one sample signature without treating additive,   Shared site indices make signals comparable, but the scorer
+multiplicative, and bottleneck updates as equivalent.            must still distinguish each sample, task, and PEFT. PCU-
+                                                                 Select uses three fixed-length vectors: the sample representa-
+   Each configuration maps to a site mask and operator type.     tion describes the example, the task representation describes
+Attention LoRA and (IA)3 -attention map to attention-output      the target need, and the PEFT representation describes where
+sites. MLP LoRA and (IA)3 -FFN map to MLP-output sites,          and how training acts. Site gradients supply separate label-
+while adapters map to block-residual sites. Prefix tuning        construction signals.
+maps to attention-output sites. LN Tuning updates Llama-2’s         The sample representation zx = [ex ; dx ; ax ] ∈ R848
+per-block RMSNorm scales (Wang et al. 2022; Touvron et al.       combines      semantic,     descriptive,     and    activation
+2023): input-normalization scales map to attention-output        features. The 768-dimensional ex is the frozen
+sites, and post-attention-normalization scales map to MLP-       sentence-transformers/all-mpnet-base-v2
+output sites. The configuration excludes the final model-level   embedding of the instruction and response (Song et al.
+RMSNorm. Both site types use the multiplicative operator         2020; Reimers and Gurevych 2019). This encoder remains
+frozen during pool and target-benchmark processing. The           from both anchors define uhi . The fillers make this mini-batch
+16-dimensional dx records length, response-LM loss,               effect more stable than a single-example update. PCU-Select
+entropy, and format. The 64-dimensional ax summarizes             allocates 10K short-update labels in three stages. Coverage
+response-token hidden states at the eight sampled layers.         sampling first spreads labels across the registry without a
+   Utility is task-relative, so PCU-Select forms zt ∈ R848        scorer.
+by mean-pooling zx over the task sketch’s 32 examples. For           Coverage labels and the proxy then train a provisional
+proxy labels, it separately averages their site gradients into    scorer. It predicts ranks and a per-triple uncertainty scale, an
+gtω . These 24 × 256 values remain outside zt and serve only      estimate of prediction noise. Uncertainty sampling selects
+label construction.                                               triples with large scales. Boundary sampling selects large
+   The PEFT representation records the target trainable sub-      predicted–observed rank disagreements near the cutoff. Ev-
+space. In zp = [mp ; cp ; rp ] ∈ R128 , the 24 × 4 mask mp con-   ery rank normalization compares labels within one PEFT,
+tributes 96 dimensions. Its channels mark active sites, addi-     task, anchor, and horizon bucket.
+tive updates, multiplicative scaling, and prefix-style control.      The proxy cheaply orders the full pool, while short updates
+Two 16-dimensional vectors encode capacity cp and train-          target consequential ranking errors. Two anchors test whether
+ing recipe rp . At this site resolution, q/v and q/k/v/o LoRA     utility persists after adaptation begins; two horizons reduce
+share attention-output sites, while capacity and recipe pre-      dependence on one update length. Ranking within condition-
+serve their projection-level distinction.                         matched buckets avoids assuming a shared raw-loss scale
+   Prefix, P-Tuning, and LN Tuning use the same determinis-       across tasks or configurations.
+tic encoding rules as seen families. The scorer has no learned
+family lookup or operator centroid. The support policy be-        Conditional Scoring Produces Target-Specific
+low decides whether a target uses direct scoring, calibrated      Subsets
+scoring, or a per-target selector.                                Given (zx , zp , zt ), the scorer sϕ outputs (bµϕ , σ
+                                                                                                                      bϕ ), where µ
+                                                                                                                                  bϕ
+   Training these representations requires labels for many        estimates utility and σ  bϕ estimates a positive, input-dependent
+(x, p, t) triples, but measuring every PEFT update would          uncertainty scale. Separate encoders map the three inputs into
+defeat amortization. PCU-Select instead uses multi-fidelity       hidden vectors. FiLM modulation (Perez et al. 2018) uses the
+supervision, which combines labels with different costs and       PEFT and task codes to rescale and shift sample features. A
+directness. A low-fidelity gradient proxy cheaply covers the      bilinear term represents sample–PEFT compatibility.
+pool. High-fidelity short updates directly measure sketch-           Stage A distills gradient-proxy ranks to learn broad con-
+loss reduction for fewer triples. Together, they learn broad      ditional structure. Stage B continues proxy distillation and
+ranking structure and correct errors near the subset cutoff.      adds ranking and regression on short-update labels plus a
+   The gradient-proxy label measures alignment between a          heteroscedastic uncertainty loss. Here heteroscedastic means
+sample and the task sketch at sites used by the target PEFT:      that predicted noise can differ across triples. PCU-Select se-
+                              X                                   lects the Stage B checkpoint on held-out PEFT–task pairs. It
+              ulo (x, p, t) =     w̃pω cos(gxω , gtω ) .    (5)
+                                                                  also fixes the sketch size, label allocation, anchors, horizons,
+                           ω∈Ω
+                                                                  and scalar selection hyperparameters on these pairs before
+Here  gxω   is the response-token loss gradient at site ω.        downstream evaluation.
+A Johnson–Lindenstrauss random projection (Johnson and               A target’s structural support level determines whether
+Lindenstrauss 1984) compresses it to 256 dimensions and           PCU-Select applies the scorer directly or calibrates it. Rela-
+unit-normalizes the result. The task-sketch mean gives gtω .      tive to the seen registry, L0 resembles a seen configuration,
+Equation (5) therefore measures alignment only at sites used      L1 makes a larger shift within a seen family, and L2 intro-
+by p. All sketches use response-token cross-entropy for these     duces an unseen family. Seen targets use the trained scorer
+signatures; task-native metrics such as option likelihood,        directly. L0 targets run zero-shot: PCU-Select scores a new
+Pass@1, and F1 remain downstream evaluation metrics.              configuration without target-specific short-update labels. L1
+Because cosine values can be negative, PCU-Select rank-           and L2 targets use calibrated scoring when compatible labels
+normalizes them within each (p, t) bucket before proxy dis-       exist and a per-target selector otherwise.
+tillation and ranking. Cached sample signatures then label           After any required calibration, PCU-Select converts the
+many (x, p, t) triples without new gradient extraction.           two scorer outputs into a conservative ranking score:
+    The short-update label measures realized sketch-loss re-
+duction near the subset cutoff. For each sampled triple, PCU-              bϕ (x, p∗ , t∗ ) − λb
+                                                                    q(x) = µ                   σϕ (x, p∗ , t∗ ),    λ = 0.2. (7)
+Select uses two anchors θa : the base model and a warm            The uncertainty scale reduces the rank of examples whose
+checkpoint after adaptation has begun. The horizon h is the       predicted utility is noisy. It serves as a ranking penalty, not a
+number of short-update steps. A mini-batch B(x) contains          confidence interval.
+the sampled example and seven condition-matched fillers.             Ranking by q alone can over-select near-duplicates, so
+PCU-Select applies PEFT p for h steps and measures                PCU-Select clusters examples in semantic space before as-
+                                                                signing the budget. It allocates budget B across K clusters
+   ∆(x, p, t, a, h) = LVt (θa ) − LVt Adapthp (B(x); θa ) .       Ck , where k ∈ {1, . . . , K}:
+                                                            (6)                                             !
+Thus, ∆ is the task-sketch loss before the update minus its                              (vk+ )γ |Ck |1−γ
+                                                                     bk = round B P + γ                 1−γ
+                                                                                                              ,     γ = 0.6. (8)
+loss afterward. Rank-normalized reductions for h ∈ {1, 4}                                 j (vj ) |Cj |
+Here vk is the mean conservative score among the top 10%           2024), warms up each target adapter, builds an Adam-
+of examples in Ck , and vk+ = max(vk , 0). The factors vk+         preconditioned gradient datastore, and ranks examples by
+and |Ck | balance√cluster value and size. For the 300K pool,       sketch influence. PCU-Select uses its conditional scorer, un-
+K = max(50, ⌊ N ⌋) produces 547 clusters of about 548              certainty penalty, and adaptive semantic-cluster quotas.
+examples. The reported end-to-end cost is 0.38 GPU-hours              We hold the backbone, PEFT recipe, training steps, and
+per PEFT–task application and includes clustering. PCU-            evaluation protocol constant, so only the selected subset
+Select takes the top-bk examples by q within each cluster.         changes. Target adaptation trains only PEFT parameters for
+Non-positive clusters receive no budget; deterministic re-         1000 AdamW steps with a cosine schedule, global batch 128,
+mainder handling makes the quotas sum to B.                        and maximum sequence length 1024. All costs use eight
+   For seen and L0 targets, all gradient extraction and la-        NVIDIA H20-96GB GPUs and the wall-time-times-GPU-
+bel construction occur offline; online selection uses cached       count convention. The main table varies target-training seeds
+features and scorer forward passes. L1 and calibratable L2         0, 1, and 2 while fixing the selector, scorer, sketch, and pool
+targets add a small label set without rebuilding a target-         at seed 0. Matched seeds give every selector the same train-
+specific gradient datastore. The evaluation next tests whether     ing randomness. We obtain each descriptive 95% interval by
+this reuse preserves LESS-level quality, reduces registry cost,    resampling the evaluated PEFT–task cells under this fixed
+and transfers across support levels.                               selection pipeline.
+
+                                                                   PCU-Select Near-Ties Per-PEFT LESS
+                       Experiments
+                                                                   Table 1 shows that PCU-Select improves on the PEFT-
+The evaluation tests whether PCU-Select preserves per-PEFT         agnostic baselines and remains close to target-specific LESS;
+LESS’s average downstream quality, reduces the marginal            Supplementary Table S1 gives task-wise aggregates and win
+cost of adding a PEFT, and transfers to new configurations ac-     counts for the 20 PEFT×task cells. It gains 0.74 points over
+cording to their structural support in the training registry. We   RDS+ (17/20 wins; interval [+0.38, +1.06]) and 0.50 over
+then identify which components sustain the reusable scorer.        Influence (18/20; [+0.21, +0.75]). Against LESS, its mean
+                                                                   difference is +0.04 points ([−0.26, +0.33]; 10/20 wins).
+Setup                                                                 Performance varies across tasks and PEFTs, so an average
+We evaluate Llama-2-7B (Touvron et al. 2023) on GSM8K,             near-tie is the appropriately scoped registry-level conclusion.
+HumanEval, MMLU, and TyDiQA (Cobbe et al. 2021; Chen               The task-grouped interval [−0.15, +0.22] also crosses zero.
+et al. 2021; Hendrycks et al. 2021; Clark et al. 2020), us-
+ing exact match, Pass@1, accuracy, and F1, respectively. We        Amortization Cuts Four-Task PEFT Onboarding
+report percentages and their equal-weight macro-average as         Cost by 42×
+a registry-level summary. Per-task results appear in Supple-       Table 2 separates fixed/shared cost, paid once, from marginal
+mentary Table S1. Every selector chooses 10% from a decon-         cost, paid for each new PEFT. All selector costs exclude
+taminated pool of 300K mixed instruction examples. Each            the shared 12.8 GPU-hour downstream run. PCU-Select
+task sketch contains 32 fixed-seed examples from the task’s        and per-PEFT LESS have near-tied average quality but dis-
+training or development split and remains disjoint from eval-      tribute selection cost differently. LESS has no fixed cost and
+uation. HumanEval uses MBPP and CodeAlpaca because it              spends 63.2 GPU-hours per four-task configuration. PCU-
+lacks a training split; content hashes and AST-normalized          Select pays 144.0 GPU-hours once, then 1.51 GPU-hours
+signatures remove all sketch examples from the candidate           per new configuration: a 42× lower marginal cost.
+pool. The pool combines seven public instruction corpora              The gap comes from configuration reuse. Adding a task
+after exact, normalized-string, 13-gram, and MinHash de-           to an existing PEFT costs one online-selection pass: 0.38
+contamination; each selected subset contains 30K examples.         GPU-hours for PCU-Select and 0.30 for LESS. The PCU-
+   The main comparison covers five configurations seen dur-        Select value rounds the exact average per-task cost of 0.3775.
+ing scorer training: attention and MLP LoRA, (IA)3 , and           Adding a PEFT forces LESS to rebuild its datastore, whereas
+adapters. The transfer study holds out configurations that         PCU-Select reuses the scorer (Supplementary Table S5). The
+vary rank, placement, learning rate, or family, including Pre-     cost benefit therefore comes from cross-PEFT reuse.
+fix Tuning, P-Tuning, and LN Tuning (Wang et al. 2022). We            The fixed-subset shortcut trades away quality. Reuse-one-
+instantiate LN Tuning by updating the scale parameters of          LESS applies one LESS subset to all five targets; it costs
+both per-block RMSNorm modules and excluding the final             63.2 GPU-hours but averages 34.24, below RDS+ at 34.44.
+model-level RMSNorm (Touvron et al. 2023). Supplemen-              Reusing a subset selected for one trainable subspace removes
+tary Table S3 lists all 17 configurations.                         the target condition. PCU-Select produces a distinct subset
+   The four baselines differ in target specificity. Ran-           for each target and retains LESS-level average quality.
+dom uses neither task nor PEFT information. RDS+, our                 The measured costs break even at 2.33 four-task configura-
+representation-similarity baseline, ranks frozen semantic          tions. Serving the five-PEFT registry costs 151.6 GPU-hours
+embeddings by similarity to the task-sketch mean but ignores       with PCU-Select and 316.0 with LESS, a 2.09× reduction.
+the PEFT configuration. Influence, our shared-datastore            For targets far from the training registry, optional calibra-
+gradient baseline, ranks projected base-model gradients            tion uses 500 reduced calibration labels from one warm
+from one PEFT-agnostic datastore. LESS, our per-PEFT               anchor and one update step. This procedure costs 1.05 GPU-
+implementation of gradient-influence selection (Xia et al.         hours per (p, t), one quarter of the ≈ 4.2 GPU-hours for the
+                                            Method                AD-b64 IA3-attnmlp     L-r16-qkvo     L-r8-mlp       L-r8-qv         Avg.
+                                            Random             32.79±0.38   31.74±0.13   33.11±0.23   31.97±0.21   31.82±0.16    32.29±0.16
+                                            RDS+               35.27±0.23   33.54±0.26   35.00±0.29   34.46±0.21   33.91±0.17    34.44±0.13
+                                            Influence          35.08±0.27   33.84±0.26   35.24±0.19   34.69±0.13   34.53±0.22    34.68±0.11
+                                            LESS               35.52±0.20   34.44±0.13   35.80±0.15   35.13±0.14   34.80±0.37    35.14±0.14
+                                            PCU-Select         35.61±0.40   34.60±0.21   35.93±0.30   34.56±0.23   35.18±0.31    35.18±0.16
+
+Table 1: Each PEFT column reports the equal-weight macro-average of the four task-native percentage scores. Values are mean
+± standard deviation across three matched downstream-training seeds; the selector, task sketch, candidate pool, and scorer are
+fixed. Across the 20 configuration–task cells, the paired PCU-Select-minus-LESS difference is +0.04 points, with a descriptive
+95% interval of [−0.26, +0.33].
+
+
+     Method                                       Fixed Marg. Total Quality      Gap               Against LESS, the zero-shot gap grows from 0.34 points at
+     Random          0.0                                      0.0 0.0     32.29 −2.85
+                                                                                                L0 to 2.08 at L1, 4.08 for LN Tuning, and 6.97 for Prefix/P-
+     RDS+            1.6                                      0.0 1.6     34.44 −0.70           Tuning (Figure 3). Cal-200 already cuts the L1 and LN-
+     Influence      48.8                                      0.0 48.8    34.68 −0.46           Tuning gaps to 0.91 and 0.65; Cal-500 further lowers them to
+     Reuse-one-LESS 63.2                                      0.0 63.2    34.24 −0.90           0.30 and 0.23, removing 86% and 94% of the original gaps.
+                                                                                                The additional 300 labels yield only 0.61 and 0.42 points
+     LESS                                           0.0      63.2 316.0   35.14 0.00
+     PCU-Select                                   144.0      1.51 151.6   35.18 +0.04
+                                                                                                of recovery, indicating that a lightweight residual correc-
+                                                                                                tion recovers most of the shared scorer’s transferable ranking
+                                                                                                structure. The Prefix/P-Tuning gap falls from 6.97 in the zero-
+Table 2: Quality and selection cost across five seen PEFTs.
+                                                                                                shot setting to 2.17 with Cal-200 and 1.99 with Cal-500; its
+Costs are GPU-hours and exclude downstream tuning; Gap
+                                                                                                0.18-point Cal-200-to-Cal-500 change is descriptive.
+is the paired difference from LESS in task-native points.
+Boldface marks the best quality and marginal cost.                                               Ablations Identify the Useful Components
+                                                                                                 Removing the PEFT code causes the largest downstream
+
+
+
+
+        Drop from LESS (points)
+                                  8                                                              drop, 1.37 points; removing the task sketch costs 0.82 points.
+                                                zero-shot
+                                                cal-200                                          A family-only code loses 0.68 points, and uniform rather
+                                  6
+                                                cal-500                                          than adaptive cluster quotas loses 0.51, showing that con-
+                                  4                                                              figuration structure and value-aware coverage both matter.
+                                                                                                 Using only gradient-proxy or short-update labels loses 0.85
+                                  2                                                              or 0.36 points, respectively. Replacing adaptive quotas with
+                                                                                                 global top-k loses 1.08 points, while removing the activation
+                                  0                                                              signature or uncertainty penalty costs 0.48 or 0.28 points.
+                                      L0 near       L1 far       L2 LN L2 Prefix/PT              Supplementary Table S9 reports the full ablation on GSM8K
+                                                                                                 and HumanEval with two representative PEFTs.
+Figure 3: Mean LESS-minus-PCU-Select gap across each
+tier’s targets and three tasks (lower is better). Cal-200/500                                    Limitations
+denote calibration-label counts.                                                                 Evaluation remains limited to one backbone family, four
+                                                                                                 tasks, and a finite registry; broader backbones, domains, and
+                                                                                                 update mechanisms require validation. Short-update labels
+full routine. It shifts the worst-case break-even point to 2.50                                  approximate full-training contribution, and structural tiers
+configurations. For supported four-task configurations that                                      are registry-relative. Finally, amortization is most relevant
+require no calibration, PCU-Select’s marginal selection cost                                     when a service repeatedly onboards configurations rather
+is 42× lower than per-PEFT LESS.                                                                 than serving a single target.
+
+Reduced Calibration Narrows Gaps Beyond the                                                                              Conclusion
+Training Registry                                                                                PCU-Select makes PEFT-conditioned selection reusable,
+Before evaluation, we group held-out targets by structural                                       producing target-specific subsets without rebuilding gradi-
+support: L0 resembles a seen configuration, L1 makes a                                           ent datastores. Across four tasks and five seen configurations,
+larger shift within a seen family, and L2 introduces an unseen                                   it matches per-PEFT LESS (35.18 versus 35.14), cuts four-
+family.                                                                                          task onboarding by 42×, and lowers five-PEFT selection
+   Cal-200/500 freeze the shared scorer and fit only a zero-                                     cost by 2.09×. Calibration recovers 86% of the L1 gap and
+initialized linear residual head using 200/500 target-specific                                   94% of the LN-Tuning gap; the PEFT-code ablation further
+short-update labels. Because each label uses one warm an-                                        supports the role of structural conditioning. Overall, PCU-
+chor and one update, the two budgets cost only 0.42 and 1.05                                     Select combines target-specific quality, efficient transfer, and
+GPU-hours per PEFT–task pair.                                                                    low marginal cost in a reusable selector.
+                        References                                  Natural Language Processing, 3045–3059. Association for
+Bukharin, A.; Li, S.; Wang, Z.; Yang, J.; Yin, B.; Li, X.;          Computational Linguistics.
+Zhang, C.; Zhao, T.; and Jiang, H. 2023. Data Diver-                Li, M.; Zhang, Y.; He, S.; Li, Z.; Zhao, H.; Wang, J.; Cheng,
+sity Matters for Robust Instruction Tuning. arXiv preprint          N.; and Zhou, T. 2024. Superfiltering: Weak-to-Strong Data
+arXiv:2311.14736.                                                   Filtering for Fast Instruction-Tuning. In Proceedings of the
+Chen, L.; Li, S.; Yan, J.; Wang, H.; Gunaratna, K.; Yadav,          62nd Annual Meeting of the Association for Computational
+V.; Tang, Z.; Srinivasan, V.; Zhou, T.; Huang, H.; and Jin,         Linguistics (Volume 1: Long Papers). Bangkok, Thailand:
+H. 2024. AlpaGasus: Training A Better Alpaca with Fewer             Association for Computational Linguistics.
+Data. In The Twelfth International Conference on Learning           Li, M.; Zhang, Y.; Li, Z.; Chen, J.; Chen, L.; Cheng,
+Representations.                                                    N.; Wang, J.; Zhou, T.; and Xiao, J. 2023. From Quan-
+Chen, M.; et al. 2021. Evaluating Large Language Models             tity to Quality: Boosting LLM Performance with Self-
+Trained on Code. arXiv preprint arXiv:2107.03374.                   Guided Data Selection for Instruction Tuning. arXiv preprint
+Clark, J. H.; Choi, E.; Collins, M.; Garrette, D.; Kwiatkowski,     arXiv:2308.12032.
+T.; Nikolaev, V.; and Palomaki, J. 2020. TyDi QA: A Bench-          Li, X. L.; and Liang, P. 2021. Prefix-Tuning: Optimizing
+mark for Information-Seeking Question Answering in Typo-            Continuous Prompts for Generation. In Proceedings of the
+logically Diverse Languages. Transactions of the Association        59th Annual Meeting of the Association for Computational
+for Computational Linguistics, 8: 454–470.                          Linguistics and the 11th International Joint Conference on
+Cobbe, K.; Kosaraju, V.; Bavarian, M.; Chen, M.; Jun, H.;           Natural Language Processing, 4582–4597. Association for
+Kaiser, L.; Plappert, M.; Tworek, J.; Hilton, J.; Nakano, R.;       Computational Linguistics.
+Hesse, C.; and Schulman, J. 2021. Training Verifiers to Solve       Liu, H.; Tam, D.; Muqeeth, M.; Mohta, J.; Huang, T.; Bansal,
+Math Word Problems. arXiv preprint arXiv:2110.14168.                M.; and Raffel, C. 2022. Few-Shot Parameter-Efficient Fine-
+Dettmers, T.; Pagnoni, A.; Holtzman, A.; and Zettlemoyer,           Tuning is Better and Cheaper than In-Context Learning. In
+L. 2023. QLoRA: Efficient Finetuning of Quantized LLMs.             Advances in Neural Information Processing Systems, vol-
+In Advances in Neural Information Processing Systems, vol-          ume 35.
+ume 36.                                                             Liu, W.; Zeng, W.; He, K.; Jiang, Y.; and He, J. 2024. What
+Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.;         Makes Good Data for Alignment? A Comprehensive Study
+Song, D.; and Steinhardt, J. 2021. Measuring Massive Mul-           of Automatic Data Selection in Instruction Tuning. In The
+titask Language Understanding. In International Conference          Twelfth International Conference on Learning Representa-
+on Learning Representations.                                        tions.
+Houlsby, N.; Giurgiu, A.; Jastrzebski, S.; Morrone, B.;             Lu, K.; Yuan, H.; Yuan, Z.; Lin, R.; Lin, J.; Tan, C.; Zhou, C.;
+de Laroussilhe, Q.; Gesmundo, A.; Attariyan, M.; and Gelly,         and Zhou, J. 2023. InsTag: Instruction Tagging for Analyzing
+S. 2019. Parameter-Efficient Transfer Learning for NLP.             Supervised Fine-tuning of Large Language Models. arXiv
+In Proceedings of the 36th International Conference on              preprint arXiv:2308.07074.
+Machine Learning, volume 97 of Proceedings of Machine               Min, G.; Huang, T.; Wan, K.; and Chen, C. 2026. GIST:
+Learning Research, 2790–2799. PMLR.                                 Targeted Data Selection for Instruction Tuning via Coupled
+Hu, E. J.; Shen, Y.; Wallis, P.; Allen-Zhu, Z.; Li, Y.; Wang, S.;   Optimization Geometry. arXiv preprint arXiv:2602.18584.
+Wang, L.; and Chen, W. 2022. LoRA: Low-Rank Adaptation              Perez, E.; Strub, F.; de Vries, H.; Dumoulin, V.; and
+of Large Language Models. In International Conference on            Courville, A. 2018. FiLM: Visual Reasoning with a General
+Learning Representations.                                           Conditioning Layer. In Proceedings of the AAAI Conference
+Johnson, W. B.; and Lindenstrauss, J. 1984. Extensions of           on Artificial Intelligence, volume 32, 3942–3951.
+Lipschitz Mappings into a Hilbert Space. In Conference              Pfeiffer, J.; Kamath, A.; Rücklé, A.; Cho, K.; and Gurevych,
+in Modern Analysis and Probability, volume 26 of Con-               I. 2021. AdapterFusion: Non-Destructive Task Composition
+temporary Mathematics, 189–206. American Mathematical               for Transfer Learning. In Proceedings of the 16th Conference
+Society.                                                            of the European Chapter of the Association for Computa-
+Koh, P. W.; and Liang, P. 2017. Understanding Black-                tional Linguistics: Main Volume, 487–503. Online: Associ-
+box Predictions via Influence Functions. In Proceedings             ation for Computational Linguistics.
+of the 34th International Conference on Machine Learning,           Pruthi, G.; Liu, F.; Sundararajan, M.; and Kale, S. 2020. Esti-
+volume 70 of Proceedings of Machine Learning Research,              mating Training Data Influence by Tracing Gradient Descent.
+1885–1894. PMLR.                                                    In Advances in Neural Information Processing Systems, vol-
+Kwon, Y.; Wu, E.; Wu, K.; and Zou, J. 2024. DataInf: Effi-          ume 33.
+ciently Estimating Data Influence in LoRA-tuned LLMs and            Rao, J.; Liu, X.; Lian, L.; Cheng, S.; Liao, Y.; and Zhang, M.
+Diffusion Models. In The Twelfth International Conference           2024. CommonIT: Commonality-Aware Instruction Tuning
+on Learning Representations.                                        for Large Language Models via Data Partitions. In Proceed-
+Lester, B.; Al-Rfou, R.; and Constant, N. 2021. The Power           ings of the 2024 Conference on Empirical Methods in Natural
+of Scale for Parameter-Efficient Prompt Tuning. In Pro-             Language Processing, 10064–10083. Miami, Florida, USA:
+ceedings of the 2021 Conference on Empirical Methods in             Association for Computational Linguistics.
+Reimers, N.; and Gurevych, I. 2019. Sentence-BERT: Sen-
+tence Embeddings using Siamese BERT-Networks. In Pro-
+ceedings of the 2019 Conference on Empirical Methods in
+Natural Language Processing and the 9th International Joint
+Conference on Natural Language Processing, 3982–3992.
+Association for Computational Linguistics.
+Song, K.; Tan, X.; Qin, T.; Lu, J.; and Liu, T.-Y. 2020. MP-
+Net: Masked and Permuted Pre-training for Language Un-
+derstanding. In Advances in Neural Information Processing
+Systems, volume 33, 16857–16867.
+Touvron, H.; et al. 2023. Llama 2: Open Foundation and
+Fine-Tuned Chat Models. arXiv preprint arXiv:2307.09288.
+Wang, P.; Shen, Y.; Guo, Z.; Stallone, M.; Kim, Y.; Golland,
+P.; and Panda, R. 2024. Diversity Measurement and Subset
+Selection for Instruction Tuning Datasets. arXiv preprint
+arXiv:2402.02318.
+Wang, Q.; Ruan, Y.-P.; Zuo, Y.; and Li, T. 2022. Parameter-
+Efficient Tuning on Layer Normalization for Pre-trained Lan-
+guage Models. arXiv preprint arXiv:2211.08682.
+Xia, M.; Malladi, S.; Gururangan, S.; Arora, S.; and Chen,
+D. 2024. LESS: Selecting Influential Data for Targeted In-
+struction Tuning. In Proceedings of the 41st International
+Conference on Machine Learning, volume 235 of Proceed-
+ings of Machine Learning Research, 54104–54132. PMLR.
+Yang, Y.; Mishra, S.; Chiang, J. N.; and Mirzasoleiman, B.
+2024. SmallToLarge (S2L): Scalable Data Selection for Fine-
+tuning Large Language Models by Summarizing Training
+Trajectories of Small Models. In Advances in Neural Infor-
+mation Processing Systems, volume 37.
+Zhou, C.; Liu, P.; Xu, P.; Iyer, S.; Sun, J.; Mao, Y.; Ma, X.;
+Efrat, A.; Yu, P.; Yu, L.; Zhang, S.; Ghosh, G.; Lewis, M.;
+Zettlemoyer, L.; and Levy, O. 2023. LIMA: Less Is More for
+Alignment. In Advances in Neural Information Processing
+Systems, volume 36.
+

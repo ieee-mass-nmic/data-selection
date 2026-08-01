@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  6 JUL 2026 02:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.6.29)  28 JUL 2026 03:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -282,17 +282,17 @@ L3 programming layer <2020/03/25>
 Here is how much of TeX's memory you used:
  3662 strings out of 467525
  59007 string characters out of 5418982
- 501525 words of memory out of 5000000
+ 502525 words of memory out of 5000000
  32534 multiletter control sequences out of 15000+600000
  640957 words of font info for 48 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 89i,5n,91p,356b,278s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,5n,91p,356b,271s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2026
 /texmf-dist/fonts/type1/public/tex-gyre/qtmr.pfb></usr/local/texlive/2026/texmf
 -dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2026/texmf-dist/fo
 nts/type1/public/newtx/ztmb.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1
 /public/newtx/ztmr.pfb>
-Output written on ReproducibilityChecklist.pdf (2 pages, 95692 bytes).
+Output written on ReproducibilityChecklist.pdf (2 pages, 95697 bytes).
 PDF statistics:
  34 PDF objects out of 1000 (max. 8388607)
  21 compressed objects within 1 object stream

@@ -1,0 +1,535 @@
+ Supplementary Material: PCU-Select: Amortizing Target-Specific Data Selection
+                         Across PEFT Configurations
+
+                                                       Anonymous submission
+
+
+
+
+                   Technical Appendix                                   paired difference with a descriptive 95% interval over the
+Quality Criterion and Break-Even Derivation                             five PEFT cells. We obtain this fixed-pipeline interval by
+                                                                        resampling the evaluated cells. Parenthetical counts report
+The main paper compares PCU-Select with per-PEFT                        how many of the five PEFT cells PCU-Select wins within
+LESS under an explicit quality criterion. Let Perf PCU and              each task.
+Perf LESS denote their downstream scores and ϵ the accept-
+                                                                           The per-task results clarify the aggregate comparison.
+able difference:
+                                                                        PCU-Select outperforms the PEFT-agnostic selectors on
+   ∆quality = Perf PCU − Perf LESS ,         |∆quality | ≤ ϵ.           all four tasks. In contrast, its comparison with LESS de-
+                                                            (S1)        pends on the task. The LESS interval excludes zero on
+   For a fixed number of tasks Q, PCU-Select becomes                    MMLU (+0.67 Acc, [+0.24, +1.08]). It includes zero
+cheaper when its shared offline cost plus its per-pair cost falls       on GSM8K (+0.29 EM, [−0.04, +0.58]) and HumanEval
+below LESS’s repeated datastore and ranking costs. Solving              (−0.04 Pass@1, [−0.44, +0.31]). On TyDiQA, it excludes
+the cost inequality from the main paper gives                           zero in the negative direction (−0.77 F1, [−1.18, −0.43]).
+                                                                        Averaging over tasks yields the near-zero aggregate gap in
+                                Coffline                                Table 1 of the main paper. PCU-Select and per-PEFT LESS
+         P > P⋆ =       data       rank − C pair )
+                                                   ,            (S2)
+                       CLESS + Q(CLESS     PCU                          are therefore near-tied on the seen registry, while PCU-Select
+                                                                        provides amortized selection cost.
+provided that the denominator is positive. For the four-task
+             pair
+workload, CPCU    = 1.51/4 = 0.3775 GPU-hours, which the                Task- and configuration-level differences. Two slices
+tables display as 0.38. LESS costs 63.2 GPU-hours per con-              show the largest differences from LESS. On TyDiQA,
+figuration, while PCU-Select pays 144.0 GPU-hours offline               PCU-Select trails LESS by 0.77 F1 (descriptive interval
+plus 1.51 GPU-hours per configuration. Therefore,                       [−1.18, −0.43]). TyDiQA-GoldP emphasizes multilingual
+                           144.0                                        answer-span alignment, whereas the other three tasks em-
+                  P⋆ =              = 2.33.             (S3)            phasize reasoning and generation more heavily. The larger
+                        63.2 − 1.51                                     TyDiQA gap is consistent with the task sketch and shared
+PCU-Select costs less from the third integer-valued configu-            intervention-site gradients representing its signal less di-
+ration onward. With 500 reduced calibration labels for each             rectly than the per-target gradients computed by LESS. On
+of four tasks, its marginal cost becomes 1.51 + 4(1.05) =               the MLP-only LoRA column (L-r8-mlp), PCU-Select trails
+5.71 GPU-hours and the worst-case threshold becomes                     LESS by 0.57 points. Its HumanEval and TyDiQA cells have
+144.0/(63.2 − 5.71) = 2.50 configurations.                              the largest dispersion, with SDs of 0.68 and 0.62. MLP-only
+                                                                        placement concentrates all trainable capacity on the eight
+Per-Task Results Behind the Main Table                                  mlp_out sites. Any error in their site weights therefore
+Table 1 in the main paper summarizes four task-native met-              affects the entire proxy, and the scorer reports its highest un-
+rics after scaling each to a percentage: GSM8K exact match,             certainty on these two cells. Together, these results identify
+HumanEval Pass@1, MMLU accuracy, and TyDiQA F1. Be-                     site-weighted proxy fidelity as the main source of variation
+cause these metrics have different scales, ceilings, and seed           across tasks and configurations.
+variances, their average can hide task-level differences. Ta-
+ble S1 therefore reports each task separately. The RDS+ and             Evaluation Protocols
+Influence columns show absolute differences in the corre-
+                                                                        All methods share the same target-training and evaluation
+sponding native metric. The LESS column instead shows a
+                                                                        pipeline; only the selected subset changes. Target training
+This is an anonymized submission for review purposes only. Dis-         uses the Llama-2-7B backbone (Touvron et al. 2023), freezes
+tribution, citation, or public sharing of this manuscript is strictly   the backbone, and trains only the target PEFT. Table S3 lists
+prohibited. Copyright and publication details will appear in the        the per-configuration learning rates (2e-4 for LoRA, 5e-4
+final version if accepted.                                              for (IA)3 , 3e-4 for adapters, and 1e-4 for L-r64-all). The
+                        Task          Metric      PCU       ∆RDS+           ∆Inf.             ∆LESS (95% CI)
+                        GSM8K         EM         22.20   +0.55 (5/5)   +0.58 (5/5)   +0.29 [−0.04, +0.58] (4/5)
+                        HumanEval     Pass@1     17.06   +0.64 (4/5)   +0.24 (4/5)   −0.04 [−0.44, +0.31] (2/5)
+                        MMLU          Acc        49.14   +1.55 (5/5)   +1.00 (5/5)   +0.67 [+0.24, +1.08] (4/5)
+                        TyDiQA        F1         52.30   +0.22 (3/5)   +0.17 (4/5)   −0.77 [−1.18, −0.43] (0/5)
+
+Table S1: Task-level summary of the main 10% budget result. Values are averaged over the five seen PEFT configurations.
+∆RDS+ and ∆Inf. are absolute native-point gains over PEFT-agnostic baselines; ∆LESS is the paired difference against per-
+PEFT LESS with a descriptive 95% cell-resampling interval over PEFT cells. Parentheses report PCU-Select wins among the
+five PEFT cells for each task; column totals are 17/20, 18/20, and 10/20, respectively.
+
+
+fixed recipe uses AdamW and a cosine schedule with a 0.03                  These protocols follow the standard public setups
+warmup ratio. It runs for 1000 steps with bfloat16, gradient            for each benchmark. An evaluation adapter supplies
+clipping at 1.0, and maximum sequence length 1024. A per-               the task-native evaluators to the runner through the
+device batch of 16 over 8 GPUs gives a global batch of 128.             --task-metric-factory hook. The fixed decoding
+   At the 10% budget, the selected subset holds 30K ex-                 and scoring settings above prevent the run environment from
+amples. The 1000 steps therefore process 128K samples,                  changing metric definitions.
+or about 4.3 passes over the subset. The dataloader shuf-                  For reference, the untuned Llama-2-7B (Touvron et al.
+fles the full subset each epoch, so it uses every selected              2023) scores 13.9 on GSM8K, 12.4 on HumanEval, 43.9 on
+example. Selected instructions average ≈ 512 tokens, and                MMLU, and 46.2 on TyDiQA. Our MMLU score falls below
+length-bucketed batches reduce padding.                                 Meta’s reported 45.3 because the prompt and harness differ.
+   With FlashAttention-2 (Dao 2024) and gradient check-                 Every selector’s fine-tune, including Random, improves over
+pointing, each step takes ≈ 5.8 wall-clock seconds. Gradient            the base model on all four tasks. The Random baseline there-
+checkpointing trades compute for memory and dominates the               fore provides a meaningful reference for the effect of data
+per-step time. This corresponds to ≈ 22 samples/s in aggre-             selection.
+gate and ≈ 1.4K tokens/s per GPU. The full run takes about
+96 minutes, or 12.8 GPU-hours per PEFT–task–seed un-                    Baseline Specifications
+der the (wall seconds × GPU count)/3600 convention. This                The three named baselines isolate two design choices:
+shared target-training cost is identical across selectors, so the       whether selection uses gradients and whether those gradients
+selection-only comparison excludes it.                                  depend on the target PEFT. We specify each implementation
+   A uniform draw from the entire 300K pool under the same              below so that the comparison is auditable.
+1000-step budget averages 36.75 across tasks. This is a fixed-
+compute reference, not a converged full-data upper bound:               RDS+ (representation similarity). RDS+ operates on the
+it covers only 0.43 pool epochs, whereas the 10% subset                 joint semantic embedding ejoint
+                                                                                                    x   produced by a frozen external
+receives about 4.3 passes.                                              sentence encoder. PCU-Select’s sample tower reads the same
+   The primary downstream metric for each task is its public-           input representation but does not train it. RDS+ therefore
+standard, task-native score, computed by a task evaluator               depends on no PCU-trained features; only the selection rule
+injected into the training runner. We log held-out response-            differs.
+LM loss as an auxiliary diagnostic (eval_loss) but use                     RDS+ first standardizes every pool embedding per fea-
+only the primary task metric for comparison. Concrete per-              ture. It forms the query by averaging the 32 task-sketch em-
+task decoding and scoring protocols are:                                beddings and applies the same pool statistics. It then L2 -
+  • GSM8K (exact match). Chain-of-thought genera-                       normalizes the pool and query vectors and ranks candidates
+    tion (Cobbe et al. 2021) with greedy decoding; the eval-            by cosine similarity.
+    uator extracts the final numeric answer and checks exact               RDS+ is task-conditioned through the sketch query but
+    match.                                                              PEFT-agnostic: its ranking does not depend on the target
+  • HumanEval (Pass@1). The standard unbiased Pass@1                    configuration. It has no tuned hyperparameters—the query
+    estimator (Chen et al. 2021): sampling at temperature               is the fixed seed-0 sketch and there is no temperature or
+    0.2 with n=20 samples per problem, scored by unit-test              mixing weight—so there is no tuning range to report. The “+”
+    execution. This is a multi-sample estimate of Pass@1, not           denotes the per-feature standardization applied before cosine,
+    a single greedy sample.                                             relative to a plain embedding-nearest-neighbor selector.
+  • MMLU (accuracy). Log-likelihood scoring (Hendrycks                  Influence (shared-datastore gradient similarity). The
+    et al. 2021) of the four answer options; the evaluator              Influence baseline builds one shared projected-gradient data-
+    selects the highest-likelihood option without free-form             store from the base model’s intervention-site activations. It
+    generation.                                                         uses the JL projection and L2 normalization specified in the
+  • TyDiQA-GoldP (F1). Greedy decoding of the answer                    reproducibility notes. Each candidate carries signatures gxω
+    span (Clark et al. 2020), scored with token-level F1                at the 24 sites. The task query gtω pools and renormalizes the
+    against the gold answers.                                           sketch gradient at each site. Influence scores each candidate
+with the plain cosine ω cos(gxω , gtω ) and applies global top-
+                     P
+                                                                  Source            Domain                Examples License
+k without site weighting. Its PEFT-agnostic gradient source       FLAN v2 (subset) general instruction     110,000 Apache-2.0
+makes the ranking independent of the target configuration.        OpenOrca (subset) reasoning traces        70,000 MIT
+Influence therefore provides the cheap gradient baseline for      Tulu-v2 mix       mixed instruction       50,000 ODC-BY-1.0
+measuring the value of PEFT conditioning.                         OpenAssistant     dialogue                30,000 Apache-2.0
+                                                                  CodeAlpaca        code instruction        20,000 CC-BY-NC-4.0
+LESS (per-PEFT gradient influence). LESS is a per-                Dolly-15k         general instruction     15,000 CC-BY-SA-3.0
+configuration reimplementation of gradient-influence selec-       WizardLM-evol complex instruction          5,000 CC-BY-NC-4.0
+tion following LESS (Xia et al. 2024). It applies four steps
+to each target PEFT. First, it warms up the target adapter        Total                                    300,000
+for 200 steps to obtain the optimization state. Second, it ex-
+tracts Adam-preconditioned gradients over the adapter’s own       Table S2: Candidate-pool provenance and licenses. All
+trainable parameters at each checkpoint. Third, it projects       sources permit research use; we use the two CC-BY-NC com-
+the gradients into a target-specific low-dimensional datas-       ponents only for non-commercial research.
+tore. Finally, it ranks candidates by their projected-gradient
+influence on the 32-example task sketch and averages across
+warmup checkpoints.                                               sources. The full supplementary configuration comprises the
+   The first three steps build the datastore over the target      PEFT registry, the scorer and feature-extraction configs, the
+adapter’s own trainable parameters. The datastore is therefore    task-sketch seeds, the candidate-pool manifest with these
+PEFT-specific but task-independent. LESS constructs it once       checksums, and the evaluation adapter.
+per PEFT and reuses it for every task sketch. Only the final      Benchmark decontamination. We decontaminate the
+projected-gradient scoring step is task-specific.                 pool against the test items of GSM8K, HumanEval, MMLU,
+   It costs about 0.30 GPU-hours per task, so 1.20 covers         and TyDiQA. The filter checks exact matches, normalized-
+all four task sketches for one configuration. The per-target      string matches, 13-gram overlap, and MinHash LSH near-
+cost of a PEFT configuration is therefore 62.0 (datastore)        duplicates. The 13-gram stage removes candidates with Jac-
++ 1.20 (four per-task rankings) = 63.2 GPU-hours, already         card overlap of at least 0.5; the MinHash stage uses a thresh-
+spanning the full four-task evaluation; the five-PEFT registry    old of 0.8. The filter removes 1,742 pre-finalization can-
+cost is 5 × 63.2 = 316.0. LESS is the strongest and most          didates (0.58% of the pool size). We then backfill from the
+expensive baseline in our study, and the amortized-cost anal-     same source buckets to keep the final pool at 300K examples,
+ysis charges it exactly this per-configuration recomputation,     so Table S2 reports final post-filter counts. We additionally
+consistent with the algorithm as implemented.                     audit the top-20 embedding nearest neighbors of each test
+Baseline configuration and tuning. Random has no                  item and find no further overlaps after the automated pass.
+hyperparameters. RDS+ uses the fixed representation-              All reported results are on the decontaminated pool.
+similarity rule above with the shared 32-example sketch as        Task sketch construction and HumanEval. Each task
+its only task input. The Influence baseline shares the same       sketch contains 32 examples sampled with a fixed seed (0)
+24-site JL projection and sketch as PCU-Select. We fix every      and stratified into response-length terciles. We draw sketches
+baseline’s hyperparameters before test-metric evaluation.         only from each task’s train or development split and keep
+                                                                  them disjoint from the evaluation test set. HumanEval has
+Reproducibility Supplement                                        no official train/dev split. We therefore draw its sketch from
+This supplement documents the pipeline configuration read         the MBPP train split and CodeAlpaca instead of HumanEval
+directly from the supplementary implementation. We take           itself. Exact matching and AST-normalized function signa-
+every value below from source code or its configuration files.    tures remove every item that matches one of the 164 Hu-
+When the code leaves a value to an external artifact or the       manEval evaluation problems. The resulting sketch source
+run environment, we flag the omission instead of guessing.        has zero overlap with the evaluation set.
+                                                                      The candidate pool also contains a 20K CodeAlpaca slice.
+Data provenance and deduplication. The candidate pool             We remove all 32 sketch examples from this pool by content
+holds 300K mixed instruction examples drawn from seven            hash and AST-normalized signature before selection. No se-
+public instruction corpora (Table S2). Deduplication runs in      lector can therefore recover a sketch example into its training
+three stages. First, it removes exact duplicates by the content   subset. The sketch is disjoint from both the HumanEval test
+hash of each (instruction, response, source) tuple. Second,       set and the candidate pool. Because the sketch is a selection
+it removes normalized-string matches after lowercasing and        signal, every selector requires this disjointness. We enforce
+stripping whitespace and punctuation. Third, MinHash LSH          it identically across methods.
+removes near-duplicates using 128 permutations and a Jac-
+card threshold of 0.8. These stages remove 18,446 intra-pool      PEFT registry. Table S3 lists all 17 PEFT configu-
+duplicates before the 300K pool is finalized.                     rations: five seen, nine unseen same-family configura-
+    For reproducibility, we include the post-filter example       tions, and three unseen families. E5 evaluates eight held-
+count and a SHA-256 checksum for each source. Ex-                 out targets—L-r32-qkvo, AD-b16, L-r64-all, AD-b256,
+amples include FLAN-v2 9f3c...a71e and OpenOrca                   L-r8-highlayers, PRE-l16, PT-l32, and LN—while the
+4b8d...c052. The supplementary manifest lists all seven           configuration-sensitivity study uses the additional LoRA
+variants. All use 1000 steps, a cosine schedule, and               Selection, clustering, and quotas. At application time,
+0.03 warmup; learning rates vary by configuration. The             the scorer ranks each example by q = µ − λ σ with un-
+LN configuration trains the input_layernorm and                    certainty penalty λ=0.2. The penalty favors examples with
+post_attention_layernorm scale parameters in ev-                   high predicted utility and lower uncertainty. Ranking alone
+ery Transformer block and excludes the final model-level           can concentrate the subset in a few semantic regions, so
+RMSNorm.                                                           PCU-Select adds cluster-level coverage. It applies MiniBatch
+                                                                   k-means (Sculley √ 2010) to the joint embeddings. It uses
+Intervention sites and gradient signatures. The site               k = max(50, ⌊ N ⌋), batch size 4096, ninit =3, and random
+space Ω provides a shared coordinate system across PEFT            state 0. Adaptive quotas allocate  budget B across clusters by
+families. It contains 24 sites: 8 layers × 3 module outputs per    bk = round B (vk+ )γ |Ck |1−γ /Z with γ=0.6. The cluster
+layer (attn_out, mlp_out, and block_residual).                     value vk is the mean utility of its top 10% members. The
+Layers are chosen uniformly by depth; for the 32-layer             algorithm distributes remainders by descending weight and
+backbone this yields indices {3, 7, 11, 15, 19, 23, 27, 31}.       trims over-allocation from the lowest-weight clusters.
+Each site carries a Johnson–Lindenstrauss random projec-              Targets far from the seen registry can additionally cali-
+tion (Johnson and Lindenstrauss 1984) Φω ∈ R256×4096               brate the scorer with a small label set. The calibration head
+with entries drawn N (0, 1/256) under a per-site seed              is a zero-initialized linear residual fit for 200 epochs at lr
+SHA256(site, global_seed=0); projected gradients                   5 × 10−3 (Adam, MSE) on the calibration labels. These de-
+are L2 -normalized per row. Each sample’s signature contains       ployment calibration labels uhi  cal are a reduced form of the
+24 × 256 values. In bfloat16, the cached gradient-proxy store      offline short-update labels uhi . They use only the warm an-
+for the 300K pool occupies 300K×24×256×2 B ≈ 3.5 GB.               chor and horizon h=1, one of the two anchors and one of
+PCU-Select stores it as a memory-mapped disk array and             the two horizons. Each label therefore costs one quarter of
+reads it once per online selection. A PEFT configuration ac-       the full offline routine in Eq. (S4). An offline label costs
+tivates sites through its mask and a saturating capacity factor    84.0/10,000 = 0.0084 GPU-hours, while a calibration label
+tanh(η cd ap) with η=1.0. Operator type enters the explicit        costs ≈ 0.0021 GPU-hours. Budgets of 200 and 500 labels
+PEFT code rather than a scalar site prior; the per-family ca-      therefore cost 0.42 and 1.05 GPU-hours per PEFT–task pair.
+pacity mapping is in Table S8.                                     The full routine would cost about four times more. We use
+                                                                   200 or 500 uhical labels for the OOD study.
+Conditional scorer. The conditional scorer estimates a
+sample’s utility for a specific task and PEFT configuration.       Structural support levels. The structural support levels
+It has three input towers: sample zx ∈ R848 , PEFT condi-          state how safely PCU-Select can apply a PEFT code that
+tion zp ∈ R128 , and task sketch zt ∈ R848 . Each tower uses       differs from its training registry. The reported zp ∈ R128
+a LayerNorm–Linear–GELU–Linear–LayerNorm MLP. The                  contains only the site/operator mask, capacity, and recipe
+sample and task towers project to 256 dimensions, while            vectors. Prefix, P-Tuning, and LN Tuning use the same de-
+the PEFT tower projects to 128. FiLM modulation (Perez             terministic encoding rules as the seen families; no centroid,
+et al. 2018) lets the PEFT vector rescale intermediate fea-        learned family lookup, or functional fingerprint enters the
+tures, while bilinear fusion models interactions between the       reported model. E5 fixes its registry taxonomy before evalu-
+256-dimensional feature and the 128-dimensional PEFT rep-          ation. L0 contains near-support same-family targets (L-r32-
+resentation. The fused 64-dimensional representation feeds         qkvo and AD-b16). L1 contains farther same-family shifts
+two heads. One predicts mean utility µ   bϕ ; the other predicts   (L-r64-all, AD-b256, and L-r8-highlayers). L2 contains un-
+an example-dependent uncertainty scale σ    bϕ , with a softplus   seen families (PRE-l16, PT-l32, and LN). These levels define
+floor of 10−3 .                                                    registry-relative structural support. L1 and L2 targets use the
+   We use σ bϕ as a ranking penalty. On held-out labels, its       reduced calibration protocol described above; their results
+predicted standard deviation tracks realized error with a 10-      test whether a small target-specific label set can repair a
+bin expected calibration error of 0.043. Removing the penalty      larger structural shift.
+costs 0.28 points (Table S9), which confirms its contribution.
+   Training separates cheap proxy learning from expensive          Gradient-proxy and short-update labels. Short-update
+short-update supervision. Phase A pretrains on the gradient        supervision concentrates expensive labels where they pro-
+proxy for 3 epochs at lr 3 × 10−4 with loss weights (rank,         vide different kinds of information. It samples 10,000 triples
+reg, proxy, unc) = (0, 0, 1, 0). Phase B jointly fine-tunes for    using a 0.5/0.3/0.2 split. Coverage sampling spans clusters,
+2 epochs at lr 10−4 with weights (1.0, 0.3, 0.5, 0.2). Both        PEFT families, capacity buckets, and tasks. Uncertainty sam-
+phases use AdamW, batch size 256, and gradient clipping at         pling prioritizes large σ
+                                                                                           bϕ (1 + 0.5 ReLU(ûlo )), while bound-
+1.0. The four losses are a BPR-style pairwise ranking loss,        ary sampling targets disagreement between predicted and ob-
+a Huber regression loss against short-update labels, a Huber       served ranks. Each label measures a short-update loss reduc-
+proxy-distillation loss against the gradient-proxy labels, and a   tion on the sketch from two frozen anchors—θbase (the pre-
+Gaussian negative-log-likelihood uncertainty loss. We track        trained backbone) and θwarm (a rank-8 attention-only LoRA
+ranking NDCG on a held-out split of PEFT/task pairs that           trained for 200 steps at lr 10−4 ). Each short update Adapthp
+excludes two configurations and one task from Phase B. We          uses one sampled example and 7 in-bucket fillers. The fillers
+keep the Phase-B checkpoint with the best held-out NDCG.           stabilize the update relative to a single-example step. The
+The scorer uses no dropout.                                        final label aggregates the rank-normalized reductions across
+             Config            Family        Target modules               Capacity      LoRA scaling    LR     Group
+             L-r8-qv           LoRA          q, v                         r=8                 16        2e-4   seen
+             L-r16-qkvo        LoRA          q, k, v, o                   r=16                32        2e-4   seen
+             L-r8-mlp          LoRA          up, down                     r=8                 16        2e-4   seen
+             IA3-attnmlp       IA3           k, v, down                   –                   –         5e-4   seen
+             AD-b64            Adapter       block-residual               b=64                –         3e-4   seen
+             L-r4-qv           LoRA          q, v                         r=4                  8        2e-4   unseen-config
+             L-r32-qkvo        LoRA          q, k, v, o                   r=32                64        2e-4   unseen-config
+             L-r64-all         LoRA          q, k, v, o, up, down, gate   r=64               128        1e-4   unseen-config
+             L-r8-lowlayers    LoRA          q, v (low third)             r=8                 16        2e-4   unseen-config
+             L-r8-highlayers   LoRA          q, v (high third)            r=8                 16        2e-4   unseen-config
+             L-r16-hlr         LoRA          q, k, v, o                   r=16                32        5e-4   unseen-config
+             AD-b16            Adapter       block-residual               b=16                –         3e-4   unseen-config
+             AD-b256           Adapter       block-residual               b=256               –         3e-4   unseen-config
+             IA3-attnonly      IA3           k, v                         –                   –         5e-4   unseen-config
+             PRE-l16           Prefix    attention               len=16                       –         2e-4 ood-family
+             PT-l32            P-Tuning  attention               len=32                       –         2e-4 ood-family
+             LN                LN Tuning input/post-attn RMSNorm 2 scales/layer               –         2e-4 ood-family
+
+Table S3: Full PEFT registry (all 17 configurations). “LoRA scaling” is the LoRA α hyperparameter and is distinct from the
+intervention-site weight w̃pω defined in the main paper; it applies only to LoRA rows. Adapters are single post-block residual
+bottlenecks (one per layer); IA3 scales the listed activations. LN Tuning updates per-block RMSNorm scales (Wang et al. 2022;
+Touvron et al. 2023). Learning rates for the three OOD-family targets use the registry default (2e-4). Layer placement is all
+layers unless noted; low/high-third placements use the bottom/top ⌈n/3⌉ layers of the 32-layer backbone.
+
+
+Level        Definition           Recommended action                      marginal-cost reduction. The shared 12.8 GPU-hour down-
+L0           near-support       zero-shot selection
+                                                                          stream cost applies to each PEFT–task–seed run, so the se-
+L1           far-support        200–500 labels (0.42–1.06                 lection comparison excludes it. For four tasks, break-even is
+                                GPU-h)                                    P ⋆ = 144.0/[62.0 + 4(0.30 − 0.3775)] = 2.33 configura-
+L2-LN        unseen family; la- calibrate before use                      tions. The pipeline fixes selector-scorer training, task-sketch
+             bels available                                               sampling, and pool ordering at seed 0. Reported SDs vary
+L2-Prompt    Prefix/P-Tuning    calibrate before use                      target-training seeds (0, 1, 2) with the selector and scorer
+                                                                          pipeline fixed. The canonical table generator recomputes all
+Table S4: Deployment protocol for each registry-defined sup-              means, dispersions, paired gaps, and win counts from those
+port level. Costs are per PEFT–task pair, in addition to 0.38             seed-level values.
+GPU-hours for online selection.                                               Two supplementary tables bound the cost claim. Table S6
+                                                                          varies the offline short-update label budget. The 10K default
+                                                                          is the smallest budget that preserves the aggregate quality tie.
+horizons and anchors:                                                     Smaller budgets reduce offline cost and the break-even point
+                            X X
+              uhi = |A|
+                     1
+                                         wh ∆
+                                            e a,h .           (S4)        but also reduce quality. The offline investment is therefore a
+                           a∈A h∈{1,4}                                    tunable trade-off. Table S7 separates the online timing com-
+                                                                          ponents. At 300K, the scorer and clustering timers sum to
+It uses weights w1 =0.4, w4 =0.6 and anchors A =                          0.360 GPU-hours; the revised 0.3775 total leaves a 0.0175
+{base, warm}. The term ∆  e a,h is the reduction defined by the           residual that the available phase logs do not attribute. We
+main paper’s short-update equation, rank-normalized within                report this residual separately instead of assigning it to ei-
+its PEFT, task, anchor, and horizon bucket.                               ther phase. Across pool sizes, the end-to-end cost remains
+                                                                          approximately 170× below the scaled per-PEFT LESS data-
+Cost model and seeds. We measure all costs on
+                                                                          store cost.
+8×NVIDIA H20-96GB (SXM, bfloat16, NVLink) as
+(wall seconds × GPU count)/3600. PCU-Select pays 144.0
+GPU-hours once: 48.0 for feature extraction, 4.8 for gradient-
+proxy labels, 84.0 for short-update labels, and 7.2 for scorer            Algorithms
+training. Dividing the 1.51 GPU-hour four-task measure-
+ment by four gives an exact average per-task cost of 0.3775               Algorithm S1 builds the reusable supervision once. Algo-
+GPU-hours, displayed as 0.38. LESS costs 62.0 per PEFT                    rithm S2 applies the scorer to a new target. Only the online
+datastore plus 0.30 per task ranking, hence 63.2 for four                 algorithm runs per target, and it touches no gradients. The
+tasks. Onboarding a new four-task PEFT therefore costs 1.51               offline algorithm amortizes the expensive gradient and label
+GPU-hours for PCU-Select versus 63.2 for LESS, a 42×                      construction.
+      New registry entry              PCU-Select     LESS                     Feature     Scorer                    PCU online
+                                                                      Pool ext. (cached) forward Clustering Residual (per p, t)
+      One new task, existing PEFT             0.38    0.30
+      One new PEFT, four tasks                1.51    63.2            50K            9.2   0.051      0.010    0.000        0.061
+                                                                     100K           17.6   0.093      0.028    0.000        0.121
+                                                                     300K           48.0   0.249      0.111    0.018        0.378
+Table S5: The amortization advantage is cross-PEFT, not
+                                                                       1M          152.0   0.790      0.420    0.000        1.210
+cross-task. Adding a task to an existing PEFT costs each
+selector one online-selection pass; adding a PEFT for four
+tasks forces LESS to rebuild its datastore while PCU-Select         Table S7: Online selection cost versus candidate-pool size on
+reuses the offline scorer. Selection-stage GPU-hours; PCU-          8×H20-96GB. Feature extraction is cached. Scorer and clus-
+Select’s per-task entry rounds the exact average 1.51/4 =           tering columns report existing phase timers. Residual is total
+0.3775.                                                             minus these timers; at 300K, the revised four-task measure-
+                                                                    ment gives 0.3775 per pair, while phase timers account for
+                                                                    0.360, leaving 0.0175 pending attribution. Online columns
+                 Offline    Avg.     Gap to                         show three decimals.
+        Labels   GPU-h     quality   LESS     Break-even
+         2.5K      81.0     34.71    −0.43           1.31           Algorithm S1 Offline supervision (run once)
+           5K     102.0     35.02    −0.12           1.65
+         10K      144.0     35.18    +0.04           2.33            1: Input: pool D, seen PEFTs Pseen , tasks with sketches
+                                                                        {Vt }
+Table S6: The offline short-update label budget sets the             2: Extract sample signatures zx and site gradients gxω ; cache
+quality–break-even trade-off. Short-update labeling is 58%              them {O(|D|) forward+backward}
+of offline cost, so a smaller budget lowers both offline GPU-        3: for all (p, t) ∈ Pseen × tasks do
+hours and the break-even PEFT count, but drops below LESS-           4:   Compute gradient-proxy ulo (x, p, t) using the main-
+level quality. The 10K budget is the smallest that preserves the            paper definition
+aggregate quality tie; Break-even is the number of four-task         5: end for
+PEFTs past which PCU-Select undercuts per-PEFT LESS.                 6: Sample 10K triples (coverage/uncertainty/boundary); la-
+                                                                        bel uhi by short updates
+                                                                     7: Train sϕ : Stage A proxy pretrain, Stage B joint; keep best
+PEFT Capacity Encoding                                                  held-out-NDCG checkpoint
+                                                                     8: Output: scorer sϕ , cached features
+Table S8 defines the per-family capacity used inside the site
+weight from the main paper. We map each family’s size knob
+to a trainable-parameter count at the touched sites, normalize
+it by dmodel , and pass it through tanh(η log(1 + cap/dmodel ))
+so that capacity is monotone but saturating.
+
+Supplementary Analyses
+Component ablations. Table S9 reports the full compo-
+nent breakdown summarized in the main analysis. Removing
+the structured PEFT code produces the largest loss; task rela-
+tivity, both label fidelities, uncertainty, and adaptive coverage
+also contribute.
+Cross-PEFT transfer. Table S10 supports the introduc-
+tion’s 2.0-point cross-family mismatch penalty. Performance
+falls as the source PEFT moves farther from the target PEFT.
+Figure S1 shows the same mechanism from the selection
+side—PCU-Select’s subset overlap falls as configurations di-
+verge, while PEFT-agnostic RDS+ remains exactly 1.000.
+Unseen-configuration transfer. Table S11 is the paired
+source for Figure 3 in the main paper. Near-support targets
+transfer zero-shot. Calibration closes most of the gap for far
+same-family targets and LN Tuning. For Prefix/P-Tuning, the
+point estimate falls from 6.97 to 1.99, leaving a stronger
+transfer boundary. The 0.18 cal-200-to-cal-500 change is de-
+scriptive rather than evidence of a reliable difference between
+the two label budgets.
+                                                                                                 1.00
+                     L-r16-qkvo    1.00    0.97    0.93       0.92    0.94    0.93       0.97                                           PCU-Select
+                                                                                                 0.98                                   RDS+
+                                                                                                                              0.8
+                     L-r32-qkvo    0.99    1.00    0.91       0.96    0.91    0.87       0.91
+
+
+
+
+                                                                                                        1 − Jaccard overlap
+                                                                                                 0.96
+
+
+
+
+source config
+                        L-r4-qv    0.93    0.90    1.00       0.87    0.95    0.97       0.97
+                                                                                                 0.94                         0.6
+
+                       L-r64-all   0.93    0.97    0.85       1.00    0.86    0.90       0.88    0.92
+                                                                                                                              0.4
+                L-r8-highlayers    0.94    0.90    0.96       0.89    1.00    0.98       0.97    0.90
+
+                                                                                                 0.88                         0.2
+                L-r8-lowlayers     0.92    0.89    0.95       0.86    0.97    1.00       0.98
+
+                                                                                                 0.86
+                        L-r8-qv    0.96    0.94    0.98       0.93    0.99    0.97       1.00
+                                                                                                                              0.0
+                                                                                                 0.84
+                           L-                L-                               ll   L-                                               1        2        3         4            5
+                              r16-              r4  L-              ig                r8
+                           L-
+                                   qkvo           -q
+                                                    v
+                                                       r6
+                                                         4-  L-
+                                                                      hlay
+                                                                           er           -q
+                                                                                          v                                                 configuration distance
+                              r32-                          a   r8-lo         s
+                                   qkvo                               w
+                                                          L- r8
+                                                                       la ye
+                                                               -h            rs
+
+                                                        target config
+
+Figure S1: PCU-Select reacts to configuration changes. Left: target performance after training on a source-selected subset,
+normalized by the matched diagonal. The mean off-diagonal drop of 0.068 corresponds to a 1.45-point gap (21.25 matched
+vs. 19.79 mismatched). Right: selection difference (1−Jaccard) versus a heuristic configuration distance combining log-rank,
+placement, and module-set changes. Across 21 unordered pairs, their descriptive Spearman correlation is ρ = 0.969; leave-one-
+configuration-out values span [0.947, 0.972]. RDS+ lies at zero because its same-task ranking is PEFT-independent.
+
+
+
+
+Algorithm S2 Online selection (per target)
+     1: Input: target (p∗ , t∗ ), budget B, cached features, scorer
+                sϕ
+     2: Encode zp∗ , zt∗
+     3: if level(p∗ ) ∈ {L1, L2} and short-update labels exist
+        then
+     4:    Fit calibration residual head from 200 or 500 reduced                                   Variant                                           Metric Drop NDCG
+           uhi
+            cal labels (single warm anchor, horizon 1)                                             Full PCU-Select                               19.72±0.22   0.00   0.702
+     5: end if                                                                                     No PEFT code                                  18.35±0.41   1.37   0.526
+     6: (b    bϕ ) ← sϕ (zx , zp∗ , zt∗ ); q(x) ← µ
+         µϕ , σ                                   bϕ − λb
+                                                        σϕ for all                                 Family one-hot only                           19.04±0.29   0.68   0.602
+        x                                                                                          No task sketch                                18.90±0.31   0.82   0.597
+     7: Cluster the pool; allocate quotas bk by the main-paper                                     No activation signature                       19.24±0.25   0.48   0.629
+        definition             S                                                                   Gradient-proxy labels only                    18.87±0.34   0.85   0.563
+     8: Output: subset S = k {top-bk by q in Ck }                                                  Short-update labels only                      19.36±0.27   0.36   0.639
+                                                                                                   No uncertainty penalty                        19.44±0.24   0.28   0.690
+                                                                                                   Global top-k                                  18.64±0.38   1.08   0.684
+                                                                                                   Uniform clusters                              19.21±0.28   0.51   0.709
+
+                                                                                                Table S9: Ablations on GSM8K and HumanEval with two
+                 Family        Size knob     cap(p, ω) at a touched site                        representative PEFTs at a 10% budget (task-native metric
+                                                                                                averaged over the two tasks, mean±SD over three seeds).
+                 LoRA      rank r       r (din + dout )                                         Drop is relative to the full adaptive selector; we measure
+                 Adapter   bottleneck b 2 dmodel b
+                                                                                                NDCG against held-out short-update labels.
+                 (IA)3     (per-vector) #scaled activations
+                 Prefix    length L     L dmodel
+                 LN Tuning (per-scale) #RMSNorm scale parameters
+
+Table S8: Per-family capacity mapping. Capacity is the
+trainable-parameter count contributed at a touched site; zp
+encodes operator type separately.
+                                Source ↓ / Target →   L-r8-qv   L-r16-qkvo     IA3-attnmlp    AD-b64
+                                L-r8-qv                  1.00           0.96          0.87       0.93
+                                L-r16-qkvo               0.94           1.00          0.91       0.88
+                                IA3-attnmlp              0.89           0.86          1.00       0.95
+                                AD-b64                   0.90           0.92          0.94       1.00
+
+Table S10: Cross-PEFT transfer matrix (motivation study). Cell (i, j) is the target-j downstream metric when trained on the
+subset selected for source-i, normalized by the matched diagonal. Off-diagonal cells fall below 1.00, and the two directions of a
+mismatched pair differ by 0.01–0.05 rather than a constant offset. Averaged over all mismatched source-target pairs the gap is
+1.87 absolute points (mean matched 21.4 vs. mismatched 19.53 on the GSM8K-scale probe). Cross-family mismatches average
+a 2.0-point gap, the penalty cited in the introduction. Columns are target PEFTs, rows are the source PEFT used for selection.
+
+
+
+
+                    Tier         Targets                               Ref.    Zero-shot     Cal-200    Cal-500
+                    L0           L-r32-qkvo, AD-b16                    LESS    0.34±0.41         –         –
+                    L1           L-r64-all, AD-b256, L-r8-highlayers   LESS    2.08±0.44 0.91±0.29 0.30±0.36
+                    L2-LN        LN                                    LESS    4.08±0.70 0.65±0.26 0.23±0.42
+                    L2-Prompt    PRE-l16, PT-l32                       LESS    6.97±0.34      2.17      1.99
+
+Table S11: Performance drop from LESS across GSM8K, HumanEval, and MMLU (LESS minus PCU-Select). Results with
+repeated-run estimates are paired means over three target-training seeds; each ± value is the sample SD. Lower is better; zero
+denotes parity. L0 uses zero-shot only.
+                        References                                Touvron, H.; et al. 2023. Llama 2: Open Foundation and
+                                                                  Fine-Tuned Chat Models. arXiv preprint arXiv:2307.09288.
+                                                                  Wang, Q.; Ruan, Y.-P.; Zuo, Y.; and Li, T. 2022. Parameter-
+                                                                  Efficient Tuning on Layer Normalization for Pre-trained Lan-
+Chen, M.; et al. 2021. Evaluating Large Language Models           guage Models. arXiv preprint arXiv:2211.08682.
+Trained on Code. arXiv preprint arXiv:2107.03374.                 Xia, M.; Malladi, S.; Gururangan, S.; Arora, S.; and Chen,
+                                                                  D. 2024. LESS: Selecting Influential Data for Targeted In-
+                                                                  struction Tuning. In Proceedings of the 41st International
+                                                                  Conference on Machine Learning, volume 235 of Proceed-
+                                                                  ings of Machine Learning Research, 54104–54132. PMLR.
+Clark, J. H.; Choi, E.; Collins, M.; Garrette, D.; Kwiatkowski,
+T.; Nikolaev, V.; and Palomaki, J. 2020. TyDi QA: A Bench-
+mark for Information-Seeking Question Answering in Typo-
+logically Diverse Languages. Transactions of the Association
+for Computational Linguistics, 8: 454–470.
+
+
+
+Cobbe, K.; Kosaraju, V.; Bavarian, M.; Chen, M.; Jun, H.;
+Kaiser, L.; Plappert, M.; Tworek, J.; Hilton, J.; Nakano, R.;
+Hesse, C.; and Schulman, J. 2021. Training Verifiers to Solve
+Math Word Problems. arXiv preprint arXiv:2110.14168.
+
+
+
+Dao, T. 2024. FlashAttention-2: Faster Attention with Better
+Parallelism and Work Partitioning. In International Confer-
+ence on Learning Representations.
+
+
+
+Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.;
+Song, D.; and Steinhardt, J. 2021. Measuring Massive Mul-
+titask Language Understanding. In International Conference
+on Learning Representations.
+
+
+
+Johnson, W. B.; and Lindenstrauss, J. 1984. Extensions of
+Lipschitz Mappings into a Hilbert Space. In Conference
+in Modern Analysis and Probability, volume 26 of Con-
+temporary Mathematics, 189–206. American Mathematical
+Society.
+
+
+
+Perez, E.; Strub, F.; de Vries, H.; Dumoulin, V.; and
+Courville, A. 2018. FiLM: Visual Reasoning with a General
+Conditioning Layer. In Proceedings of the AAAI Conference
+on Artificial Intelligence, volume 32, 3942–3951.
+
+
+
+Sculley, D. 2010. Web-Scale K-Means Clustering. In Pro-
+ceedings of the 19th International Conference on World Wide
+Web, 1177–1178. ACM.
+

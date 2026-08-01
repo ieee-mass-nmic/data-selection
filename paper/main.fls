@@ -197,11 +197,11 @@ INPUT ./Sections/04_method.tex
 INPUT ./Sections/04_method.tex
 INPUT ./Sections/04_method.tex
 INPUT Sections/04_method.tex
-INPUT ./Figures/image.jpg
-INPUT ./Figures/image.jpg
-INPUT ./Figures/image.jpg
-INPUT ./Figures/image.jpg
-INPUT ./Figures/image.jpg
+INPUT ./Figures/image.png
+INPUT ./Figures/image.png
+INPUT ./Figures/image.png
+INPUT ./Figures/image.png
+INPUT ./Figures/image.png
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/newtx/ntx-Regular-tlf-t1.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/newtx/ntx-Bold-tlf-t1.tfm
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd

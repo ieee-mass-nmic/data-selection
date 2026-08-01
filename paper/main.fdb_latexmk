@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex main"] 1785170952.37813 "main.aux" "main.bbl" "main" 1785171396.24172 0
+["bibtex main"] 1785240390.93281 "main.aux" "main.bbl" "main" 1785241096.93071 0
   "./aaai2027.bib" 1785170671.19043 21370 8e5381e06fc26cb7a008b72a3d2b1709 ""
   "./aaai2027.bst" 1782704500 30207 bd248dfe461b9b2fc7481a44feafe197 ""
-  "main.aux" 1785171396.00432 5464 7efef6eca055cc98e88d4ce1cc3baf11 "pdflatex"
+  "main.aux" 1785241096.67639 5355 e6ea0fcb3b1bf411ed4dbdee771b9730 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1785171395.15768 "main.tex" "main.pdf" "main" 1785171396.24185 0
+["pdflatex"] 1785241095.45802 "main.tex" "main.pdf" "main" 1785241096.93088 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1698694482 2914 fdbc4a54b9bc76f4551b5303f2737d33 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -123,21 +123,21 @@
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1782738481 3636769 d68c8d030107c2771cb2a3e432ba7b2f ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "Figures/fig_motivation_disagreement.pdf" 1783688969.63389 46607 f499faeadc0dc984687ab333dec7d1fc ""
-  "Figures/fig_ood_calibration.pdf" 1785170973.46566 26923 8e20922c43a80f34985ca1fd61186b8d ""
-  "Figures/image.jpg" 1784293357.37622 333267 a7fb3ca59c3e28511017fb2312693ff1 ""
-  "Sections/00_abstract.tex" 1785141149.62273 1514 287d09ec2ca05264f25482ecd241b58f ""
-  "Sections/01_introduction.tex" 1785151474.26795 6600 bc5c364ce96963f1a3c78df80e349070 ""
-  "Sections/02_related_work.tex" 1785170940.21141 4091 3bb4b76f376c2cc40ca7fd758e918100 ""
-  "Sections/03_problem_formulation.tex" 1785151474.36058 3849 d188da81dd74993d3b14430752417760 ""
-  "Sections/04_method.tex" 1785170940.30451 12494 95c56d5d09accf0038fa60dcc514393c ""
-  "Sections/05_experiments.tex" 1785171336.54026 8599 a6984436ba886697e628aa28c1a8d3dc ""
-  "Sections/07_conclusion.tex" 1785171344.68989 983 48fa4ffaeda50ef9b2d9153831d277d2 ""
+  "Figures/fig_ood_calibration.pdf" 1785208339.54457 27115 4a35c39f2651f9b5602036f5d5529179 ""
+  "Figures/image.png" 1785211163.0274 2045609 81f3da67442004b3e4e02cbb312341ad ""
+  "Sections/00_abstract.tex" 1785241092.17575 1434 000e052c4480377e4a617d0033294042 ""
+  "Sections/01_introduction.tex" 1785213148.6647 6261 bd46112abfcda84d920bdc3d413b0828 ""
+  "Sections/02_related_work.tex" 1785179278.94382 3622 75c3a31eae0d163f7f28bbe4dce17fd7 ""
+  "Sections/03_problem_formulation.tex" 1785181258.12266 3715 045c0eef9bff4a242fc6fe30216c3a39 ""
+  "Sections/04_method.tex" 1785181258.22119 12537 6989cadfe9eae46e00e7322f810e7019 ""
+  "Sections/05_experiments.tex" 1785213801.31588 8589 5477bfec4032f5be307082a7121e3608 ""
+  "Sections/07_conclusion.tex" 1785210366.92334 607 2056138b95e210a001325cbc9a9f8dd5 ""
   "aaai2027.sty" 1782704500 16915 1b1c792e2acfbbd8b672259e267b95d8 ""
-  "main.aux" 1785171396.00432 5464 7efef6eca055cc98e88d4ce1cc3baf11 "pdflatex"
-  "main.bbl" 1785170952.49181 11565 cf4648062256279e47ce9bf8b42eca6a "bibtex main"
-  "main.tex" 1785151474.08207 4349 83481d87d59d943c114b46b9f95d7f51 ""
-  "tables/table_main_results.tex" 1785124584.80015 1385 5f6e7816f6ca650269489002d3fd6fbf ""
-  "tables/table_quality_cost_headline.tex" 1785141150.12364 861 0135eedfa39dcce9bc94bd7137b7064f ""
+  "main.aux" 1785241096.67639 5355 e6ea0fcb3b1bf411ed4dbdee771b9730 "pdflatex"
+  "main.bbl" 1785240391.06673 11565 cf4648062256279e47ce9bf8b42eca6a "bibtex main"
+  "main.tex" 1785209482.0718 4287 306df0f86354765bb83eb2eee94e7a1c ""
+  "tables/table_main_results.tex" 1785213511.85018 1282 6d994ba9de25f8ecd53b3d3e1a2f3d24 ""
+  "tables/table_quality_cost_headline.tex" 1785213511.94329 852 b3a8f3a1edea5da6da2d127f95f882a1 ""
   (generated)
   "main.aux"
   "main.log"

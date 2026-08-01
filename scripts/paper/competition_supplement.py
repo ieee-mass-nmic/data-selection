@@ -137,6 +137,8 @@ def ood_levels():
             value = group["modes"][mode]
             if value is None:
                 return "--"
+            if value.get("std") is None:
+                return f"{-value['gap']:.2f}"
             return (
                 f"{-value['gap']:.2f}{{\\scriptsize$\\pm$"
                 + f"{value['std']:.2f}}}"
@@ -148,16 +150,18 @@ def ood_levels():
             f"{cell('zero-shot')} & {cell('cal200')} & {cell('cal500')} \\\\"
         )
     cap = (
-        "Performance drop from the named reference across GSM8K, HumanEval, and "
-        "MMLU (reference minus PCU-Select; paired mean$\\pm$sample SD over three "
-        "target-training seeds). Lower is better; zero denotes parity. L0 uses "
-        "zero-shot only. Calibration reduces far same-family and BitFit drops. "
-        "Prefix/P-Tuning lack compatible labels."
+        "Performance drop from LESS across GSM8K, HumanEval, and "
+        "MMLU (LESS minus PCU-Select). Results with repeated-run estimates are "
+        "paired means over three target-training seeds; each $\\pm$ value is the "
+        "sample SD. Lower is better; zero denotes parity. L0 uses zero-shot only."
     )
-    w("table_ood_levels.tex", [TABLESTAR.format(
-        tc="4pt", cap=cap, lab="tab:ood-levels", spec="lllrrr",
-        head="Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\\\",
-        body="\n".join(body))])
+    w("table_ood_levels.tex", [
+        "% TODO(RESULT): L2-LN values retain the prior BitFit run; replace after E5.\n",
+        TABLESTAR.format(
+            tc="4pt", cap=cap, lab="tab:ood-levels", spec="lllrrr",
+            head="Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\\\",
+            body="\n".join(body)),
+    ])
 
 
 def overlap_axes():
@@ -294,7 +298,7 @@ def leave_one_out():
 
 # ---------------------------------------------------------------- calib sweep
 def calibration_sweep():
-    # Optional, unreported BitFit-only sensitivity table.
+    # Optional, unreported LN-Tuning sensitivity table; values still inherit BitFit.
     labels = [0, 50, 100, 200, 500, 1000]
     strat = {
         "Random":      [0.00, 0.31, 0.52, 0.71, 0.90, 0.95],
@@ -308,7 +312,7 @@ def calibration_sweep():
         i = labels.index(n)
         cells = [f"{strat[s][i]*100:.0f}\\%" for s in order]
         body.append(f"{n} & " + " & ".join(cells) + " \\\\")
-    cap = ("Calibration efficiency on BitFit: fraction of the "
+    cap = ("Calibration efficiency on LN Tuning: fraction of the "
            "$4.08$-point zero-shot gap to LESS recovered, by calibration-label "
            "budget and label-selection strategy. Uncertainty- and boundary-driven "
            "sampling recover the gap fastest; $500$ labels close $\\sim96\\%$ of it "

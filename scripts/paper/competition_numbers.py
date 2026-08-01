@@ -176,6 +176,12 @@ def per_task_ci(task):
     return float(d.mean()), (float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5)))
 
 
+def per_task_wins(task, reference):
+    """Number of PEFT cells in which PCU-Select exceeds ``reference``."""
+    return sum(cell_mean(task, "PCU-Select", j) > cell_mean(task, reference, j)
+               for j in range(len(PEFTS)))
+
+
 def per_task_table_body():
     blocks = []
     for t in TASKS:
@@ -214,8 +220,9 @@ def compact_task_table_body():
         d_inf = pcu - task_avg(t, "Influence")
         dmean, (lo, hi) = per_task_ci(t)
         lines.append(
-            f"{t} & {METRIC[t]} & {fmt(pcu)} & {sfmt(d_rds)} & "
-            f"{sfmt(d_inf)} & ${sfmt(dmean)}$ $[{sfmt(lo)}, {sfmt(hi)}]$ \\\\")
+            f"{t} & {METRIC[t]} & {fmt(pcu)} & {sfmt(d_rds)} ({per_task_wins(t, 'RDS+')}/5) & "
+            f"{sfmt(d_inf)} ({per_task_wins(t, 'Influence')}/5) & "
+            f"${sfmt(dmean)}$ $[{sfmt(lo)}, {sfmt(hi)}]$ ({per_task_wins(t, 'LESS')}/5) \\\\")
     return "\n".join(lines)
 
 
@@ -269,15 +276,14 @@ def main():
     ps_inf = paired_stats("Influence")
 
     main_cap = (
-        "Downstream performance at a 10\\% selection budget (mean$\\pm$SD over "
-        "three matched target-training seeds; four task-native scores per PEFT). "
-        "Selector, sketch, and scorer state are fixed. PCU-Select near-ties "
-        f"per-PEFT LESS: the paired difference over the {ps['n_cells']} "
-        f"PEFT$\\times$task cells is ${fmt(ps['mean_diff'])}$ points with a descriptive "
-        f"cell-resampling interval $[{fmt(ps['ci'][0])}, "
-        f"{'+' if ps['ci'][1]>=0 else ''}{fmt(ps['ci'][1])}]$. "
-        "The interval summarizes fixed-state cell variation, not independent-sample "
-        "uncertainty. Boldface marks the best mean.")
+        "Each PEFT column reports the equal-weight macro-average of the four "
+        "task-native percentage scores. Values are mean $\\pm$ standard deviation "
+        "across three matched downstream-training seeds; the selector, task sketch, "
+        "candidate pool, and scorer are fixed. Across the "
+        f"{ps['n_cells']} configuration--task cells, the paired "
+        f"PCU-Select-minus-LESS difference is ${sfmt(ps['mean_diff'])}$ points, "
+        f"with a descriptive 95\\% interval of $[{sfmt(ps['ci'][0])}, "
+        f"{sfmt(ps['ci'][1])}]$.")
     write("table_main_results.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{4pt}\n",
         "\\caption{" + main_cap + "}\n\\label{tab:main-results}\n",
@@ -318,8 +324,9 @@ def main():
         "over the five seen PEFT configurations. $\\Delta$RDS+ and $\\Delta$Inf. "
         "are absolute native-point gains over PEFT-agnostic baselines; "
         "$\\Delta$LESS is the paired difference against per-PEFT LESS with a "
-        "descriptive 95\\% cell-resampling interval over PEFT cells. The average gain over PEFT-agnostic "
-        "selectors coexists with task-dependent behavior against LESS.")
+        "descriptive 95\\% cell-resampling interval over PEFT cells. Parentheses "
+        "report PCU-Select wins among the five PEFT cells for each task; column "
+        "totals are 17/20, 18/20, and 10/20, respectively.")
     write("table_per_task_compact.tex", [
         "\\begin{table*}[t]\n\\centering\n\\small\n\\setlength{\\tabcolsep}{5pt}\n",
         "\\caption{" + compact_cap + "}\n\\label{tab:per-task-compact}\n",

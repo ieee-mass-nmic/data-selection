@@ -9,28 +9,25 @@ We study \emph{cross-PEFT data-efficient fine-tuning}: selecting a small trainin
 \end{equation}
 Here $\mathrm{Tune}$ adapts $M_0$ with configuration $p$ and subset $\mathcal{S}$, and $\mathrm{Perf}$ evaluates the adapted model. The held-out test set $V_t^{\mathrm{test}}$ defines this ideal objective but never enters training, scoring, or selection; those procedures use only $V_t$. Directly solving Eq.~\eqref{eq:selection-objective} would require training and evaluating many subsets for every target $(p,t)$ pair.
 
-PCU-Select avoids this search by assigning each example a conditional utility: its benefit for task $t$ when training uses configuration $p$. The scorer $s_{\phi}$ approximates this utility for each example:
+PCU-Select avoids this search by assigning each example a conditional utility: its benefit for task $t$ when training uses configuration $p$. Its mean prediction approximates this utility:
 \begin{equation}
-  s_{\phi}(x,p,t)\approx u(x,p,t).
+  \widehat{\mu}_{\phi}(x,p,t)\approx u(x,p,t).
   \label{eq:surrogate}
 \end{equation}
-The target $u(x,p,t)\in[0,1]$ summarizes task-sketch loss reductions after a few PEFT update steps. PCU-Select rank-normalizes these reductions within groups that share the same PEFT, task, and measurement setting (\S\ref{sec:method}). Including $p$ allows the ranking to change with the trainable subspace; omitting $p$ would force every configuration to share one task-specific ranking. The task sketch $V_t$ identifies the desired task behavior, while $p$ identifies the updates available to the model. Utility is therefore relative to both the task and the PEFT configuration.
+The target $u(x,p,t)\in[0,1]$ summarizes task-sketch loss reductions after a few PEFT update steps. PCU-Select rank-normalizes these reductions within groups that share the same PEFT, task, and measurement setting (see ``Method: PCU-Select''). Including $p$ allows the ranking to change with the trainable subspace; omitting $p$ would force every configuration to share one task-specific ranking. The task sketch $V_t$ identifies the desired task behavior, while $p$ identifies the updates available to the model. Utility is therefore relative to both the task and the PEFT configuration.
 
 \paragraph{Amortization objective.}
 A registry changes the cost objective because it serves multiple PEFT configurations and tasks from one candidate pool. Let $P$ be the number of target configurations and $Q$ the number of task sketches. LESS builds one gradient datastore for each configuration and ranks that datastore once for each task. PCU-Select instead pays one shared offline cost, followed by one scoring-and-selection pass for every PEFT--task pair:
 \begin{equation}
   \begin{aligned}
   C_{\mathrm{LESS}}(P,Q)
-    &=P\!\left(C^{\mathrm{data}}_{\mathrm{LESS}}+
-      Q C^{\mathrm{rank}}_{\mathrm{LESS}}\right),\\
+    &=P C^{\mathrm{data}}_{\mathrm{LESS}}+
+      PQ C^{\mathrm{rank}}_{\mathrm{LESS}},\\
   C_{\mathrm{PCU}}(P,Q)
     &=C_{\mathrm{offline}}+PQ C^{\mathrm{pair}}_{\mathrm{PCU}}.
   \end{aligned}
   \label{eq:cost}
 \end{equation}
-Equation~\eqref{eq:cost} separates four costs. $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one PEFT-specific datastore, and $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task. $C_{\mathrm{offline}}$ extracts reusable signals and trains PCU-Select once. $C^{\mathrm{pair}}_{\mathrm{PCU}}$ scores and selects data for one target pair. The first expression repeats datastore construction $P$ times, whereas the second pays the offline cost once. Section~\ref{sec:reuse} measures each cost term.
+Equation~\eqref{eq:cost} separates four costs. $C^{\mathrm{data}}_{\mathrm{LESS}}$ builds one PEFT-specific datastore, and $C^{\mathrm{rank}}_{\mathrm{LESS}}$ ranks it for one task. $C_{\mathrm{offline}}$ extracts reusable signals and trains PCU-Select once. $C^{\mathrm{pair}}_{\mathrm{PCU}}$ scores and selects data for one target pair. LESS builds $P$ datastores and performs $PQ$ rankings, whereas PCU-Select pays the offline cost once. The onboarding-cost experiment measures each cost term.
 
-The objective is to retain per-PEFT LESS quality while replacing repeated datastore construction with shared offline work. The supplementary material formalizes the quality criterion and derives the break-even point; Section~\ref{sec:reuse} reports the measured result.
-
-% Equation 4 (the quality criterion) appears in the supplementary material.
-\setcounter{equation}{4}
+The objective is to retain per-PEFT LESS quality while replacing repeated datastore construction with shared offline work. Solving the two cost equations gives a break-even registry size; the onboarding-cost experiment substitutes the measured costs.

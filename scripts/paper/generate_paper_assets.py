@@ -320,28 +320,10 @@ def fig_config_sensitivity() -> None:
 
 
 def fig_ood_calibration() -> None:
-    e5 = read_jsonl(DATA / "E5.jsonl")
-    e5["level"] = e5["extra"].map(lambda e: e.get("level"))
-    e5["mode"] = e5["method"].str.replace("pcu_", "", regex=False).where(
-        e5["method"].str.startswith("pcu_"), e5["method"]
-    )
-    levels = ["L0", "L1", "L2"]
-    modes = ["zeroshot", "cal200", "cal500"]
-    mode_label = {"zeroshot": "zero-shot", "cal200": "cal200", "cal500": "cal500"}
-    means = e5.groupby(["level", "mode"])["metric"].mean().unstack()
-    x = np.arange(len(levels))
-    width = 0.23
-    fig, ax = plt.subplots(figsize=(3.35, 2.35))
-    colors = ["#4C78A8", "#F58518", "#54A24B"]
-    for i, mode in enumerate(modes):
-        ax.bar(x + (i - 1) * width, means.loc[levels, mode], width, label=mode_label[mode], color=colors[i])
-    for method, color in [("less", "black"), ("rds_plus", "0.45")]:
-        ax.plot(x, means.loc[levels, method], marker="D", linestyle="--", color=color, label=METHOD_LABEL[method])
-    ax.set_xticks(x, levels)
-    ax.set_xlabel("OOD level")
-    ax.set_ylabel("downstream metric")
-    ax.legend(frameon=False, ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.28))
-    save_pdf(fig, "fig_ood_calibration.pdf")
+    """Regenerate Figure 3 through its canonical, single-reference pipeline."""
+    from plot_competition_ood import main as ood_figure_main
+
+    ood_figure_main()
 
 
 def _wilcoxon_p(diffs: np.ndarray) -> float:

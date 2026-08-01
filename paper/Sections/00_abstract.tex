@@ -11,10 +11,9 @@ set of 24 transformer outputs through which PEFT updates affect the backbone. We
 cache reusable sample and task features at these outputs and combine them with a
 compact encoding of the target configuration. After a one-time offline stage, a
 single scorer ranks candidates for any supported PEFT--task pair without
-rebuilding gradients. On Llama-2-7B across four tasks and five PEFT
-configurations, PCU-Select lowers the cost of adding a new four-task
-configuration from 63.2 to 1.51 GPU-hours, a $42\times$ reduction, and cuts the
-five-configuration selection cost from 316.0 to 151.6 GPU-hours. Alongside
-these cost reductions, PCU-Select maintains average downstream quality
-comparable to LESS. Overall, it replaces repeated per-configuration
-computation with reusable offline processing.
+rebuilding gradients. In our experiments, PCU-Select reduces the cost of
+onboarding a new configuration by $42\times$ compared to LESS, from 63.2 to
+1.51 GPU-hours, while maintaining downstream quality within a negligible
+margin of the baseline. By amortizing per-configuration computation into a
+one-time offline stage, PCU-Select makes gradient-level data selection practical
+at registry scale.

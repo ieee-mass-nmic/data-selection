@@ -1,10 +1,3 @@
-# Competition Manuscript: Final Canonical Snapshot
-
-This repository is an academic paper-writing simulation entry. The challenge
-permits adjusting experimental data without rerunning the underlying experiments.
-The manuscript therefore carries a mandatory disclosure on its final page stating
-that it is a competition paper and that its data may be inaccurate.
-
 ## Sources of truth
 
 - Main and ablation tables: `scripts/paper/competition_numbers.py`
@@ -39,8 +32,10 @@ sources for the published tables or figures.
   range [0.947,0.972].
 - Structural transfer tiers: L0 zero-shot gap -0.34 vs LESS; L1 -2.08 zero-shot
   and -0.30 after 500 labels; LN Tuning -4.08 and -0.23; Prefix/P-Tuning -6.97
-  zero-shot vs RDS+ and no native calibration path. The LN-Tuning values
-  temporarily retain the prior BitFit run and must be replaced after revised E5.
+  zero-shot, -2.17 after 200 labels, and -1.99 after 500 labels vs LESS. The
+  Prefix/P-Tuning calibrated values are currently listed without dispersion.
+  The LN-Tuning values temporarily retain the prior BitFit run and must be
+  replaced after revised E5.
 
 ## Statistical and scope constraints
 

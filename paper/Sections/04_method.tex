@@ -1,11 +1,11 @@
 \section{Method: PCU-Select}
 \label{sec:method}
 
-PCU-Select learns the conditional utility surrogate in Eq.~\eqref{eq:surrogate} and selects a budgeted subset for a target PEFT--task pair. Figure~\ref{fig:architecture} summarizes two stages. Offline, it extracts reusable sample and task signals, constructs two types of utility label, and trains one scorer. Online, it combines cached sample features with a target $(p^{*},t^{*})$, scores the pool, and distributes budget across semantic clusters. Supplementary Algorithms~S1 and~S2 specify both stages.
+PCU-Select learns the conditional utility surrogate in Eq.~\eqref{eq:surrogate} and selects a budgeted subset for a target PEFT--task pair. Figure~\ref{fig:architecture} summarizes two stages. Offline, it extracts reusable sample and task signals, constructs two types of utility label, and trains one scorer. Online, it combines cached sample features with a target $(p^{*},t^{*})$, scores the pool, and distributes budget across semantic clusters. Both stages use deterministic cluster quotas and the same cached representations.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\textwidth]{Figures/image.jpg}
+\includegraphics[width=\textwidth]{Figures/image.png}
 \caption{PCU-Select learns from reusable site-level signals and scores each PEFT--task target online. A 24-site coordinate system aligns sample and task gradients with a 128-dimensional structured PEFT code; proxy and short-update labels provide complementary supervision.}
 \label{fig:architecture}
 \end{figure*}
@@ -30,7 +30,7 @@ Each configuration maps to a site mask and operator type. Attention LoRA and (IA
   \end{aligned}
   \label{eq:site-weight}
 \end{equation}
-Here $\mathrm{mask}(p,\omega)$ is zero at untouched sites, and $\mathrm{cap}(p,\omega)$ measures trainable capacity. The width $d_{\mathrm{model}}$ normalizes capacity, $\eta$ controls saturation through $\tanh$, and $\varepsilon_w$ keeps the denominator nonzero. Thus, $\tilde{w}_p^{\omega}$ distributes unit weight over the sites used by $p$. Supplementary Table~S8 maps LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, and LN-Tuning scale count to this quantity. Operator type remains separate in $z_p$ because a family-wide scalar would cancel under Eq.~\eqref{eq:site-weight}'s normalization.
+Here $\mathrm{mask}(p,\omega)$ is zero at untouched sites, and $\mathrm{cap}(p,\omega)$ measures trainable capacity. The width $d_{\mathrm{model}}$ normalizes capacity, $\eta$ controls saturation through $\tanh$, and $\varepsilon_w$ keeps the denominator nonzero. Thus, $\tilde{w}_p^{\omega}$ distributes unit weight over the sites used by $p$. Capacity corresponds to LoRA rank, adapter width, (IA)$^3$ vector count, prefix length, or LN-Tuning scale count. Operator type remains separate in $z_p$ because a family-wide scalar would cancel under Eq.~\eqref{eq:site-weight}'s normalization.
 
 \subsection{Shared Representations Preserve Target Specificity}
 
@@ -68,7 +68,7 @@ The proxy cheaply orders the full pool, while short updates target consequential
 
 \subsection{Conditional Scoring Produces Target-Specific Subsets}
 
-The scorer consumes $(z_x,z_p,z_t)$ and predicts $(\hat{\mu},\hat{\sigma})=s_{\phi}(z_x,z_p,z_t)$. Here $\hat{\mu}$ gives predicted mean utility, while $\hat{\sigma}$ gives a positive, input-dependent uncertainty scale. Separate encoders map the three inputs into hidden vectors. FiLM modulation~\cite{perez2018film} uses the PEFT and task codes to rescale and shift sample features. A bilinear term represents sample--PEFT compatibility.
+Given $(z_x,z_p,z_t)$, the scorer $s_{\phi}$ outputs $(\widehat{\mu}_{\phi},\widehat{\sigma}_{\phi})$, where $\widehat{\mu}_{\phi}$ estimates utility and $\widehat{\sigma}_{\phi}$ estimates a positive, input-dependent uncertainty scale. Separate encoders map the three inputs into hidden vectors. FiLM modulation~\cite{perez2018film} uses the PEFT and task codes to rescale and shift sample features. A bilinear term represents sample--PEFT compatibility.
 
 Stage A distills gradient-proxy ranks to learn broad conditional structure. Stage B continues proxy distillation and adds ranking and regression on short-update labels plus a heteroscedastic uncertainty loss. Here \emph{heteroscedastic} means that predicted noise can differ across triples. PCU-Select selects the Stage B checkpoint on held-out PEFT--task pairs. It also fixes the sketch size, label allocation, anchors, horizons, and scalar selection hyperparameters on these pairs before downstream evaluation.
 
@@ -76,7 +76,7 @@ A target's structural support level determines whether PCU-Select applies the sc
 
 After any required calibration, PCU-Select converts the two scorer outputs into a conservative ranking score:
 \begin{equation}
-  q(x)=\hat{\mu}(x,p^{*},t^{*})-\lambda\hat{\sigma}(x,p^{*},t^{*}),\qquad \lambda=0.2.
+  q(x)=\widehat{\mu}_{\phi}(x,p^{*},t^{*})-\lambda\widehat{\sigma}_{\phi}(x,p^{*},t^{*}),\qquad \lambda=0.2.
   \label{eq:qscore}
 \end{equation}
 The uncertainty scale reduces the rank of examples whose predicted utility is noisy. It serves as a ranking penalty, not a confidence interval.

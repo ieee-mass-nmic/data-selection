@@ -13,6 +13,6 @@ LESS & 35.52$\pm$0.20 & 34.44$\pm$0.13 & 35.80$\pm$0.15 & \textbf{35.13$\pm$0.14
 PCU-Select & \textbf{35.61$\pm$0.40} & \textbf{34.60$\pm$0.21} & \textbf{35.93$\pm$0.30} & 34.56$\pm$0.23 & \textbf{35.18$\pm$0.31} & \textbf{35.18$\pm$0.16} \\
 \bottomrule
 \end{tabular}
-\caption{Downstream performance at a 10\% selection budget (mean$\pm$SD over three matched target-training seeds; four task-native scores per PEFT). Selector, sketch, and scorer state are fixed. PCU-Select near-ties per-PEFT LESS: the paired difference over the 20 PEFT$\times$task cells is $0.04$ points with a descriptive cell-resampling interval $[-0.26, +0.33]$. The interval summarizes variation across cells under this fixed pipeline; it does not represent independent-run uncertainty. Boldface marks the best mean.}
+\caption{Each PEFT column reports the equal-weight macro-average of the four task-native percentage scores. Values are mean $\pm$ standard deviation across three matched downstream-training seeds; the selector, task sketch, candidate pool, and scorer are fixed. Across the 20 configuration--task cells, the paired PCU-Select-minus-LESS difference is $+0.04$ points, with a descriptive 95\% interval of $[-0.26,+0.33]$.}
 \label{tab:main-results}
 \end{table*}
