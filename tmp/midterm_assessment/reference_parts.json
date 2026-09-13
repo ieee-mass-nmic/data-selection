@@ -1,0 +1,200 @@
+[
+  {
+    "part": "[Content_Types].xml",
+    "size": 2098,
+    "sha256": "56393645ab4e082d39b8c959984c5722f5db83bc2c7cbfd8cd6a8515d2631484",
+    "role": "editable"
+  },
+  {
+    "part": "_rels/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "_rels/.rels",
+    "size": 737,
+    "sha256": "514e1846381cb6bcfff105a4b0a17d666cf0ed1f0c120bff73b82226ab7ed977",
+    "role": "preserve"
+  },
+  {
+    "part": "docProps/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "docProps/app.xml",
+    "size": 679,
+    "sha256": "3c050850ef52b171ed3f5cf57769fd99cf8545e501773d837d96b79f17c1d3c2",
+    "role": "editable"
+  },
+  {
+    "part": "docProps/core.xml",
+    "size": 722,
+    "sha256": "3390a6028941d3925c7823b0f12a98975eb0c5d628b8200c8ea26896f0cdd3da",
+    "role": "editable"
+  },
+  {
+    "part": "docProps/custom.xml",
+    "size": 526,
+    "sha256": "105dcd5858354844e4d9466cd76e7ad28450c44ec1bf0d391fd0cf0ba06da0b1",
+    "role": "preserve"
+  },
+  {
+    "part": "word/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "word/_rels/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "word/_rels/document.xml.rels",
+    "size": 2791,
+    "sha256": "980802dd7b788ae833a47c2ced2db6137cf637381a5911f7861e34aaa62bd284",
+    "role": "editable"
+  },
+  {
+    "part": "word/document.xml",
+    "size": 176454,
+    "sha256": "3df907181e8172da470f534f50582a8a5df52dcb8ca80ecd4d117b2e893185ab",
+    "role": "editable"
+  },
+  {
+    "part": "word/fontTable.xml",
+    "size": 4406,
+    "sha256": "39da38b52256721f91d065fb9625c1af6cf4326acd22ce50082e76f4e3954429",
+    "role": "preserve"
+  },
+  {
+    "part": "word/footer1.xml",
+    "size": 1792,
+    "sha256": "ad0798b4eb04232d922bc9412f6788fc40c6083f93920fbe6252efbd85c2e359",
+    "role": "editable"
+  },
+  {
+    "part": "word/footer2.xml",
+    "size": 1341,
+    "sha256": "9345cb2098b37a974836fb8c727a481f12f69fdd3f1b467575c8a87ec71d8773",
+    "role": "preserve"
+  },
+  {
+    "part": "word/header1.xml",
+    "size": 1396,
+    "sha256": "2c6665676ebf60d323cba547ff45101b01f27e4aeddc589ac523151156fc98bf",
+    "role": "preserve"
+  },
+  {
+    "part": "word/header2.xml",
+    "size": 1396,
+    "sha256": "2c6665676ebf60d323cba547ff45101b01f27e4aeddc589ac523151156fc98bf",
+    "role": "preserve"
+  },
+  {
+    "part": "word/media/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "word/media/image1.jpeg",
+    "size": 26510,
+    "sha256": "f72b4b14f2f28880d4cfd063ba0ead856b205da5618bbbbea9f513479f0926a9",
+    "role": "preserve"
+  },
+  {
+    "part": "word/media/image10.png",
+    "size": 121140,
+    "sha256": "58c66c44d653df5b4a17a531964649dd7a2a5eed68a5542036f604e3e2ceb0b5",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image11.png",
+    "size": 92548,
+    "sha256": "93f410519853a32fb0932973ac741059f2a9f668e58118d73efb17cccc2750eb",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image2.png",
+    "size": 5688,
+    "sha256": "f05c518bdb7debac2b541f9850ba44611176f28582cf9ddf66c6db41b95c8b9a",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image3.png",
+    "size": 116187,
+    "sha256": "9af932d0396077b466526dc856ff8eaecb6e42b9343543c5c9eade11aa54d8bf",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image4.png",
+    "size": 182510,
+    "sha256": "39ec557c722d1e621cb4a3b5c971806c5b537b997b519af21d986cc079f123d2",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image5.png",
+    "size": 144167,
+    "sha256": "94b0865766475e0a80362e1fd24a5b7f6b8ee03e6426a18af9a6d092ebbd86e5",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image6.png",
+    "size": 31118,
+    "sha256": "05c11419118c933d7ab8bc1d526c8dc2660992f9f19b7644fe75a1645392fbcb",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image7.png",
+    "size": 26760,
+    "sha256": "b0971023a25f48f5143a5c61889435230b8c78a2d03552e79234c5ef142ab732",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image8.png",
+    "size": 80335,
+    "sha256": "541fb140bb11bc7becbcb8ff1e90eaae0dbf342d7c37625a859afc44a2d44e72",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/media/image9.png",
+    "size": 227172,
+    "sha256": "b591e65041ef2bbe259fd51ad8d800265c9e4fa10dee4eac546a552e9848c3b2",
+    "role": "remove_source_research_figure"
+  },
+  {
+    "part": "word/numbering.xml",
+    "size": 1990,
+    "sha256": "0afa082121820d5c8fa0c022ff7e5fcd469bf6f0ce566ea9c0b46470d0a81c37",
+    "role": "preserve"
+  },
+  {
+    "part": "word/settings.xml",
+    "size": 20740,
+    "sha256": "f8dc7d904a5c32b406b716e518a991815d9565bfb526ed836abded1b99b52203",
+    "role": "editable"
+  },
+  {
+    "part": "word/styles.xml",
+    "size": 23804,
+    "sha256": "db633dab0a48220b3fddea5115dc236597932f900ac74f850bd6310321165d61",
+    "role": "editable"
+  },
+  {
+    "part": "word/theme/",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "role": "preserve"
+  },
+  {
+    "part": "word/theme/theme1.xml",
+    "size": 7048,
+    "sha256": "877930300f41fcf60d3edea108678078177c4c20b65ced288432470652e6b4a1",
+    "role": "preserve"
+  }
+]

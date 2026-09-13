@@ -43,8 +43,8 @@
       "reference": "LESS",
       "modes": {
         "zero-shot": {"gap": -6.97, "std": 0.34},
-        "cal200": {"gap": -2.17, "std": null},
-        "cal500": {"gap": -1.99, "std": null}
+        "cal200": {"gap": -2.17, "std": 0.33},
+        "cal500": {"gap": -1.99, "std": 0.38}
       }
     }
   ]

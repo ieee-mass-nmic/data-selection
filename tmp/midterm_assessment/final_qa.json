@@ -1,0 +1,13 @@
+{
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_研究生学位论文中期考核表.docx",
+  "pages": 8,
+  "visual_review": "All eight pages reviewed. Final pages 1–4,7–8 are byte-identical to reviewed v3 PNGs; final pages 5–6 re-inspected after heading fix. No clipping, overlap, missing glyphs, orphan heading, blank page or split audit table.",
+  "source_unchanged": true,
+  "reference_logo_preserved": true,
+  "reference_identity_removed": true,
+  "personal_information_verified": true,
+  "unknown_literature_review_title_blank": true,
+  "signatures_and_review_opinions_blank": true,
+  "content_review": "Paper methods/numbers and future system rules independently reviewed; values described as manuscript summaries pending original-log verification.",
+  "output_sha256": "01bef9e675bc3a7ab31cddea1ca96ddaf85f604ddc37b406aa9ed409df57f604"
+}

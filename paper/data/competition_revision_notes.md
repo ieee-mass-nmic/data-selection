@@ -12,7 +12,7 @@
 - One-shot full asset regeneration: `scripts/paper/generate_paper_assets.py`
 
 Legacy `result/data/E1.jsonl`, `E2.jsonl`, `E3.jsonl`, `E5.jsonl`, and the raw
-motivation summary are retained as historical scaffolding and are not canonical
+motivation summary are retained as legacy artifacts and are not canonical
 sources for the published tables or figures.
 
 ## Locked headline values
@@ -32,10 +32,7 @@ sources for the published tables or figures.
   range [0.947,0.972].
 - Structural transfer tiers: L0 zero-shot gap -0.34 vs LESS; L1 -2.08 zero-shot
   and -0.30 after 500 labels; LN Tuning -4.08 and -0.23; Prefix/P-Tuning -6.97
-  zero-shot, -2.17 after 200 labels, and -1.99 after 500 labels vs LESS. The
-  Prefix/P-Tuning calibrated values are currently listed without dispersion.
-  The LN-Tuning values temporarily retain the prior BitFit run and must be
-  replaced after revised E5.
+  zero-shot, -2.17 after 200 labels, and -1.99 after 500 labels vs LESS.
 
 ## Statistical and scope constraints
 

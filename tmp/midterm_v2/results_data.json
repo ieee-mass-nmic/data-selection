@@ -1,0 +1,880 @@
+{
+  "audit_date": "2026-09-11",
+  "evidence_status": "updated_experiment_results",
+  "mandatory_chart_note_zh": "",
+  "sources": [
+    {
+      "path": "scripts/paper/competition_numbers.py",
+      "sha256": "6dae416ce7fa298881c9b78a45866bc550f34482cc053714920395fa7a497ec7",
+      "mtime_local": "2026-07-28T12:38:32"
+    },
+    {
+      "path": "scripts/paper/competition_reuse_experiment.py",
+      "sha256": "e19d9e899bdbf8bb7fc194875011d4a4d715bee99830115c41618ecde540336c",
+      "mtime_local": "2026-07-10T19:14:39"
+    },
+    {
+      "path": "scripts/paper/revise_motivation_figure.py",
+      "sha256": "fefe6201c292f5a4d894e153a938202a9d390aa43107fb27bb0dacd7a804bf41",
+      "mtime_local": "2026-07-10T21:09:21"
+    },
+    {
+      "path": "paper/Sections/05_experiments.tex",
+      "sha256": "49940af6e5c46c4acc4dadfd48537bb8377f870f120aa7626b458cb59458eaf4",
+      "mtime_local": "2026-07-28T12:43:21"
+    },
+    {
+      "path": "paper/data/competition_revision_notes.md",
+      "sha256": "675f0ef668db7df0a63393fa7cf48f34a2b40493052f8c23b76196cb0159f4ca",
+      "mtime_local": "2026-08-01T14:31:37"
+    },
+    {
+      "path": "paper/data/competition_cost_model.json",
+      "sha256": "5bee036dc69b80f22c93b0f329286f3f4d7967a2d811da8e9c91254e2f39d251",
+      "mtime_local": "2026-07-28T11:20:35"
+    },
+    {
+      "path": "paper/data/competition_ood_summary.json",
+      "sha256": "82e2d5936da327b883f2d7980df1fa90a05fd0b2a74bf46298ca3c59f165240e",
+      "mtime_local": "2026-08-01T16:59:23"
+    }
+  ],
+  "setup": {
+    "backbone": "Llama-2-7B",
+    "pool": 300000,
+    "budget": 0.1,
+    "selected": 30000,
+    "tasks": [
+      "GSM8K",
+      "HumanEval",
+      "MMLU",
+      "TyDiQA"
+    ],
+    "pefts": [
+      "AD-b64",
+      "IA3-attnmlp",
+      "L-r16-qkvo",
+      "L-r8-mlp",
+      "L-r8-qv"
+    ],
+    "downstream_seed_ids_described_in_manuscript": [
+      0,
+      1,
+      2
+    ],
+    "selector_seed_fixed": 0,
+    "task_sketch_examples": 32,
+    "metric_summary": "equal-weight mean of task-native percentage scores, then five PEFT configurations",
+    "hardware": "8 × NVIDIA H20-96GB"
+  },
+  "main_quality": {
+    "unit": "macro-average of native percentage metrics (points)",
+    "rows": [
+      {
+        "method": "Random",
+        "mean_exact_from_encoded_grid": 32.28575,
+        "display_mean": 32.29,
+        "per_peft_mean": [
+          32.79,
+          31.74,
+          33.11,
+          31.97,
+          31.82
+        ]
+      },
+      {
+        "method": "RDS+",
+        "mean_exact_from_encoded_grid": 34.4365,
+        "display_mean": 34.44,
+        "per_peft_mean": [
+          35.27,
+          33.54,
+          35.0,
+          34.46,
+          33.91
+        ]
+      },
+      {
+        "method": "Influence",
+        "mean_exact_from_encoded_grid": 34.6775,
+        "display_mean": 34.68,
+        "per_peft_mean": [
+          35.08,
+          33.84,
+          35.24,
+          34.69,
+          34.53
+        ]
+      },
+      {
+        "method": "LESS",
+        "mean_exact_from_encoded_grid": 35.1395,
+        "display_mean": 35.14,
+        "per_peft_mean": [
+          35.52,
+          34.44,
+          35.8,
+          35.13,
+          34.8
+        ]
+      },
+      {
+        "method": "PCU-Select",
+        "mean_exact_from_encoded_grid": 35.1765,
+        "display_mean": 35.18,
+        "per_peft_mean": [
+          35.61,
+          34.6,
+          35.93,
+          34.56,
+          35.18
+        ]
+      }
+    ],
+    "pcu_vs_less": {
+      "display_diff": 0.04,
+      "descriptive_interval": [
+        -0.26,
+        0.33
+      ],
+      "wins": 10,
+      "n": 20,
+      "task_grouped_interval": [
+        -0.15,
+        0.22
+      ]
+    },
+    "pcu_vs_rds": {
+      "display_diff": 0.74,
+      "descriptive_interval": [
+        0.38,
+        1.06
+      ],
+      "wins": 17,
+      "n": 20
+    },
+    "pcu_vs_influence": {
+      "display_diff": 0.5,
+      "descriptive_interval": [
+        0.21,
+        0.75
+      ],
+      "wins": 18,
+      "n": 20
+    }
+  },
+  "per_task": [
+    {
+      "task": "GSM8K",
+      "metric": "EM",
+      "unit": "percent",
+      "means_exact": {
+        "Random": 20.059,
+        "RDS+": 21.652,
+        "Influence": 21.62,
+        "LESS": 21.91,
+        "PCU-Select": 22.202
+      },
+      "means_display": {
+        "Random": 20.06,
+        "RDS+": 21.65,
+        "Influence": 21.62,
+        "LESS": 21.91,
+        "PCU-Select": 22.2
+      },
+      "pcu_minus_less_exact": 0.29200000000000015,
+      "pcu_minus_less_display": 0.29,
+      "interval_descriptive": [
+        -0.04,
+        0.58
+      ],
+      "pcu_wins_of_5": 4
+    },
+    {
+      "task": "HumanEval",
+      "metric": "Pass@1",
+      "unit": "percent",
+      "means_exact": {
+        "Random": 15.36,
+        "RDS+": 16.418,
+        "Influence": 16.823999999999998,
+        "LESS": 17.098,
+        "PCU-Select": 17.06
+      },
+      "means_display": {
+        "Random": 15.36,
+        "RDS+": 16.42,
+        "Influence": 16.82,
+        "LESS": 17.1,
+        "PCU-Select": 17.06
+      },
+      "pcu_minus_less_exact": -0.03799999999999955,
+      "pcu_minus_less_display": -0.04,
+      "interval_descriptive": [
+        -0.44,
+        0.31
+      ],
+      "pcu_wins_of_5": 2
+    },
+    {
+      "task": "MMLU",
+      "metric": "Acc",
+      "unit": "percent",
+      "means_exact": {
+        "Random": 44.746,
+        "RDS+": 47.596000000000004,
+        "Influence": 48.14,
+        "LESS": 48.476,
+        "PCU-Select": 49.144
+      },
+      "means_display": {
+        "Random": 44.75,
+        "RDS+": 47.6,
+        "Influence": 48.14,
+        "LESS": 48.48,
+        "PCU-Select": 49.14
+      },
+      "pcu_minus_less_exact": 0.6679999999999978,
+      "pcu_minus_less_display": 0.67,
+      "interval_descriptive": [
+        0.24,
+        1.08
+      ],
+      "pcu_wins_of_5": 4
+    },
+    {
+      "task": "TyDiQA",
+      "metric": "F1",
+      "unit": "percent",
+      "means_exact": {
+        "Random": 48.978,
+        "RDS+": 52.08,
+        "Influence": 52.126,
+        "LESS": 53.074,
+        "PCU-Select": 52.3
+      },
+      "means_display": {
+        "Random": 48.98,
+        "RDS+": 52.08,
+        "Influence": 52.13,
+        "LESS": 53.07,
+        "PCU-Select": 52.3
+      },
+      "pcu_minus_less_exact": -0.7740000000000024,
+      "pcu_minus_less_display": -0.77,
+      "interval_descriptive": [
+        -1.18,
+        -0.43
+      ],
+      "pcu_wins_of_5": 0
+    }
+  ],
+  "reuse_comparison": {
+    "unit": "native percentage metric macro-average (points)",
+    "rows": [
+      {
+        "method": "Reuse-one-LESS",
+        "quality": 34.24,
+        "selection_cost_gpu_h_five_pefts": 63.2,
+        "per_peft_display": [
+          34.05,
+          33.36,
+          35.28,
+          33.71,
+          34.8
+        ]
+      },
+      {
+        "method": "Per-PEFT LESS",
+        "quality": 35.14,
+        "selection_cost_gpu_h_five_pefts": 316.0,
+        "per_peft_display": [
+          35.52,
+          34.44,
+          35.8,
+          35.13,
+          34.8
+        ]
+      },
+      {
+        "method": "PCU-Select",
+        "quality": 35.18,
+        "selection_cost_gpu_h_five_pefts": 151.55,
+        "per_peft_display": [
+          35.61,
+          34.6,
+          35.93,
+          34.56,
+          35.18
+        ]
+      }
+    ],
+    "source_peft": "L-r8-qv",
+    "note": "For each task, reuse its source-PEFT LESS subset across five target PEFTs. There are four task-specific source subsets; do not describe one common subset across all tasks.",
+    "sd_note": "Mean values match canonical main table but SDs in reuse table conflict with main table; omit error bars."
+  },
+  "cost": {
+    "unit": "GPU-hours",
+    "gpu_hour_definition": "wall_seconds × gpu_count / 3600",
+    "selection_only": true,
+    "fixed_pcu": 144.0,
+    "fixed_breakdown": {
+      "feature_extraction": 48.0,
+      "low_fidelity_labels": 4.8,
+      "high_fidelity_labels": 84.0,
+      "scorer_training": 7.2
+    },
+    "per_four_task_new_peft": {
+      "PCU-Select": 1.51,
+      "LESS": 63.2
+    },
+    "per_new_task_existing_peft": {
+      "PCU-Select": 0.3775,
+      "LESS": 0.3
+    },
+    "marginal_ratio_exact": 41.85430463576159,
+    "five_peft_ratio_exact": 2.0851204223028703,
+    "break_even_four_task_pefts": 2.334251904684714,
+    "curve": [
+      {
+        "pefts": 0,
+        "PCU-Select": 144.0,
+        "LESS": 0.0,
+        "PCU-Select_all_cal500": 144.0
+      },
+      {
+        "pefts": 1,
+        "PCU-Select": 145.51,
+        "LESS": 63.2,
+        "PCU-Select_all_cal500": 149.71
+      },
+      {
+        "pefts": 2,
+        "PCU-Select": 147.02,
+        "LESS": 126.4,
+        "PCU-Select_all_cal500": 155.42
+      },
+      {
+        "pefts": 3,
+        "PCU-Select": 148.53,
+        "LESS": 189.60000000000002,
+        "PCU-Select_all_cal500": 161.13
+      },
+      {
+        "pefts": 4,
+        "PCU-Select": 150.04,
+        "LESS": 252.8,
+        "PCU-Select_all_cal500": 166.84
+      },
+      {
+        "pefts": 5,
+        "PCU-Select": 151.55,
+        "LESS": 316.0,
+        "PCU-Select_all_cal500": 172.55
+      },
+      {
+        "pefts": 6,
+        "PCU-Select": 153.06,
+        "LESS": 379.20000000000005,
+        "PCU-Select_all_cal500": 178.26
+      },
+      {
+        "pefts": 7,
+        "PCU-Select": 154.57,
+        "LESS": 442.40000000000003,
+        "PCU-Select_all_cal500": 183.97
+      },
+      {
+        "pefts": 8,
+        "PCU-Select": 156.08,
+        "LESS": 505.6,
+        "PCU-Select_all_cal500": 189.68
+      },
+      {
+        "pefts": 9,
+        "PCU-Select": 157.59,
+        "LESS": 568.8000000000001,
+        "PCU-Select_all_cal500": 195.39
+      },
+      {
+        "pefts": 10,
+        "PCU-Select": 159.1,
+        "LESS": 632.0,
+        "PCU-Select_all_cal500": 201.1
+      }
+    ],
+    "cal500_extra_per_pair": 1.05,
+    "cal500_extra_per_four_tasks": 4.2,
+    "worst_case_break_even": 2.5047834405983647,
+    "common_downstream_training_excluded_per_run": 12.8,
+    "residual_per_pair_not_attributed": 0.0175,
+    "note": "42× concerns marginal selection cost for a new PEFT across four tasks, not task addition or end-to-end training speedup."
+  },
+  "ablation": {
+    "full": 19.72,
+    "unit": "GSM8K/HumanEval native metric macro-average points",
+    "scope": "two representative PEFTs, 10% budget",
+    "rows": [
+      {
+        "variant": "Full PCU-Select",
+        "label_zh": "完整方法",
+        "metric": 19.72,
+        "drop": 0.0,
+        "ndcg": 0.702,
+        "encoded_sd_unverified": 0.22
+      },
+      {
+        "variant": "No PEFT code",
+        "label_zh": "去除 PEFT 编码",
+        "metric": 18.35,
+        "drop": 1.37,
+        "ndcg": 0.526,
+        "encoded_sd_unverified": 0.41
+      },
+      {
+        "variant": "Family one-hot only",
+        "label_zh": "仅保留家族编码",
+        "metric": 19.04,
+        "drop": 0.68,
+        "ndcg": 0.602,
+        "encoded_sd_unverified": 0.29
+      },
+      {
+        "variant": "No task sketch",
+        "label_zh": "去除任务表征",
+        "metric": 18.9,
+        "drop": 0.82,
+        "ndcg": 0.597,
+        "encoded_sd_unverified": 0.31
+      },
+      {
+        "variant": "No activation signature",
+        "label_zh": "去除激活特征",
+        "metric": 19.24,
+        "drop": 0.48,
+        "ndcg": 0.629,
+        "encoded_sd_unverified": 0.25
+      },
+      {
+        "variant": "Low-fidelity only",
+        "label_zh": "仅用梯度代理标签",
+        "metric": 18.87,
+        "drop": 0.85,
+        "ndcg": 0.563,
+        "encoded_sd_unverified": 0.34
+      },
+      {
+        "variant": "High-fidelity only",
+        "label_zh": "仅用短更新标签",
+        "metric": 19.36,
+        "drop": 0.36,
+        "ndcg": 0.639,
+        "encoded_sd_unverified": 0.27
+      },
+      {
+        "variant": "No uncertainty penalty",
+        "label_zh": "去除不确定性惩罚",
+        "metric": 19.44,
+        "drop": 0.28,
+        "ndcg": 0.69,
+        "encoded_sd_unverified": 0.24
+      },
+      {
+        "variant": "Global top-$k$",
+        "label_zh": "改为全局 Top-k",
+        "metric": 18.64,
+        "drop": 1.08,
+        "ndcg": 0.684,
+        "encoded_sd_unverified": 0.38
+      },
+      {
+        "variant": "Uniform clusters",
+        "label_zh": "改为均匀聚类配额",
+        "metric": 19.21,
+        "drop": 0.51,
+        "ndcg": 0.709,
+        "encoded_sd_unverified": 0.28
+      }
+    ],
+    "recommended_order": [
+      "No PEFT code",
+      "Global top-$k$",
+      "Low-fidelity only",
+      "No task sketch",
+      "Family one-hot only",
+      "Uniform clusters"
+    ],
+    "note": "Uniform quota NDCG .709 exceeds full .702; downstream quality is the target. Avoid claiming all full-method metrics are best."
+  },
+  "ood_backup_only": {
+    "tasks": [
+      "gsm8k",
+      "humaneval",
+      "mmlu"
+    ],
+    "gap_definition": "PCU-Select minus reference; plots and tables negate this value to show reference minus PCU-Select.",
+    "dispersion": "sample standard deviation of the paired seed-level mean over target-training seeds 0, 1, and 2",
+    "groups": [
+      {
+        "id": "L0",
+        "label": "near-support same-family",
+        "targets": [
+          "L-r32-qkvo",
+          "AD-b16"
+        ],
+        "reference": "LESS",
+        "modes": {
+          "zero-shot": {
+            "gap": -0.34,
+            "std": 0.41
+          },
+          "cal200": null,
+          "cal500": null
+        }
+      },
+      {
+        "id": "L1",
+        "label": "far-support same-family",
+        "targets": [
+          "L-r64-all",
+          "AD-b256",
+          "L-r8-highlayers"
+        ],
+        "reference": "LESS",
+        "modes": {
+          "zero-shot": {
+            "gap": -2.08,
+            "std": 0.44
+          },
+          "cal200": {
+            "gap": -0.91,
+            "std": 0.29
+          },
+          "cal500": {
+            "gap": -0.3,
+            "std": 0.36
+          }
+        }
+      },
+      {
+        "id": "L2-LN",
+        "label": "unseen-family LN Tuning",
+        "targets": [
+          "LN"
+        ],
+        "reference": "LESS",
+        "modes": {
+          "zero-shot": {
+            "gap": -4.08,
+            "std": 0.7
+          },
+          "cal200": {
+            "gap": -0.65,
+            "std": 0.26
+          },
+          "cal500": {
+            "gap": -0.23,
+            "std": 0.42
+          }
+        }
+      },
+      {
+        "id": "L2-Prompt",
+        "label": "unseen-family Prefix/P-Tuning",
+        "targets": [
+          "PRE-l16",
+          "PT-l32"
+        ],
+        "reference": "LESS",
+        "modes": {
+          "zero-shot": {
+            "gap": -6.97,
+            "std": 0.34
+          },
+          "cal200": {
+            "gap": -2.17,
+            "std": 0.33
+          },
+          "cal500": {
+            "gap": -1.99,
+            "std": 0.38
+          }
+        }
+      }
+    ]
+  },
+  "ood_exclusion_note": "LN Tuning and Prompt calibration values follow the updated experiment summary. Prompt calibration SDs are 0.33 and 0.38.",
+  "budget_optional": {
+    "budgets": [
+      0.05,
+      0.1,
+      0.3
+    ],
+    "series": {
+      "Random": [
+        29.81,
+        32.29,
+        34.86
+      ],
+      "RDS+": [
+        31.72,
+        34.44,
+        36.28
+      ],
+      "Influence": [
+        31.94,
+        34.68,
+        36.45
+      ],
+      "LESS": [
+        32.74,
+        35.14,
+        36.79
+      ],
+      "PCU-Select": [
+        33.09,
+        35.18,
+        36.81
+      ]
+    },
+    "note": "Hard-coded supplementary grid, not verified raw runs; main result should remain 10% budget."
+  },
+  "plots": {
+    "slide6_motivation_reuse": {
+      "categories": [
+        "Reuse-one-LESS",
+        "RDS+",
+        "Per-PEFT LESS"
+      ],
+      "values": [
+        34.24,
+        34.44,
+        35.14
+      ],
+      "unit": "四任务原生百分制指标 × 五PEFT宏平均（点）",
+      "note": "Reuse-one-LESS uses one source PEFT (L-r8-qv) and one subset per task, then shares each task subset across target PEFTs."
+    },
+    "slide16_quality_six_methods": {
+      "categories": [
+        "Random",
+        "RDS+",
+        "Influence",
+        "Reuse-one-LESS",
+        "LESS",
+        "PCU-Select"
+      ],
+      "values": [
+        32.29,
+        34.44,
+        34.68,
+        34.24,
+        35.14,
+        35.18
+      ],
+      "unit": "四任务原生百分制指标 × 五PEFT宏平均（点）",
+      "highlight_delta_to_less": 0.04,
+      "descriptive_interval": [
+        -0.26,
+        0.33
+      ],
+      "pcu_wins_of_20": 10
+    },
+    "slide17_task_delta": {
+      "categories": [
+        "GSM8K",
+        "HumanEval",
+        "MMLU",
+        "TyDiQA"
+      ],
+      "values": [
+        0.29,
+        -0.04,
+        0.67,
+        -0.77
+      ],
+      "unit": "PCU−LESS，任务原始指标点",
+      "metric_labels": [
+        "EM",
+        "Pass@1",
+        "Accuracy",
+        "F1"
+      ],
+      "pcu_means": [
+        22.2,
+        17.06,
+        49.14,
+        52.3
+      ],
+      "less_means": [
+        21.91,
+        17.1,
+        48.48,
+        53.07
+      ]
+    },
+    "slide18_ablation": {
+      "categories": [
+        "去除 PEFT 编码",
+        "全局 Top-k",
+        "仅用梯度代理标签",
+        "去除任务表征",
+        "仅家族编码",
+        "均匀聚类配额"
+      ],
+      "values": [
+        1.37,
+        1.08,
+        0.85,
+        0.82,
+        0.68,
+        0.51
+      ],
+      "unit": "相对完整方法的下降（原始指标点）",
+      "full": 19.72,
+      "scope": "GSM8K + HumanEval；两个代表PEFT；10%预算"
+    },
+    "slide19_cost_curve": {
+      "categories": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "series": [
+        {
+          "name": "PCU-Select",
+          "values": [
+            145.51,
+            147.02,
+            148.53,
+            150.04,
+            151.55,
+            153.06,
+            154.57,
+            156.08,
+            157.59,
+            159.1
+          ]
+        },
+        {
+          "name": "LESS",
+          "values": [
+            63.2,
+            126.4,
+            189.6,
+            252.8,
+            316.0,
+            379.2,
+            442.4,
+            505.6,
+            568.8,
+            632.0
+          ]
+        }
+      ],
+      "x_label": "服务的 PEFT 配置数 P（每配置4任务）",
+      "y_label": "累计选数成本（GPU 小时）",
+      "break_even": 2.334251904684714,
+      "offline_cost": 144,
+      "marginal_pcu": 1.51,
+      "marginal_less": 63.2,
+      "five_pefts_pcu_display": 151.6,
+      "five_pefts_less": 316.0,
+      "note": "选择阶段；排除下游训练；PCU含一次144 GPU小时前期成本。"
+    },
+    "slide29_main_table": {
+      "columns": [
+        "Method",
+        "AD-b64",
+        "IA3-attnmlp",
+        "L-r16-qkvo",
+        "L-r8-mlp",
+        "L-r8-qv",
+        "Avg."
+      ],
+      "rows": [
+        [
+          "Random",
+          32.79,
+          31.74,
+          33.11,
+          31.97,
+          31.82,
+          32.29
+        ],
+        [
+          "RDS+",
+          35.27,
+          33.54,
+          35.0,
+          34.46,
+          33.91,
+          34.44
+        ],
+        [
+          "Influence",
+          35.08,
+          33.84,
+          35.24,
+          34.69,
+          34.53,
+          34.68
+        ],
+        [
+          "LESS",
+          35.52,
+          34.44,
+          35.8,
+          35.13,
+          34.8,
+          35.14
+        ],
+        [
+          "PCU-Select",
+          35.61,
+          34.6,
+          35.93,
+          34.56,
+          35.18,
+          35.18
+        ]
+      ],
+      "note": "Means only. Main and reuse tables have inconsistent SDs; encoded seed summaries are not verified raw repeats."
+    },
+    "slide30_cost_breakdown": {
+      "offline_labels": [
+        "样本特征",
+        "梯度代理标签",
+        "短更新标签",
+        "评分器训练"
+      ],
+      "offline_values": [
+        48,
+        4.8,
+        84,
+        7.2
+      ],
+      "online_values": [
+        {
+          "scenario": "已有 PEFT 新增1任务",
+          "PCU": 0.3775,
+          "LESS": 0.3
+        },
+        {
+          "scenario": "新增 PEFT ×4任务",
+          "PCU": 1.51,
+          "LESS": 63.2
+        }
+      ],
+      "unit": "GPU 小时",
+      "cal500_extra_per_pair": 1.05,
+      "cal500_extra_per_four_tasks": 4.2
+    }
+  }
+}

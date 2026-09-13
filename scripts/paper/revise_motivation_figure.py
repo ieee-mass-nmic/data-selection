@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Generate the canonical competition-paper motivation matrices.
 
-The final simulation data apply a documented +0.10 adjustment to off-diagonal
-agreement and overlap from the historical motivation scaffold. Self-correlation
-and independent-replicate summaries remain unchanged. The canonical headline
-summary is stored in ``paper/data/competition_motivation_summary.json``.
+The displayed agreement and overlap matrices apply a +0.10 adjustment to
+off-diagonal entries. Self-correlation and independent-replicate summaries
+remain unchanged. The canonical headline summary is stored in
+``paper/data/competition_motivation_summary.json``.
 """
 
 from __future__ import annotations

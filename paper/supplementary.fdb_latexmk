@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex supplementary"] 1785207944.07124 "supplementary.aux" "supplementary.bbl" "supplementary" 1785211542.56983 0
-  "./aaai2027.bib" 1785170671.19043 21370 8e5381e06fc26cb7a008b72a3d2b1709 ""
+["bibtex supplementary"] 1785570866.92464 "supplementary.aux" "supplementary.bbl" "supplementary" 1785574768.60526 0
+  "./aaai2027.bib" 1785567342.06047 25091 064a28c0e4011a08f57e3db8d11b8f11 ""
   "./aaai2027.bst" 1782704500 30207 bd248dfe461b9b2fc7481a44feafe197 ""
-  "supplementary.aux" 1785211542.30556 2897 7ea0d8b4293c94fb58a1719cd3503c34 "pdflatex"
+  "supplementary.aux" 1785574768.34852 4200 93875b9c9b9e19c84683c837786cd550 "pdflatex"
   (generated)
   "supplementary.bbl"
   "supplementary.blg"
   (rewritten before read)
-["pdflatex"] 1785211541.50696 "supplementary.tex" "supplementary.pdf" "supplementary" 1785211542.56994 0
+["pdflatex"] 1785574767.48625 "supplementary.tex" "supplementary.pdf" "supplementary" 1785574768.60538 0
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/newtx/ntx-ec-tlf.enc" 1698694482 2914 fdbc4a54b9bc76f4551b5303f2737d33 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/tex-gyre/q-ts1.enc" 1529098226 3124 3813fd4c981d99822890a2861b0d274c ""
@@ -106,6 +106,7 @@
   "/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/courier.sty" 1586716065 803 1508145d595475dad3d7fb46782a0f94 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/helvet.sty" 1586716065 1499 de0ad166b701b820e03588a29bb30798 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/t1pcr.fd" 1137110629 798 d5895e9edc628f2be019beb2c0ec66df ""
+  "/usr/local/texlive/2026/texmf-dist/tex/latex/tools/array.sty" 1761946296 15651 9d7c62df82cb29a555c00550babfe364 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/url/url.sty" 1388531844 12796 8edb7d69a20b857904dd0ea757c14ec9 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty" 1727642399 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "/usr/local/texlive/2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty" 1762376337 5006 d7e899bb5d9717c7f214e9bc0284de7b ""
@@ -114,16 +115,16 @@
   "/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1782738526 5573038 b99aad5e4898a9034e953632f940512b ""
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1782738481 3636769 d68c8d030107c2771cb2a3e432ba7b2f ""
   "/usr/local/texlive/2026/texmf.cnf" 1774209515 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
-  "Figures/fig_config_sensitivity.pdf" 1783679199.36091 62671 d86ddbfa2cecf48ae250db93694981b8 ""
-  "Sections/08_appendix.tex" 1785211427.47369 34777 0d1b2829af1b4089d3817cda34a7d884 ""
+  "Figures/fig_config_sensitivity.pdf" 1785574224.57446 61755 06a2fcd23fa6652c82a29810636a61d2 ""
+  "Sections/08_appendix.tex" 1785570861.10288 38765 c94edfe2cb2beec574d19590bb9ea16d ""
   "aaai2027.sty" 1782704500 16915 1b1c792e2acfbbd8b672259e267b95d8 ""
-  "supplementary.aux" 1785211542.30556 2897 7ea0d8b4293c94fb58a1719cd3503c34 "pdflatex"
-  "supplementary.bbl" 1785207944.2018 3452 0b60ff538943cbdd0453cb44ff032f68 "bibtex supplementary"
-  "supplementary.tex" 1785180042.47506 1150 7dd91384e030f4a7b8ef321e7e599e14 ""
-  "tables/table_ablations.tex" 1785211525.20181 1014 a43be7d6e82041df5fad7cfe85d56533 ""
+  "supplementary.aux" 1785574768.34852 4200 93875b9c9b9e19c84683c837786cd550 "pdflatex"
+  "supplementary.bbl" 1785570867.03109 6611 6186b698259162ef11a1272e7885e4f9 "bibtex supplementary"
+  "supplementary.tex" 1785567674.96434 1337 55d8259feac0626a21321dd29a8d1551 ""
+  "tables/table_ablations.tex" 1785568261.34029 1015 90badd95ca71d6e87213ee22cdc73e16 ""
   "tables/table_cost_axes.tex" 1785159457.39169 655 90baec39801544ecd5dad89e9f88b2f8 ""
   "tables/table_hf_budget.tex" 1785124585.17424 832 3da737d5d65c89b631240e4dc5471603 ""
-  "tables/table_ood_levels.tex" 1785208835.41587 877 af4b8161c14f462ed0e9a0038c8cf98a ""
+  "tables/table_ood_levels.tex" 1785574763.13599 819 fb64ef797b4087da11dff9c37a6044be ""
   "tables/table_per_task_compact.tex" 1785211525.29009 1065 67c87ccd7fb554ae024e5881ae1457e0 ""
   "tables/table_pool_scaling.tex" 1785159457.3921 883 a3f3b3be42e1c41d083c4d49234c7cba ""
   "tables/table_transfer_matrix.tex" 1785124635.62833 1089 ccc086e91004212e497065fb26cf8579 ""

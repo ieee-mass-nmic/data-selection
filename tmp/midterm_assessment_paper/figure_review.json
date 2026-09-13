@@ -1,0 +1,215 @@
+{
+  "status": "只读审查完成；原论文、数据与图形未修改。",
+  "recommendation": "采用2张当前论文原图（总体架构、累计选择成本），搭配1张可编辑主结果表和1张可编辑消融表；不为凑3张图插入已过时或证据不稳的原图。若需要第3张图，可将当前消融表重绘为中文横向柱形图，明确为按当前稿件表重绘，不能使用旧 T2_ablation.png。",
+  "selected_original_figures": [
+    {
+      "role": "总体架构",
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/image.png",
+      "current_reference": "paper/Sections/04_method.tex:8",
+      "caption": "图1 PCU-Select总体架构。共享的24个干预位点对齐样本梯度、任务梯度与结构化PEFT编码；低保真梯度代理和高保真短更新标签共同训练条件效用评分器，在线为每个PEFT–任务组合独立生成数据子集。",
+      "scope_notes": [
+        "这是方法架构示意图，不承载已验证的实验量化结论。",
+        "图中样本与任务表征和梯度缓存为不同对象；正文说明848维任务向量不包含另行存储的位点梯度。",
+        "在线校准为兼容标签条件下的可选过程，不意味着全部新家族都已验证。"
+      ],
+      "layout": "建议宽15.5厘米、保持原比例约2.12:1，不裁掉图中三阶段。可在图前用中文概括三个阶段以减轻英文图阅读负担。"
+    },
+    {
+      "role": "累计选择成本",
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/fig_cost_break_even.pdf",
+      "script": "/Users/bytedance/code/data-selection/scripts/paper/revise_cost_figure.py",
+      "data": "/Users/bytedance/code/data-selection/paper/data/competition_cost_model.json",
+      "caption": "图2 不同PEFT配置数量下的累计数据选择成本（实验结果汇总）。每个配置均服务4个任务；PCU-Select计入144 GPU小时的一次性离线成本，对无需额外校准的受支持配置，新增成本为1.51 GPU小时，LESS为63.2 GPU小时。",
+      "scope_notes": [
+        "横轴是PEFT配置数，不是任务数或训练实验次数。",
+        "成本公式 C_PCU(P)=144+1.51P、C_LESS(P)=63.2P，是依据稿件分项成本绘制的线性累计曲线，不能描述为每个点均单独测量。",
+        "所有成本均为GPU小时，采用8×H20硬件与墙钟时间乘GPU数量的口径；不包含共同的下游训练成本。",
+        "交点精确值144/(63.2-1.51)≈2.33；图上T*=2.3为显示舍入。整数配置到第3个开始体现摊销收益。",
+        "五配置PCU为151.55≈151.6，LESS316，选择成本比约2.09；42倍仅为63.2/1.51边际选择成本比，不是端到端加速。",
+        "共享梯度Influence、RDS+和Random曲线较低，但其质量与PCU不同；不能由此图单独得出综合优越。"
+      ],
+      "layout": "建议宽11.5至13厘米居中；PDF可按300dpi渲染成PNG用于DOCX。预览已写tmp/midterm_assessment_paper/cost_preview.png。"
+    }
+  ],
+  "main_results_table": {
+    "caption": "表1 四任务主实验结果（实验结果汇总）",
+    "columns": [
+      "方法",
+      "GSM8K（EM）",
+      "HumanEval（Pass@1）",
+      "MMLU（Acc）",
+      "TyDiQA（F1）",
+      "宏平均"
+    ],
+    "rows": [
+      {
+        "method": "Random",
+        "tasks": {
+          "GSM8K": 20.06,
+          "HumanEval": 15.36,
+          "MMLU": 44.75,
+          "TyDiQA": 48.98
+        },
+        "macro_average": 32.29,
+        "full_precision_task_means": {
+          "GSM8K": 20.059,
+          "HumanEval": 15.36,
+          "MMLU": 44.745999999999995,
+          "TyDiQA": 48.977999999999994
+        }
+      },
+      {
+        "method": "RDS+",
+        "tasks": {
+          "GSM8K": 21.65,
+          "HumanEval": 16.42,
+          "MMLU": 47.6,
+          "TyDiQA": 52.08
+        },
+        "macro_average": 34.44,
+        "full_precision_task_means": {
+          "GSM8K": 21.651999999999997,
+          "HumanEval": 16.418,
+          "MMLU": 47.596000000000004,
+          "TyDiQA": 52.08
+        }
+      },
+      {
+        "method": "Influence",
+        "tasks": {
+          "GSM8K": 21.62,
+          "HumanEval": 16.82,
+          "MMLU": 48.14,
+          "TyDiQA": 52.13
+        },
+        "macro_average": 34.68,
+        "full_precision_task_means": {
+          "GSM8K": 21.619999999999997,
+          "HumanEval": 16.824,
+          "MMLU": 48.14,
+          "TyDiQA": 52.126
+        }
+      },
+      {
+        "method": "LESS",
+        "tasks": {
+          "GSM8K": 21.91,
+          "HumanEval": 17.1,
+          "MMLU": 48.48,
+          "TyDiQA": 53.07
+        },
+        "macro_average": 35.14,
+        "full_precision_task_means": {
+          "GSM8K": 21.91,
+          "HumanEval": 17.098,
+          "MMLU": 48.476,
+          "TyDiQA": 53.074
+        }
+      },
+      {
+        "method": "PCU-Select",
+        "tasks": {
+          "GSM8K": 22.2,
+          "HumanEval": 17.06,
+          "MMLU": 49.14,
+          "TyDiQA": 52.3
+        },
+        "macro_average": 35.18,
+        "full_precision_task_means": {
+          "GSM8K": 22.202,
+          "HumanEval": 17.06,
+          "MMLU": 49.144,
+          "TyDiQA": 52.3
+        }
+      }
+    ],
+    "scope": "Llama-2-7B；30万候选中选择10%即3万条；各任务列为五种已见PEFT配置的原生百分制指标等权平均，宏平均为四任务再等权平均。PEFT为AD-b64、IA3-attnmlp、L-r16-qkvo、L-r8-mlp、L-r8-qv。",
+    "interpretation": "PCU与LESS宏平均35.18/35.14，接近；相对LESS，GSM8K+0.29、HumanEval-0.04、MMLU+0.67、TyDiQA-0.77，不能声称所有任务占优。差值来自未舍入均值，不能简单用显示值相减校验（MMLU显示49.14-48.48=0.66，真实49.144-48.476=0.668≈0.67）。",
+    "rounding_note": "原表使用未舍入格均值求平均；保留2位小数。不要从已舍入任务列重新计算最终宏平均。",
+    "source": "/Users/bytedance/code/data-selection/scripts/paper/competition_numbers.py",
+    "verified_against": [
+      "/Users/bytedance/code/data-selection/paper/tables/table_per_task_peft.tex",
+      "/Users/bytedance/code/data-selection/paper/tables/table_main_results.tex"
+    ]
+  },
+  "ablation_table_or_optional_redraw": {
+    "caption": "表2 主要模块消融结果（实验结果汇总）",
+    "scope": "GSM8K、HumanEval两个任务和两个代表性PEFT，10%预算；是该局部实验的原生指标宏平均，不能与主结果宏平均35.18混比。",
+    "columns": [
+      "设置",
+      "宏平均",
+      "相对完整方法下降"
+    ],
+    "selected_rows": [
+      [
+        "完整PCU-Select",
+        19.72,
+        0.0
+      ],
+      [
+        "移除PEFT编码",
+        18.35,
+        1.37
+      ],
+      [
+        "仅使用家族one-hot",
+        19.04,
+        0.68
+      ],
+      [
+        "移除任务摘要",
+        18.9,
+        0.82
+      ],
+      [
+        "仅用梯度代理标签",
+        18.87,
+        0.85
+      ],
+      [
+        "仅用短更新标签",
+        19.36,
+        0.36
+      ],
+      [
+        "移除不确定性惩罚",
+        19.44,
+        0.28
+      ],
+      [
+        "改用全局Top-k",
+        18.64,
+        1.08
+      ],
+      [
+        "改用均匀簇配额",
+        19.21,
+        0.51
+      ]
+    ],
+    "source": "/Users/bytedance/code/data-selection/paper/tables/table_ablations.tex",
+    "display_recommendation": "篇幅紧张时保留完整方法、无PEFT编码、无任务摘要、仅代理标签、全局Top-k五行；图示可画相对下降量更直观。不使用不可靠的误差棒。"
+  },
+  "excluded_assets": [
+    {
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/T2_ablation.png",
+      "reason": "历史E3脚手架图，均值约34至36，与当前稿件消融19.72体系不一致；标题甚至写each removed component should drop， unsuitable正式研究证据。"
+    },
+    {
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/Architecture.png",
+      "reason": "旧架构图，当前论文已不用；部分框内文字越界且底部脚注拥挤。"
+    },
+    {
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/pcu-select-architecture-spec.md",
+      "reason": "绘图规范含旧0.18 GPU小时数值，不能作为最新成本依据。"
+    },
+    {
+      "path": "/Users/bytedance/code/data-selection/paper/Figures/F2_break_even.png",
+      "reason": "历史E2图。应以revised fig_cost_break_even.pdf及competition_cost_model.json为准。"
+    }
+  ],
+  "evidence_limitations": [
+    "描述性统计不用于独立样本显著性结论；保留各实验的任务、配置与预算范围。",
+    "表和图按论文实验结果展示；不宣称已投稿录用或显著优越。"
+  ]
+}

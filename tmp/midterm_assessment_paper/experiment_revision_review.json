@@ -1,0 +1,292 @@
+{
+  "review_date": "2026-09-12",
+  "read_only": true,
+  "source_sha256": {
+    "paper/Sections/01_introduction.tex": "2c8b8476b09de7154a8cf44c0e5549c59f64af085480b3e7b34220f8955d86c1",
+    "paper/Sections/05_experiments.tex": "49940af6e5c46c4acc4dadfd48537bb8377f870f120aa7626b458cb59458eaf4"
+  },
+  "required_content_map": [
+    {
+      "section": "背景动机实验",
+      "source": "01_introduction.tex",
+      "main_asset": "paper/Figures/fig_motivation_disagreement.pdf"
+    },
+    {
+      "section": "实验一：已见配置上的下游质量对比",
+      "source": "05_experiments.tex subsection PCU-Select Near-Ties Per-PEFT LESS",
+      "main_asset": "paper/tables/table_main_results.tex"
+    },
+    {
+      "section": "实验二：跨配置复用与摊销成本",
+      "source": "05_experiments.tex subsection Amortization Cuts Four-Task PEFT Onboarding Cost by 42x",
+      "main_asset": "paper/tables/table_quality_cost_headline.tex"
+    },
+    {
+      "section": "实验三：注册范围外配置的小样本校准",
+      "source": "05_experiments.tex subsection Reduced Calibration Narrows Gaps Beyond the Training Registry",
+      "main_asset": "paper/Figures/fig_ood_calibration.pdf"
+    }
+  ],
+  "organization_recommendation": "保留方法架构与关键公式。背景新增动机研究设计及原图，实验部分按质量—成本—范围外校准三节组织；删除上一版独立消融小节及所选消融图表。主文成本依据为质量—成本表，累计成本曲线可保留作辅助但不能代替主文该表。",
+  "motivation": {
+    "figure": "/Users/bytedance/code/data-selection/paper/Figures/fig_motivation_disagreement.pdf",
+    "script": "/Users/bytedance/code/data-selection/scripts/paper/revise_motivation_figure.py",
+    "summary_source": "/Users/bytedance/code/data-selection/paper/data/competition_motivation_summary.json",
+    "data_input": "result/data/motivation/values.parquet",
+    "design": "在相同候选样本及目标任务下，为不同PEFT配置建立短更新效用排序；用Spearman相关系数衡量排序一致性，用Top-5%集合的Jaccard重叠衡量高价值样本的一致性，并以相同配置的独立重复作为噪声参照。随后比较源配置选出的子集迁移至目标配置的下游表现，检验排序差异是否伴随选数效果差异。",
+    "reported_values": {
+      "cross_family_mean_spearman": 0.3603,
+      "cross_family_mean_top5_jaccard": 0.1724,
+      "independent_same_peft_mean_spearman": 0.7874,
+      "independent_same_peft_mean_top5_jaccard": 0.3197,
+      "intro_matched_vs_cross_family_gain_points": 2.0,
+      "intro_matched_vs_within_lora_gain_points": 1.45
+    },
+    "evidence_status": "按更新后的实验数据绘制，指标定义与生成流程见论文及绘图脚本。",
+    "safe_caption": "图X PEFT配置相关性的动机分析：左为效用排序的Spearman相关系数，右为Top-5%样本集合的Jaccard重叠。图源为论文引言。",
+    "safe_conclusion": "该设计用于检验“不同PEFT配置需要不同样本排序”的研究假设；图中呈现同配置较一致、跨家族差异较大的趋势，为条件效用建模提供直观动机。",
+    "transfer_check": {
+      "table": "/Users/bytedance/code/data-selection/paper/tables/table_transfer_matrix.tex",
+      "script": "/Users/bytedance/code/data-selection/scripts/paper/competition_supplement.py",
+      "intro_aux_figure": "/Users/bytedance/code/data-selection/paper/Figures/fig_motivation_transfer.pdf",
+      "warning": "补充表的4×4迁移矩阵与21.4匹配均值直接编码在脚本中。该表给跨家族差距约2.0点、全部不匹配差距1.87点；其LoRA两方向归一化值0.96/0.94按21.4计算为1.07点，不能直接支持引言1.45点。引言1.45点涉及另一路历史MOT_F2图数据，应省略此精确数字或明确待跨来源核对。",
+      "recommendation": "背景段说明排序与子集迁移的实验设计，并按配置和任务范围解释结果。"
+    }
+  },
+  "experimental_setup": {
+    "backbone": "Llama-2-7B",
+    "tasks": [
+      [
+        "GSM8K",
+        "EM"
+      ],
+      [
+        "HumanEval",
+        "Pass@1"
+      ],
+      [
+        "MMLU",
+        "Accuracy"
+      ],
+      [
+        "TyDiQA",
+        "F1"
+      ]
+    ],
+    "pool": 300000,
+    "selection_budget": 30000,
+    "fraction": 0.1,
+    "task_sketch_size": 32,
+    "train": "1000 AdamW steps, global batch 128, max sequence length 1024, cosine schedule; vary only selected subset under matched backbone, PEFT recipe and evaluation protocol.",
+    "reported_seed_protocol": "下游训练种子为0、1、2；选择器、评分器、任务摘要与候选池固定种子0。",
+    "hardware": "8×NVIDIA H20-96GB；GPU小时=墙钟小时×GPU数；仅选择成本时排除共同下游训练。"
+  },
+  "experiment_1_quality": {
+    "source": "/Users/bytedance/code/data-selection/paper/tables/table_main_results.tex",
+    "caption": "表X 五种已见PEFT配置的下游质量对比（实验结果汇总）",
+    "columns": [
+      "方法",
+      "AD-b64",
+      "IA3-attnmlp",
+      "L-r16-qkvo",
+      "L-r8-mlp",
+      "L-r8-qv",
+      "平均"
+    ],
+    "means": [
+      [
+        "Random",
+        32.79,
+        31.74,
+        33.11,
+        31.97,
+        31.82,
+        32.29
+      ],
+      [
+        "RDS+",
+        35.27,
+        33.54,
+        35.0,
+        34.46,
+        33.91,
+        34.44
+      ],
+      [
+        "Influence",
+        35.08,
+        33.84,
+        35.24,
+        34.69,
+        34.53,
+        34.68
+      ],
+      [
+        "LESS",
+        35.52,
+        34.44,
+        35.8,
+        35.13,
+        34.8,
+        35.14
+      ],
+      [
+        "PCU-Select",
+        35.61,
+        34.6,
+        35.93,
+        34.56,
+        35.18,
+        35.18
+      ]
+    ],
+    "table_note": "各PEFT列为四个任务原生百分制指标的等权平均；最后一列再对五个PEFT平均。此为稿件主表，不是所有任务统一同一指标；不同任务的绝对值不宜直接比较。",
+    "claims": [
+      "PCU-Select宏平均35.18，LESS35.14，差+0.04，适当结论为有限注册集合上的平均质量接近。",
+      "相对RDS+34.44和Influence34.68分别提高0.74与0.50点。",
+      "正文分别报告17/20、18/20、10/20个PEFT–任务格胜出；只有10/20胜LESS，不是所有配置与任务都占优。",
+      "任务差异：相对LESS，GSM8K+0.29，HumanEval-0.04，MMLU+0.67，TyDiQA-0.77。"
+    ],
+    "stats_constraint": "表中只转录均值；描述性统计不用于独立样本显著性结论。"
+  },
+  "experiment_2_cost": {
+    "source": "/Users/bytedance/code/data-selection/paper/tables/table_quality_cost_headline.tex",
+    "caption": "表X 五种已见PEFT配置的质量与数据选择成本（实验结果汇总，成本单位为GPU小时）",
+    "columns": [
+      "方法",
+      "固定/共享成本",
+      "新增配置边际成本",
+      "五配置总成本",
+      "质量",
+      "相对LESS差值"
+    ],
+    "rows": [
+      [
+        "Random",
+        0.0,
+        0.0,
+        0.0,
+        32.29,
+        -2.85
+      ],
+      [
+        "RDS+",
+        1.6,
+        0.0,
+        1.6,
+        34.44,
+        -0.7
+      ],
+      [
+        "Influence",
+        48.8,
+        0.0,
+        48.8,
+        34.68,
+        -0.46
+      ],
+      [
+        "Reuse-one-LESS",
+        63.2,
+        0.0,
+        63.2,
+        34.24,
+        -0.9
+      ],
+      [
+        "LESS",
+        0.0,
+        63.2,
+        316.0,
+        35.14,
+        0.0
+      ],
+      [
+        "PCU-Select",
+        144.0,
+        1.51,
+        151.6,
+        35.18,
+        0.04
+      ]
+    ],
+    "note": "表内固定/共享列针对本五配置、四任务注册集合计账；RDS+1.6与Influence48.8是该集合可共享计算的总额。每个新增PEFT配置均对应四任务。",
+    "claims": [
+      "支持范围内且无需校准时，PCU一次性成本144，新增四任务配置1.51；LESS每配置63.2，边际比63.2/1.51≈41.85，稿件简写42倍。",
+      "五配置累计PCU151.55≈151.6，LESS316，选择成本比316/151.55≈2.09。",
+      "P个配置下C_PCU=144+1.51P，C_LESS=63.2P，交点约2.33个配置，整数第三个配置开始体现摊销收益。",
+      "仅新增任务（沿用已有PEFT）PCU0.3775≈0.38、LESS0.30；收益来自跨PEFT复用，并非每种新增目标都更便宜。",
+      "Reuse-one-LESS把来源PEFT针对四任务的子集复用于所有目标，成本63.2、质量34.24，低于RDS+34.44；共享评分器后仍为各目标单独选数。",
+      "若所有新配置需500标签/任务校准，每配置另加4.2，交点约2.50；不能仍按1.51报需要校准配置的边际成本。"
+    ],
+    "auxiliary_figure": "/Users/bytedance/code/data-selection/paper/Figures/fig_cost_break_even.pdf",
+    "cost_limit": "全部数据选择成本均排除共同下游微调。42倍不是端到端加速；各P曲线点由分项成本模型累计，不能描述成每点独立实测。"
+  },
+  "experiment_3_ood": {
+    "source": "/Users/bytedance/code/data-selection/paper/Figures/fig_ood_calibration.pdf",
+    "data": "/Users/bytedance/code/data-selection/paper/data/competition_ood_summary.json",
+    "script": "/Users/bytedance/code/data-selection/scripts/paper/plot_competition_ood.py",
+    "table": "/Users/bytedance/code/data-selection/paper/tables/table_ood_levels.tex",
+    "definition": "纵轴为LESS减PCU-Select的性能差（百分点），越小越好、0为相同；汇总GSM8K、HumanEval和MMLU三个任务，不包括TyDiQA。JSON存负号相反的PCU减LESS，绘图脚本取负。",
+    "groups": [
+      {
+        "id": "L0",
+        "targets": [
+          "L-r32-qkvo",
+          "AD-b16"
+        ],
+        "zero_shot_drop": 0.34,
+        "cal200_drop": null,
+        "cal500_drop": null,
+        "status": "实验结果汇总"
+      },
+      {
+        "id": "L1",
+        "targets": [
+          "L-r64-all",
+          "AD-b256",
+          "L-r8-highlayers"
+        ],
+        "zero_shot_drop": 2.08,
+        "cal200_drop": 0.91,
+        "cal500_drop": 0.3,
+        "status": "实验结果汇总"
+      },
+      {
+        "id": "L2-LN",
+        "targets": [
+          "LN"
+        ],
+        "zero_shot_drop": 4.08,
+        "cal200_drop": 0.65,
+        "cal500_drop": 0.23,
+        "status": "LN Tuning 校准实验结果"
+      },
+      {
+        "id": "L2-Prompt",
+        "targets": [
+          "PRE-l16",
+          "PT-l32"
+        ],
+        "zero_shot_drop": 6.97,
+        "cal200_drop": 2.17,
+        "cal500_drop": 1.99,
+        "status": "实验结果汇总"
+      }
+    ],
+    "calibration_protocol": "冻结共享评分器，只拟合零初始化线性残差头。Cal-200/500分别使用200/500条目标配置–任务短更新标签，每条仅一个warm anchor和一步更新，成本分别0.42/1.05 GPU小时/配置–任务。",
+    "safe_caption": "图X 注册范围外PEFT配置的校准结果（当前稿件图）。纵轴为三个任务上LESS减PCU-Select的平均指标差，越小越好；Cal-200/500表示校准标签数。",
+    "conclusions": [
+      "L0与已见结构接近，零样本差距0.34；稿件未报告L0校准值，不能将空白写0。",
+      "L1为同一家族的大偏移，差距2.08降至0.91/0.30；500条校准对应约86%差距回收（1−0.30/2.08≈85.6%）。该结果汇总了对应配置与任务的实验。",
+      "Prefix/P-Tuning跨家族目标，差距6.97降至2.17/1.99；增加300标签仅再改善0.18点，校准后仍保留较大差距，不宜声称任意新家族均可无损迁移。",
+      "LN Tuning的差距从4.08降至0.65和0.23，500条校准标签对应约94%的差距回收。"
+    ],
+    "unresolved_evidence": []
+  },
+  "must_not_claim": [
+    "描述性统计区间不用于独立样本显著性结论。",
+    "不得将42倍边际选择成本差异写成端到端训练加速。"
+  ],
+  "document_safe_status_note": "本节按论文实验结果组织研究设计与阶段结论，分别说明配置支持、校准预算和成本边界。"
+}

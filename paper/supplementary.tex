@@ -14,6 +14,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
+\usepackage{array}
 
 % Packages for algorithms
 \usepackage{algorithm}
@@ -45,6 +46,9 @@
 \appendix
 \input{Sections/08_appendix}
 
+% Keep the nominal AAAI bibliography gap fixed.  The default includes
+% stretchable glue, which becomes conspicuous on a short final column.
+\setlength{\bibsep}{2.5pt}
 \bibliography{aaai2027}
 
 \end{document}

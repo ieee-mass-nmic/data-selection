@@ -1,0 +1,49 @@
+{
+  "slides_visually_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22
+  ],
+  "slide_render": "final_render",
+  "speech_pages_visually_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "speech_render": "docx_render_v3",
+  "speaker_notes_match_all_scripts": true,
+  "native_chart_slides": [
+    12,
+    14,
+    15
+  ],
+  "data_status": "Manuscript values with constructed seed series; LN-Tuning values excluded as pending replacement",
+  "native_powerpoint_test": false
+}

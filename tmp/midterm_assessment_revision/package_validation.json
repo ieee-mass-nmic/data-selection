@@ -1,0 +1,40 @@
+{
+  "base": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_论文式图文版.docx",
+  "base_sha256": "a0c2a766afda1dcbb994d5dfd56556e93b44b8239552463580fd827f9f08cd6c",
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_公式与正文实验修订版.docx",
+  "equations": 7,
+  "figures": 3,
+  "research_tables": 3,
+  "modified_parts": [
+    "[Content_Types].xml",
+    "docProps/core.xml",
+    "word/_rels/document.xml.rels",
+    "word/document.xml",
+    "word/settings.xml"
+  ],
+  "added_parts": [
+    "word/media/image4.png",
+    "word/media/image5.png"
+  ],
+  "preserved_parts": [
+    "_rels/",
+    "_rels/.rels",
+    "docProps/",
+    "docProps/app.xml",
+    "docProps/custom.xml",
+    "word/",
+    "word/_rels/",
+    "word/fontTable.xml",
+    "word/footer1.xml",
+    "word/footer2.xml",
+    "word/header1.xml",
+    "word/header2.xml",
+    "word/media/image1.jpeg",
+    "word/media/image2.png",
+    "word/media/image3.png",
+    "word/numbering.xml",
+    "word/styles.xml",
+    "word/theme/",
+    "word/theme/theme1.xml"
+  ]
+}

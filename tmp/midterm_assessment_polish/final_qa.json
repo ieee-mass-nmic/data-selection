@@ -1,0 +1,11 @@
+{
+  "page_count": 11,
+  "render_directory": "tmp/midterm_assessment_polish/render_verified",
+  "last_changed_pages": [
+    8,
+    9
+  ],
+  "all_other_pages_identical_to_visually_reviewed_pages": true,
+  "numeric_tables_unchanged": true,
+  "native_math_drawings_official_forms": "see changes.json"
+}

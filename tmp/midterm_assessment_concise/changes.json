@@ -1,0 +1,15 @@
+{
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_精简修订版.docx",
+  "source_sha256": "01ada8a9a347fba301eeb9a6d299f8417caf41ca007173e0e954a6d3aaef530c",
+  "output_sha256": "4476b6b7694263c4d8bbe93065d6e9eb000ea1826a2c1485bf41ffef793932ec",
+  "changed_parts": [
+    "word/document.xml"
+  ],
+  "new_plan": [
+    "（1）完善 PCU-Select 的实验分析，进一步明确不同任务、选数预算和配置差异下的适用范围，整理方法与实验材料。",
+    "（2）基于现有算法开发多配置数据选择与微调实验管理系统，研究分层缓存与增量复用、公共计算去重与阶段恢复，支持多任务、多配置实验的统一执行。",
+    "（3）通过对比实验检验缓存复用结果的一致性，评估运行时间、存储占用和恢复开销，完成系统总结及学位论文撰写。"
+  ],
+  "academic_achievements_blank": true,
+  "prior_content_formulas_figures_numeric_tables_official_forms_preserved": true
+}

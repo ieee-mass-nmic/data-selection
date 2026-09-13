@@ -1,0 +1,366 @@
+{"kind": "deck", "id": "pr/od5n0t", "name": "Deck"}
+{"kind": "layout", "layoutId": "/ppt/slideMasters/slideMaster1.xml", "name": "", "type": "master", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout1.xml", "name": "标题幻灯片", "type": "title", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "subtitle", "type": "subtitle", "textPreview": "单击此处编辑母版副标题样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout2.xml", "name": "标题和内容", "type": "obj", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "2", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout3.xml", "name": "节标题", "type": "secHead", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout4.xml", "name": "两栏内容", "type": "twoObj", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "2", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "3", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout5.xml", "name": "比较", "type": "twoTxTwoObj", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式"}, {"name": "3", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式"}, {"name": "5", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout6.xml", "name": "仅标题", "type": "titleOnly", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout7.xml", "name": "空白", "type": "blank", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout8.xml", "name": "内容与标题", "type": "objTx", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "2", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout9.xml", "name": "图片与标题", "type": "picTx", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "picture", "type": "picture"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout10.xml", "name": "标题和竖排文字", "type": "vertTx", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout11.xml", "name": "垂直排列标题与\n文本", "type": "vertTitleAndTx", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideMasters/slideMaster2.xml", "name": "", "type": "master", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout12.xml", "name": "标题幻灯片", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "单击编辑母版标题"}, {"name": "subtitle", "type": "subtitle", "textPreview": "单击此处编辑副标题"}, {"name": "body", "type": "body", "textPreview": "署名"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout13.xml", "name": "标题和内容", "type": "obj", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "2", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout14.xml", "name": "目录", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "标题"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout15.xml", "name": "节标题", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "body", "type": "body", "textPreview": "编号"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout16.xml", "name": "两栏内容", "type": "twoObj", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "2", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "3", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout17.xml", "name": "比较", "placeholders": [{"name": "body", "type": "body", "textPreview": "单击此处编辑母版标题样式"}, {"name": "3", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "body", "type": "body", "textPreview": "单击此处编辑母版标题样式"}, {"name": "5", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout18.xml", "name": "仅标题", "type": "titleOnly", "placeholders": [{"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout19.xml", "name": "空白", "type": "blank", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout20.xml", "name": "仅内容", "placeholders": [{"name": "1", "textPreview": "单击此处编辑母版文本样式 | 第二级 | 第三级 | 第四级 | 第五级"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout21.xml", "name": "标题和副标题", "placeholders": [{"name": "body", "type": "body", "textPreview": "单击此处编辑副标题"}, {"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "单击此处编辑母版标题样式"}]}
+{"kind": "layout", "layoutId": "/ppt/slideLayouts/slideLayout22.xml", "name": "末尾幻灯片", "placeholders": [{"name": "dateTime", "type": "dateTime"}, {"name": "footer", "type": "footer"}, {"name": "slideNumber", "type": "slideNumber"}, {"name": "title", "type": "title", "textPreview": "单击编辑母版标题"}, {"name": "subtitle", "type": "subtitle", "textPreview": "单击此处编辑副标题"}, {"name": "body", "type": "body", "textPreview": "署名"}]}
+{"kind": "slide", "id": "sl/39qzxs", "slide": 1, "title": "面向大模型的数据与参数", "textShapes": 3}
+{"kind": "textbox", "id": "sh/xor65o7m", "slide": 1, "name": "标题", "placeholder": "title", "text": "面向大模型的数据与参数\n联合高效微调算法研究", "textPreview": "面向大模型的数据与参数 | 联合高效微调算法研究", "textChars": 22, "textLines": 2, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/ex07y547", "slide": 1, "name": "署名", "placeholder": "body", "text": "汇报人: 林肯达", "textPreview": "汇报人: 林肯达", "textChars": 8, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/fy98ra5s", "slide": 1, "text": "中期答辩", "textPreview": "中期答辩", "textChars": 4, "textLines": 1, "bbox": [160, 215, 950, 50]}
+{"kind": "notes", "id": "nt/39qzxs", "slide": 1, "text": "第 1 页；建议 20 秒\n\n本页要点：中期答辩：已开展条件数据选择研究，后续推进多配置实验管理系统。\n\n各位老师好，我是林肯达。今天汇报的课题是《面向大模型的数据与参数联合高效微调算法研究》。本次是中期答辩，我会重点说明已经开展的 PCU-Select 算法工作，以及接下来计划完成的实验管理系统。\n\n转场：下面按四个部分汇报。\n\n提示：完整读出总题目，明确“中期”定位。\n\n来源：\n\n/Users/bytedance/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gv7hy4hchzzw22_bc53/msg/file/2026-09/开题答辩-林肯达.pptx\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/1xhcxn", "slide": 2, "title": "目录", "textShapes": 9}
+{"kind": "textbox", "id": "sh/to7y5ozq", "slide": 2, "name": "标题", "placeholder": "title", "text": "目录", "textPreview": "目录", "textChars": 2, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/7mpg3ehk", "slide": 2, "name": "序号", "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [591.24, 120.37, 68.03, 68.03]}
+{"kind": "textbox", "id": "sh/6lgfu90z", "slide": 2, "name": "项标题", "text": "课题进展概览", "textPreview": "课题进展概览", "textChars": 6, "textLines": 1, "bbox": [710.79, 127.93, 429.83, 52.91]}
+{"kind": "textbox", "id": "sh/14nu1wnu", "slide": 2, "name": "序号", "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [591.24, 244.81, 68.03, 68.03]}
+{"kind": "textbox", "id": "sh/03et8rm9", "slide": 2, "name": "项标题", "text": "工作一：PCU-Select", "textPreview": "工作一：PCU-Select", "textChars": 14, "textLines": 1, "bbox": [710.79, 252.37, 429.83, 52.91]}
+{"kind": "textbox", "id": "sh/25wba14f", "slide": 2, "name": "序号", "text": "03", "textPreview": "03", "textChars": 2, "textLines": 1, "bbox": [591.24, 369.25, 68.03, 68.03]}
+{"kind": "textbox", "id": "sh/p87u5gnq", "slide": 2, "name": "项标题", "text": "工作二：实验管理系统", "textPreview": "工作二：实验管理系统", "textChars": 10, "textLines": 1, "bbox": [710.79, 376.81, 429.83, 52.91]}
+{"kind": "textbox", "id": "sh/upgfyt0b", "slide": 2, "name": "序号", "text": "04", "textPreview": "04", "textChars": 2, "textLines": 1, "bbox": [591.24, 493.73, 68.03, 68.03]}
+{"kind": "textbox", "id": "sh/8nyxwji5", "slide": 2, "name": "项标题", "text": "后续计划与总结", "textPreview": "后续计划与总结", "textChars": 7, "textLines": 1, "bbox": [710.79, 501.29, 429.83, 52.91]}
+{"kind": "shape", "id": "sh/n2x0jehw", "slide": 2, "name": "任意多边形 32", "bbox": [140.46, 389.06, 236.44, 33.64]}
+{"kind": "notes", "id": "nt/1xhcxn", "slide": 2, "text": "第 2 页；建议 12 秒\n\n本页要点：围绕课题进展、工作一、工作二和后续计划展开。\n\n首先交代开题目标与当前进展；接着介绍工作一的方法和验证边界；然后说明工作二的系统方案；最后汇报后续八周的建议计划与交付标准。\n\n转场：先看课题目前推进到了哪里。\n\n提示：快速指过四项，不展开技术细节。\n\n来源：\n\n/Users/bytedance/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gv7hy4hchzzw22_bc53/msg/file/2026-09/开题答辩-林肯达.pptx\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/ocmo86", "slide": 3, "title": "课题进展", "textShapes": 3}
+{"kind": "textbox", "id": "sh/7up8badk", "slide": 3, "name": "标题", "placeholder": "title", "text": "课题进展", "textPreview": "课题进展", "textChars": 4, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/tw7qdkvq", "slide": 3, "name": "节编号", "placeholder": "body", "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/svy9kfu5", "slide": 3, "text": "从开题目标到两项具体工作", "textPreview": "从开题目标到两项具体工作", "textChars": 12, "textLines": 1, "bbox": [590, 430, 610, 58]}
+{"kind": "notes", "id": "nt/ocmo86", "slide": 3, "text": "第 3 页；建议 6 秒\n\n本页要点：将开题研究目标收敛为算法与系统两条主线。\n\n第一部分是课题进展，重点说明研究目标怎样落实为两项可以完成和验证的工作。\n\n转场：先对齐开题目标和中期聚焦。\n\n提示：章节页短暂停顿后翻页。\n\n来源：\n\n/Users/bytedance/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gv7hy4hchzzw22_bc53/msg/file/2026-09/开题答辩-林肯达.pptx\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/irn57n", "slide": 4, "title": "开题目标与中期聚焦", "textShapes": 11}
+{"kind": "textbox", "id": "sh/3i14jexc", "slide": 4, "name": "标题 8", "placeholder": "title", "text": "开题目标与中期聚焦", "textPreview": "开题目标与中期聚焦", "textChars": 9, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/zmxwj21g", "slide": 4, "text": "围绕数据选择与参数高效微调，形成两项相互衔接的工作", "textPreview": "围绕数据选择与参数高效微调，形成两项相互衔接的工作", "textChars": 25, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/yl4vqxkv", "slide": 4, "bbox": [75, 266, 545, 259]}
+{"kind": "textbox", "id": "sh/lofelcjm", "slide": 4, "text": "工作一：PCU-Select", "textPreview": "工作一：PCU-Select", "textChars": 14, "textLines": 1, "bbox": [100, 290, 495, 55]}
+{"kind": "shape", "id": "sh/0n6ds721", "slide": 4, "bbox": [100, 356, 495, 0]}
+{"kind": "textbox", "id": "sh/bydcfi1k", "slide": 4, "text": "研究条件数据价值\n复用特征与评分器\n为不同目标生成各自子集", "textPreview": "研究条件数据价值 | 复用特征与评分器 | 为不同目标生成各自子集", "textChars": 29, "textLines": 3, "bbox": [100, 381, 495, 127]}
+{"kind": "shape", "id": "sh/qx4vmdkz", "slide": 4, "bbox": [100, 233, 58, 58]}
+{"kind": "textbox", "id": "sh/dkvuhsja", "slide": 4, "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [100, 241, 58, 45]}
+{"kind": "shape", "id": "sh/cjmdon25", "slide": 4, "bbox": [660, 266, 545, 259]}
+{"kind": "textbox", "id": "sh/vuhwrm1o", "slide": 4, "text": "工作二：实验管理系统", "textPreview": "工作二：实验管理系统", "textChars": 10, "textLines": 1, "bbox": [685, 290, 495, 55]}
+{"kind": "shape", "id": "sh/utovyhk3", "slide": 4, "bbox": [685, 356, 495, 0]}
+{"kind": "textbox", "id": "sh/69szql4b", "slide": 4, "text": "组织多任务、多配置实验\n识别可复用计算与产物\n支持批量执行和阶段恢复", "textPreview": "组织多任务、多配置实验 | 识别可复用计算与产物 | 支持批量执行和阶段恢复", "textChars": 34, "textLines": 3, "bbox": [685, 381, 495, 127]}
+{"kind": "shape", "id": "sh/ra1gjqlw", "slide": 4, "bbox": [685, 233, 58, 58]}
+{"kind": "textbox", "id": "sh/sbahsvmh", "slide": 4, "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [685, 241, 58, 45]}
+{"kind": "shape", "id": "sh/tcjyl032", "slide": 4, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/edczul4n", "slide": 4, "text": "算法负责“如何选”，系统负责“如何可靠、重复地开展实验”", "textPreview": "算法负责“如何选”，系统负责“如何可靠、重复地开展实验”", "textChars": 28, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/felgnqls", "slide": 4, "text": "原开题中的动态 PEFT 路由保留为后续展望，本阶段聚焦算法与系统两项工作。", "textPreview": "原开题中的动态 PEFT 路由保留为后续展望，本阶段聚焦算法与系统两项工作。", "textChars": 38, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/gfuhwvmd", "slide": 4, "text": "04", "textPreview": "04", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/irn57n", "slide": 4, "text": "第 4 页；建议 38 秒\n\n本页要点：围绕数据与参数的协同，形成条件选数算法和多配置实验系统两项工作。\n\n开题时，我希望同时考虑训练数据和可训练参数，降低大模型适配任务的成本。中期阶段，这个目标进一步聚焦为两项工作。第一项是 PCU-Select：给定任务和微调配置，选择更适合的数据。第二项是实验管理系统：当任务、配置和预算反复组合时，管理可复用计算与实验产物。开题中的动态路由方向暂时收敛为后续展望，当前优先把这两项工作的实现和验证做完整。\n\n转场：两项工作处于不同阶段，下面分别说明。\n\n提示：强调总目标延续，研究内容有所聚焦；不要把动态路由说成已完成。\n\n来源：\n\n/Users/bytedance/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gv7hy4hchzzw22_bc53/msg/file/2026-09/开题答辩-林肯达.pptx\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/5j9mco", "slide": 5, "title": "当前进展与待完成工作", "textShapes": 4}
+{"kind": "textbox", "id": "sh/rm587m5c", "slide": 5, "name": "标题 8", "placeholder": "title", "text": "当前进展与待完成工作", "textPreview": "当前进展与待完成工作", "textChars": 10, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/jipgvu58", "slide": 5, "text": "方法、代码和实验基础已经形成，后续重点是系统化实现", "textPreview": "方法、代码和实验基础已经形成，后续重点是系统化实现", "textChars": 25, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "textbox", "id": "sh/5krix4ne", "slide": 5, "text": "状态口径：已有方法与代码基础；实验数据已更新；第二项系统为后续计划。", "textPreview": "状态口径：已有方法与代码基础；实验数据已更新；第二项系统为后续计划。", "textChars": 34, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/4jyh4zmt", "slide": 5, "text": "05", "textPreview": "05", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/18z6pc32", "slide": 5, "name": "", "rows": 4, "cols": 3, "preview": "工作层次 | 当前基础 | 接下来完成", "bbox": [75, 244, 1130, 348]}
+{"kind": "notes", "id": "nt/5j9mco", "slide": 5, "text": "第 5 页；建议 35 秒\n\n本页要点：算法与脚本已有基础；真实实验核验和系统工程机制仍需完成。\n\n目前已经形成论文稿件和算法实现，包括特征缓存、任务表示、PEFT 编码、条件评分、聚类配额，以及训练评测脚本。这里的“已有”主要指方法和代码资产。实验数据已更新为真实运行结果。第二项工作目前处于方案阶段，分层依赖缓存、公共节点去重和恢复机制将作为后续新增内容。\n\n转场：接下来先介绍已经形成的方法。\n\n提示：区分已有研究进展与计划新增的系统工作。\n\n来源：\n\n/Users/bytedance/code/data-selection/README.md\n\n/Users/bytedance/code/data-selection/src/pcu_select/pipeline/apply.py\n\n/Users/bytedance/code/data-selection/scripts/paper/competition_numbers.py\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/zk7r0v", "slide": 6, "title": "工作一", "textShapes": 3}
+{"kind": "textbox", "id": "sh/72lsvypo", "slide": 6, "name": "标题", "placeholder": "title", "text": "工作一", "textPreview": "工作一", "textChars": 3, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/t4nax87u", "slide": 6, "name": "节编号", "placeholder": "body", "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/s3uto3q9", "slide": 6, "text": "PCU-Select 条件数据选择方法", "textPreview": "PCU-Select 条件数据选择方法", "textChars": 19, "textLines": 1, "bbox": [590, 430, 610, 58]}
+{"kind": "notes", "id": "nt/zk7r0v", "slide": 6, "text": "第 6 页；建议 6 秒\n\n本页要点：跨 PEFT 配置复用的数据选择方法。\n\n第二部分介绍工作一，核心是让数据选择感知具体的微调配置，同时复用前期计算。\n\n转场：先说明为什么选数要同时考虑配置和任务。\n\n提示：PCU-Select 读作字母加 Select 即可。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/Sections/03_problem_formulation.tex"}
+{"kind": "slide", "id": "sl/t95vi8", "slide": 7, "title": "研究问题：数据价值取决于目标条件", "textShapes": 5}
+{"kind": "textbox", "id": "sh/xsz6pwja", "slide": 7, "name": "标题 8", "placeholder": "title", "text": "研究问题：数据价值取决于目标条件", "textPreview": "研究问题：数据价值取决于目标条件", "textChars": 16, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/5ojat4vq", "slide": 7, "text": "u(x, p, t)", "textPreview": "u(x, p, t)", "textChars": 10, "textLines": 1, "bbox": [75, 178, 530, 100]}
+{"kind": "textbox", "id": "sh/4na90ze5", "slide": 7, "text": "样本 x 在配置 p 下训练，\n对目标任务 t 有多大帮助？", "textPreview": "样本 x 在配置 p 下训练， | 对目标任务 t 有多大帮助？", "textChars": 30, "textLines": 2, "bbox": [655, 183, 550, 104]}
+{"kind": "textbox", "id": "sh/i1srypwf", "slide": 7, "text": "共享评分器，根据目标条件重新评分；每个目标保留自己的训练子集。测试集只用于最终评估。", "textPreview": "共享评分器，根据目标条件重新评分；每个目标保留自己的训练子集。测试集只用于最终评估。", "textChars": 42, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/h0japkvu", "slide": 7, "text": "07", "textPreview": "07", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/sf2p07m5", "slide": 7, "name": "", "rows": 4, "cols": 3, "preview": "条件 | 含义 | 输入来源", "bbox": [75, 331, 1130, 259]}
+{"kind": "notes", "id": "nt/t95vi8", "slide": 7, "text": "第 7 页；建议 46 秒\n\n本页要点：用 u(x,p,t) 表示一条样本在特定微调配置和目标任务下的价值。\n\nPEFT 是参数高效微调，也就是只更新模型中的一小部分参数。不同配置会改变能更新的位置和容量。因此，同一道练习题对不同学习方式的帮助可能不同，数据价值也不能只看样本本身。我用 u(x,p,t) 表示这种条件效用：x 是样本，p 是微调配置，t 是目标任务。目标是在有限预算内选出有帮助的子集。逐一训练所有候选子集代价太高，所以需要学习一个评分器，近似判断每条样本对当前配置和任务的作用。\n\n转场：为了让同一个评分器处理不同配置，需要先把三类信息表达清楚。\n\n提示：解释一次练习题类比，再回到 x、p、t；强调这是要验证的建模假设。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/Sections/03_problem_formulation.tex\n\n/Users/bytedance/code/data-selection/paper/Sections/04_method.tex"}
+{"kind": "slide", "id": "sl/q9cwh2", "slide": 8, "title": "方法设计：统一表征，保留配置差异", "textShapes": 14}
+{"kind": "textbox", "id": "sh/0fu5o7i1", "slide": 8, "name": "标题 8", "placeholder": "title", "text": "方法设计：统一表征，保留配置差异", "textPreview": "方法设计：统一表征，保留配置差异", "textChars": 16, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/a547yhon", "slide": 8, "text": "用共享位点建立可比较的坐标，再显式描述样本、配置和任务", "textPreview": "用共享位点建立可比较的坐标，再显式描述样本、配置和任务", "textChars": 27, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/bqd87mp8", "slide": 8, "bbox": [75, 288, 354, 260]}
+{"kind": "textbox", "id": "sh/crmp0r6t", "slide": 8, "text": "样本表征 zₓ", "textPreview": "样本表征 zₓ", "textChars": 7, "textLines": 1, "bbox": [100, 312, 304, 55]}
+{"kind": "shape", "id": "sh/xsvq9w7e", "slide": 8, "bbox": [100, 378, 304, 0]}
+{"kind": "textbox", "id": "sh/yt4721oz", "slide": 8, "text": "语义 + 描述统计\n+ 激活特征\n合计 848 维", "textPreview": "语义 + 描述统计 | + 激活特征 | 合计 848 维", "textChars": 25, "textLines": 3, "bbox": [100, 403, 304, 128]}
+{"kind": "shape", "id": "sh/zux8bmpk", "slide": 8, "bbox": [100, 255, 58, 58]}
+{"kind": "textbox", "id": "sh/kv6p4r6p", "slide": 8, "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [100, 263, 58, 45]}
+{"kind": "shape", "id": "sh/lwfqdw7a", "slide": 8, "bbox": [463, 288, 354, 260]}
+{"kind": "textbox", "id": "sh/mxo761ov", "slide": 8, "text": "PEFT 表征 zₚ", "textPreview": "PEFT 表征 zₚ", "textChars": 10, "textLines": 1, "bbox": [488, 312, 304, 55]}
+{"kind": "shape", "id": "sh/7yx8f6pg", "slide": 8, "bbox": [488, 378, 304, 0]}
+{"kind": "textbox", "id": "sh/j2ho36lo", "slide": 8, "text": "位点与算子掩码\n+ 容量 + 训练配方\n合计 128 维", "textPreview": "位点与算子掩码 | + 容量 + 训练配方 | 合计 128 维", "textChars": 28, "textLines": 3, "bbox": [488, 403, 304, 128]}
+{"kind": "shape", "id": "sh/i1o7u143", "slide": 8, "bbox": [488, 255, 58, 58]}
+{"kind": "textbox", "id": "sh/5oz65g3u", "slide": 8, "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [488, 263, 58, 45]}
+{"kind": "shape", "id": "sh/43qpwbm9", "slide": 8, "bbox": [851, 288, 354, 260]}
+{"kind": "textbox", "id": "sh/vyxoz6lc", "slide": 8, "text": "任务表征 zₜ", "textPreview": "任务表征 zₜ", "textChars": 7, "textLines": 1, "bbox": [876, 312, 304, 55]}
+{"kind": "shape", "id": "sh/uxo7q147", "slide": 8, "bbox": [876, 378, 304, 0]}
+{"kind": "textbox", "id": "sh/h0f61w3i", "slide": 8, "text": "32 条任务样本\n汇总任务特征\n合计 848 维", "textPreview": "32 条任务样本 | 汇总任务特征 | 合计 848 维", "textChars": 24, "textLines": 3, "bbox": [876, 403, 304, 128]}
+{"kind": "shape", "id": "sh/wz6psrmx", "slide": 8, "bbox": [876, 255, 58, 58]}
+{"kind": "textbox", "id": "sh/7uxovmlg", "slide": 8, "text": "03", "textPreview": "03", "textChars": 2, "textLines": 1, "bbox": [876, 263, 58, 45]}
+{"kind": "shape", "id": "sh/mt4nmh4v", "slide": 8, "bbox": [75, 584, 1130, 65]}
+{"kind": "textbox", "id": "sh/cz2lwn2t", "slide": 8, "text": "8 层 × 3 类模块输出 = 24 个共享位点", "textPreview": "8 层 × 3 类模块输出 = 24 个共享位点", "textChars": 24, "textLines": 1, "bbox": [95, 599, 1090, 39]}
+{"kind": "textbox", "id": "sh/x0bmpsje", "slide": 8, "text": "共同观察位置：Attention 输出、MLP 输出、残差输出；共享位点提供近似坐标。", "textPreview": "共同观察位置：Attention 输出、MLP 输出、残差输出；共享位点提供近似坐标。", "textChars": 43, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/adk3udkn", "slide": 8, "text": "08", "textPreview": "08", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/q9cwh2", "slide": 8, "text": "第 8 页；建议 50 秒\n\n本页要点：样本描述内容，任务描述需求，PEFT 描述更新方式；共享位点支持信号复用。\n\n评分器读取三类表示。样本表示包括语义、难度和激活特征；任务表示由少量任务样本的表示平均得到；PEFT 编码记录作用位置、更新类型、容量和训练配方。不同微调方法的参数形状不同，不能直接共用原始参数梯度。因此，方法在模型内部固定观察位置：八个层，每层三个模块输出，共二十四个位点。可以把它看成固定的测量坐标。不同配置保留自己的作用方式，同时共用这些坐标下的样本信号。位点梯度主要服务于离线标签构造，不直接等同于全部参数梯度。\n\n转场：表示解决了如何输入，接下来需要说明评分器从什么信号学习。\n\n提示：先讲三种表示分别回答什么，再解释 8×3；不要朗读所有维度。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/Sections/04_method.tex\n\n/Users/bytedance/code/data-selection/src/pcu_select/pipeline/offline.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/peft_space/encoder.py"}
+{"kind": "slide", "id": "sl/bhv9g5", "slide": 9, "title": "方法设计：多保真监督与聚类配额", "textShapes": 8}
+{"kind": "textbox", "id": "sh/fehgrapc", "slide": 9, "name": "标题 8", "placeholder": "title", "text": "方法设计：多保真监督与聚类配额", "textPreview": "方法设计：多保真监督与聚类配额", "textChars": 15, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "shape", "id": "sh/nu1szm1c", "slide": 9, "bbox": [75, 225, 545, 305]}
+{"kind": "textbox", "id": "sh/mt8b61kr", "slide": 9, "text": "先学会评分", "textPreview": "先学会评分", "textChars": 5, "textLines": 1, "bbox": [100, 249, 495, 55]}
+{"kind": "shape", "id": "sh/9wja1wji", "slide": 9, "bbox": [100, 315, 495, 0]}
+{"kind": "textbox", "id": "sh/8vat8r2x", "slide": 9, "text": "低成本梯度相似度提供广泛监督\n少量短更新标签校正代理偏差\n输出效用均值 μ 与不确定性 σ", "textPreview": "低成本梯度相似度提供广泛监督 | 少量短更新标签校正代理偏差 | 输出效用均值 μ 与不确定性 σ", "textChars": 45, "textLines": 3, "bbox": [100, 340, 495, 173]}
+{"kind": "shape", "id": "sh/zqhsvm1g", "slide": 9, "bbox": [660, 225, 545, 305]}
+{"kind": "textbox", "id": "sh/e58r2hkv", "slide": 9, "text": "再构建子集", "textPreview": "再构建子集", "textChars": 5, "textLines": 1, "bbox": [685, 249, 495, 55]}
+{"kind": "shape", "id": "sh/lszaxwjm", "slide": 9, "bbox": [685, 315, 495, 0]}
+{"kind": "textbox", "id": "sh/0rqt4r21", "slide": 9, "text": "使用 q = μ − 0.2σ 进行排序\n语义聚类，按簇价值分配预算\n各簇内部选取高分样本", "textPreview": "使用 q = μ − 0.2σ 进行排序 | 语义聚类，按簇价值分配预算 | 各簇内部选取高分样本", "textChars": 45, "textLines": 3, "bbox": [685, 340, 495, 173]}
+{"kind": "shape", "id": "sh/r2hsr214", "slide": 9, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/q1oryhkz", "slide": 9, "text": "同时考虑目标效用与覆盖度，避免预算集中在少数语义区域", "textPreview": "同时考虑目标效用与覆盖度，避免预算集中在少数语义区域", "textChars": 26, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/uxobax4r", "slide": 9, "text": "σ 在这里用于排序惩罚，不是置信区间。各预算独立分配配额，子集不要求互相嵌套。", "textPreview": "σ 在这里用于排序惩罚，不是置信区间。各预算独立分配配额，子集不要求互相嵌套。", "textChars": 39, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/fyxcj25c", "slide": 9, "text": "09", "textPreview": "09", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/bhv9g5", "slide": 9, "text": "第 9 页；建议 55 秒\n\n本页要点：低成本代理覆盖候选池，短更新提供直接反馈，分簇配额控制重复与覆盖。\n\n多保真指两种成本和直接程度不同的监督信号。低保真比较样本与任务在共享位点上的梯度方向，便宜，适合覆盖大量数据。高保真则做少量真实更新，观察任务样本集的损失是否下降，更直接，但仍然只是小批次短期作用，不能当成长程训练的真实贡献。评分器学习这些信号后，输出效用和不确定性，再对不确定性作惩罚。最后不直接全局取最高分，而是先按语义分簇，根据每个簇的价值和规模分配预算，再在簇内取高分样本，从而兼顾效用与覆盖。\n\n转场：把这些模块连起来，就是方法的完整流程。\n\n提示：按“标签从哪来→如何评分→怎样选集”顺序，配额公式只讲价值和规模。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/Sections/04_method.tex\n\n/Users/bytedance/code/data-selection/src/pcu_select/selection/selector.py"}
+{"kind": "slide", "id": "sl/lysbs9", "slide": 10, "title": "PCU-Select 完整流程", "textShapes": 17}
+{"kind": "textbox", "id": "sh/4b29gf2l", "slide": 10, "name": "标题 8", "placeholder": "title", "text": "PCU-Select 完整流程", "textPreview": "PCU-Select 完整流程", "textChars": 15, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/ilonit8v", "slide": 10, "text": "离线准备", "textPreview": "离线准备", "textChars": 4, "textLines": 1, "bbox": [75, 176, 200, 45]}
+{"kind": "shape", "id": "sh/3mxorypg", "slide": 10, "bbox": [270, 170, 232, 92]}
+{"kind": "textbox", "id": "sh/4765k3q1", "slide": 10, "text": "多保真效用标签", "textPreview": "多保真效用标签", "textChars": 7, "textLines": 1, "bbox": [280, 186, 212, 40]}
+{"kind": "textbox", "id": "sh/p8f6t87m", "slide": 10, "text": "梯度代理 + 短更新", "textPreview": "梯度代理 + 短更新", "textChars": 10, "textLines": 1, "bbox": [258, 279, 256, 78]}
+{"kind": "shape", "id": "sh/q9onmt8r", "slide": 10, "bbox": [527, 204, 40, 22]}
+{"kind": "shape", "id": "sh/rahovypc", "slide": 10, "bbox": [590, 170, 232, 92]}
+{"kind": "textbox", "id": "sh/cbq5o3qx", "slide": 10, "text": "训练条件评分器", "textPreview": "训练条件评分器", "textChars": 7, "textLines": 1, "bbox": [600, 186, 212, 40]}
+{"kind": "textbox", "id": "sh/dcz6x87i", "slide": 10, "text": "学习 u(x, p, t)", "textPreview": "学习 u(x, p, t)", "textChars": 13, "textLines": 1, "bbox": [578, 279, 256, 78]}
+{"kind": "shape", "id": "sh/6d4na98n", "slide": 10, "bbox": [847, 204, 40, 22]}
+{"kind": "shape", "id": "sh/7ed4jep8", "slide": 10, "bbox": [910, 170, 270, 92]}
+{"kind": "textbox", "id": "sh/bi9kra50", "slide": 10, "text": "保存可复用资产", "textPreview": "保存可复用资产", "textChars": 7, "textLines": 1, "bbox": [920, 186, 250, 40]}
+{"kind": "textbox", "id": "sh/ah0ji5of", "slide": 10, "text": "特征、编码、评分器", "textPreview": "特征、编码、评分器", "textChars": 9, "textLines": 1, "bbox": [898, 279, 294, 78]}
+{"kind": "shape", "id": "sh/xkb2tkn6", "slide": 10, "bbox": [75, 372, 1130, 0]}
+{"kind": "textbox", "id": "sh/wjilkf6l", "slide": 10, "text": "在线选数", "textPreview": "在线选数", "textChars": 4, "textLines": 1, "bbox": [75, 403, 200, 45]}
+{"kind": "shape", "id": "sh/nu9knq54", "slide": 10, "bbox": [270, 396, 232, 92]}
+{"kind": "textbox", "id": "sh/mt0jeloj", "slide": 10, "text": "输入目标条件", "textPreview": "输入目标条件", "textChars": 6, "textLines": 1, "bbox": [280, 412, 212, 40]}
+{"kind": "textbox", "id": "sh/9wr2p0nu", "slide": 10, "text": "数据池 + PEFT + 任务", "textPreview": "数据池 + PEFT + 任务", "textChars": 15, "textLines": 1, "bbox": [258, 505, 256, 78]}
+{"kind": "shape", "id": "sh/ovi1gv69", "slide": 10, "bbox": [527, 430, 40, 22]}
+{"kind": "shape", "id": "sh/7qtkzu58", "slide": 10, "bbox": [590, 396, 232, 92]}
+{"kind": "textbox", "id": "sh/6pk3qpon", "slide": 10, "text": "条件评分与聚类", "textPreview": "条件评分与聚类", "textChars": 7, "textLines": 1, "bbox": [600, 412, 212, 40]}
+{"kind": "textbox", "id": "sh/4jup4nit", "slide": 10, "text": "复用公共特征", "textPreview": "复用公共特征", "textChars": 6, "textLines": 1, "bbox": [578, 505, 256, 78]}
+{"kind": "shape", "id": "sh/5k3qxsze", "slide": 10, "bbox": [847, 430, 40, 22]}
+{"kind": "shape", "id": "sh/ihc72d0n", "slide": 10, "bbox": [910, 396, 270, 92]}
+{"kind": "textbox", "id": "sh/3il8vih8", "slide": 10, "text": "配额选数与微调", "textPreview": "配额选数与微调", "textChars": 7, "textLines": 1, "bbox": [920, 412, 250, 40]}
+{"kind": "textbox", "id": "sh/sne987i5", "slide": 10, "text": "预算 B 对应的独立子集", "textPreview": "预算 B 对应的独立子集", "textChars": 12, "textLines": 1, "bbox": [898, 505, 294, 78]}
+{"kind": "textbox", "id": "sh/donq1cza", "slide": 10, "text": "算法层面复用表示与评分器；第二项工作将这些产物的依赖、复用和执行过程系统化。", "textPreview": "算法层面复用表示与评分器；第二项工作将这些产物的依赖、复用和执行过程系统化。", "textChars": 38, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/qlcr6x0z", "slide": 10, "text": "10", "textPreview": "10", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/lysbs9", "slide": 10, "text": "第 10 页；建议 48 秒\n\n本页要点：离线形成可复用资产，在线根据目标条件生成各自子集。\n\n整体分成离线和在线两部分。离线阶段提取并保存样本特征、任务表示和位点信号，构造两类监督标签，训练条件评分器。这部分构成前期投入。在线阶段输入目标 PEFT 和任务，读取缓存，计算条件分数，再通过聚类和配额生成预算内子集，最后进入下游训练评测。这里复用的是特征和评分器，每个目标仍然使用自己的子集。对于超出训练支持范围的配置，需要按验证情况选择校准或其他选数方案，不能默认所有新配置都能直接使用。\n\n转场：评价时，我分别考察最终质量和选择侧成本。\n\n提示：沿流程箭头讲，突出“复用公共资产＋保留目标条件”。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/Sections/04_method.tex\n\n/Users/bytedance/code/data-selection/src/pcu_select/pipeline/offline.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/pipeline/apply.py"}
+{"kind": "slide", "id": "sl/yox38s", "slide": 11, "title": "稿件中的质量与成本分析", "textShapes": 7}
+{"kind": "textbox", "id": "sh/mdkz250b", "slide": 11, "name": "标题 8", "placeholder": "title", "text": "稿件中的质量与成本分析", "textPreview": "稿件中的质量与成本分析", "textChars": 11, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/07yp0fa5", "slide": 11, "text": "下游质量：PCU 与 LESS 接近", "textPreview": "下游质量：PCU 与 LESS 接近", "textChars": 18, "textLines": 1, "bbox": [75, 171, 550, 48]}
+{"kind": "textbox", "id": "sh/e5g7y5sz", "slide": 11, "text": "差值 +0.04，当前口径应描述为接近\n需要原始日志与独立重复支持结论", "textPreview": "差值 +0.04，当前口径应描述为接近 | 需要原始日志与独立重复支持结论", "textChars": 35, "textLines": 2, "bbox": [75, 426, 540, 105]}
+{"kind": "textbox", "id": "sh/f6p8ra9k", "slide": 11, "text": "选择侧成本：五套配置，四个任务", "textPreview": "选择侧成本：五套配置，四个任务", "textChars": 15, "textLines": 1, "bbox": [674, 171, 531, 66]}
+{"kind": "shape", "id": "sh/d476p0re", "slide": 11, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/qhg7u5sn", "slide": 11, "text": "新加一套四任务配置的边际成本：PCU 1.51，LESS 63.2 GPU 小时", "textPreview": "新加一套四任务配置的边际成本：PCU 1.51，LESS 63.2 GPU 小时", "textChars": 40, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/riponq98", "slide": 11, "text": "实验结果汇总。成本不含下游训练；PCU 总成本含 144 GPU 小时前期投入。", "textPreview": "实验结果汇总。成本不含下游训练；PCU 总成本含 144 GPU 小时前期投入。", "textChars": 40, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/czip8zax", "slide": 11, "text": "11", "textPreview": "11", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "chart", "id": "ch/4nat8nat", "slide": 11, "name": "", "chartType": "bar", "bbox": [660, 245, 540, 285]}
+{"kind": "table", "id": "tb/2dwri103", "slide": 11, "name": "", "rows": 2, "cols": 3, "preview": "稿件均值 | PCU-Select | LESS", "bbox": [75, 235, 550, 160]}
+{"kind": "notes", "id": "nt/yox38s", "slide": 11, "text": "第 11 页；建议 58 秒\n\n本页要点：实验结果体现质量接近、选择计算可摊销的分析思路；按实验协议解释质量与成本。\n\n这一页保留实验中的三个比较口径。质量方面，PCU-Select 的任务原生指标宏平均是三十五点一八，LESS 是三十五点一四，只能说稿件均值接近，不能据此宣称显著领先。选择成本方面，五套配置的合计分别是一百五十一点六和三百一十六个 GPU 小时；新增一套四任务配置的边际成本分别是一点五一和六十三点二。总成本包含前期摊销，边际成本描述新增目标，两者都排除下游训练。\n\n转场：所以，中期阶段需要把方法进展和实验结论的成熟度分开说明。\n\n提示：每组数字先报口径再比较；说明质量与成本的比较范围。\n\n来源：\n\n/Users/bytedance/code/data-selection/paper/tables/table_quality_cost_headline.tex\n\n/Users/bytedance/code/data-selection/paper/data/competition_cost_model.json\n\n/Users/bytedance/code/data-selection/scripts/paper/competition_numbers.py\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md"}
+{"kind": "slide", "id": "sl/utcdew", "slide": 12, "title": "工作一小结与验证边界", "textShapes": 9}
+{"kind": "textbox", "id": "sh/wfm9o72d", "slide": 12, "name": "标题 8", "placeholder": "title", "text": "工作一小结与验证边界", "textPreview": "工作一小结与验证边界", "textChars": 10, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/m5gvixc3", "slide": 12, "text": "当前已经形成条件选数方案，重点验证“质量保持与多配置摊销”", "textPreview": "当前已经形成条件选数方案，重点验证“质量保持与多配置摊销”", "textChars": 29, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/76pcb2d8", "slide": 12, "bbox": [75, 275, 545, 276]}
+{"kind": "textbox", "id": "sh/87ydk7ut", "slide": 12, "text": "方法贡献", "textPreview": "方法贡献", "textChars": 4, "textLines": 1, "bbox": [100, 299, 495, 55]}
+{"kind": "shape", "id": "sh/987udcve", "slide": 12, "bbox": [100, 365, 495, 0]}
+{"kind": "textbox", "id": "sh/y1wvexcr", "slide": 12, "text": "条件效用明确数据价值的目标\n共享位点与配置编码支持复用\n多保真监督结合聚类配额", "textPreview": "条件效用明确数据价值的目标 | 共享位点与配置编码支持复用 | 多保真监督结合聚类配额", "textChars": 39, "textLines": 3, "bbox": [100, 390, 495, 144]}
+{"kind": "shape", "id": "sh/z25c72dc", "slide": 12, "bbox": [660, 275, 545, 276]}
+{"kind": "textbox", "id": "sh/k3ydgnux", "slide": 12, "text": "实验记录与范围", "textPreview": "实验记录与范围", "textChars": 7, "textLines": 1, "bbox": [685, 299, 495, 55]}
+{"kind": "shape", "id": "sh/l47u9svi", "slide": 12, "bbox": [685, 365, 495, 0]}
+{"kind": "textbox", "id": "sh/adwbadcv", "slide": 12, "text": "真实训练记录与独立重复\n选择侧、前期投入的分项计时\n未见配置的兼容性与校准范围", "textPreview": "真实训练记录与独立重复 | 选择侧、前期投入的分项计时 | 未见配置的兼容性与校准范围", "textChars": 39, "textLines": 3, "bbox": [685, 390, 495, 144]}
+{"kind": "shape", "id": "sh/be5c3idg", "slide": 12, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/fi1sbet8", "slide": 12, "text": "系统建设沿用已验证的骨干和 PEFT 支持范围", "textPreview": "系统建设沿用已验证的骨干和 PEFT 支持范围", "textChars": 23, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/ehsri9sn", "slide": 12, "text": "首版不将 Prefix、P-Tuning 等结构外推为零样本通用支持；LN-Tuning 校准实验。", "textPreview": "首版不将 Prefix、P-Tuning 等结构外推为零样本通用支持；LN-Tuning 校准实验。", "textChars": 52, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/1k3adoby", "slide": 12, "text": "12", "textPreview": "12", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/utcdew", "slide": 12, "text": "第 12 页；建议 38 秒\n\n本页要点：已形成方法与代码基础；有效性、稳定性和成本结论以对应实验协议为限。\n\n工作一已经形成共享位点、条件评分和聚类配额的完整方法，也有对应代码与实验入口。实验记录需关联数据版本、训练种子、配置与表格结果。方法本身也有边界：短更新只近似长期收益，共享位点是结构近似，现有范围不能直接推出跨模型家族的普遍结论。\n\n转场：当这些算法资产被反复用于实验时，就引出了第二项工作。\n\n提示：小结先讲已有成果，再说明实验范围。\n\n来源：\n\n/Users/bytedance/code/data-selection/README.md\n\n/Users/bytedance/code/data-selection/paper/Sections/04_method.tex\n\n/Users/bytedance/code/data-selection/scripts/paper/competition_numbers.py\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md"}
+{"kind": "slide", "id": "sl/8lys7e", "slide": 13, "title": "工作二", "textShapes": 3}
+{"kind": "textbox", "id": "sh/7et4zeh0", "slide": 13, "name": "标题", "placeholder": "title", "text": "工作二", "textPreview": "工作二", "textChars": 3, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/9gvm1oz6", "slide": 13, "name": "节编号", "placeholder": "body", "text": "03", "textPreview": "03", "textChars": 2, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/8fmlsjil", "slide": 13, "text": "多配置数据选择与微调实验管理系统", "textPreview": "多配置数据选择与微调实验管理系统", "textChars": 16, "textLines": 1, "bbox": [590, 430, 610, 58]}
+{"kind": "notes", "id": "nt/8lys7e", "slide": 13, "text": "第 13 页；建议 6 秒\n\n本页要点：基于 PCU-Select 的多配置数据选择与微调实验管理系统（计划）。\n\n第三部分是计划开展的工作二，将工作一的算法资产组织成可重复执行、可追溯的系统。\n\n转场：先说明系统要解决的具体问题。\n\n提示：明确本部分属于拟开展工作。\n\n来源：\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/aaj0f0", "slide": 14, "title": "系统目标：管理多配置实验的产物与执行", "textShapes": 5}
+{"kind": "textbox", "id": "sh/4rylsf21", "slide": 14, "name": "标题 8", "placeholder": "title", "text": "系统目标：管理多配置实验的产物与执行", "textPreview": "系统目标：管理多配置实验的产物与执行", "textChars": 18, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/exsb2xwj", "slide": 14, "text": "基于 PCU-Select 的多配置数据选择与微调实验管理系统", "textPreview": "基于 PCU-Select 的多配置数据选择与微调实验管理系统", "textChars": 31, "textLines": 1, "bbox": [75, 155, 1130, 68]}
+{"kind": "shape", "id": "sh/0zat47ep", "slide": 14, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/103axcva", "slide": 14, "text": "已有模块提供算法能力，新增机制解决正确复用与可靠执行", "textPreview": "已有模块提供算法能力，新增机制解决正确复用与可靠执行", "textChars": 26, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/qtsbyxwn", "slide": 14, "text": "代码中的具体需求：预算变化时仍重复评分与聚类；选数结果路径需要纳入预算，避免覆盖。", "textPreview": "代码中的具体需求：预算变化时仍重复评分与聚类；选数结果路径需要纳入预算，避免覆盖。", "textChars": 41, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/ru1sr2ds", "slide": 14, "text": "14", "textPreview": "14", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/03idczq9", "slide": 14, "name": "", "rows": 4, "cols": 2, "preview": "已有基础 | 第二项工作新增内容", "bbox": [75, 247, 1130, 320]}
+{"kind": "notes", "id": "nt/aaj0f0", "slide": 14, "text": "第 14 页；建议 44 秒\n\n本页要点：复用算法资产，补齐多配置实验的产物管理、公共计算和恢复能力。\n\n重复做多任务、多配置实验时，会不断遇到三个问题：哪些旧结果还能用，相同计算是否重复执行，以及失败后从哪里继续。第一工作已经提供了特征缓存、任务表示、条件评分、聚类配额、PEFT 注册和实验脚本。第二工作将补上依赖清单、版本判定、公共节点执行以及请求独立目录。现有脚本已经能循环运行实验矩阵，所以新增内容重点是让复用规则可检查，让执行状态和产物对应清楚，而不是重新设计一套评分算法。\n\n转场：第一项工程机制先回答：一个产物什么时候还能复用？\n\n提示：对照“已有资产→新增能力”，不要说系统已上线。\n\n来源：\n\n/Users/bytedance/code/data-selection/README.md\n\n/Users/bytedance/code/data-selection/scripts/experiments/README.md\n\n/Users/bytedance/code/data-selection/src/pcu_select/features/cache.py\n\n/Users/bytedance/code/data-selection/scripts/experiments/run_e1.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/9r6a4q", "slide": 15, "title": "机制一：分层缓存与增量复用", "textShapes": 15}
+{"kind": "textbox", "id": "sh/98rmhw7m", "slide": 15, "name": "标题 8", "placeholder": "title", "text": "机制一：分层缓存与增量复用", "textPreview": "机制一：分层缓存与增量复用", "textChars": 13, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/lwfihgvm", "slide": 15, "text": "为每项产物记录依赖，输入变化时只重算受影响节点", "textPreview": "为每项产物记录依赖，输入变化时只重算受影响节点", "textChars": 23, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/kv6hobe1", "slide": 15, "bbox": [75, 269, 235, 92]}
+{"kind": "textbox", "id": "sh/jux0f6dg", "slide": 15, "text": "样本特征", "textPreview": "样本特征", "textChars": 4, "textLines": 1, "bbox": [85, 285, 215, 40]}
+{"kind": "textbox", "id": "sh/y9ozm1wv", "slide": 15, "text": "内容摘要、模型版本", "textPreview": "内容摘要、模型版本", "textChars": 9, "textLines": 1, "bbox": [63, 378, 259, 78]}
+{"kind": "shape", "id": "sh/x8fydwva", "slide": 15, "bbox": [335, 303, 38, 22]}
+{"kind": "shape", "id": "sh/w76hkbe5", "slide": 15, "bbox": [395, 269, 235, 92]}
+{"kind": "textbox", "id": "sh/b6dgb6dk", "slide": 15, "text": "目标评分", "textPreview": "目标评分", "textChars": 4, "textLines": 1, "bbox": [405, 285, 215, 40]}
+{"kind": "textbox", "id": "sh/a54zi1wz", "slide": 15, "text": "特征 + 任务 + PEFT", "textPreview": "特征 + 任务 + PEFT", "textChars": 14, "textLines": 1, "bbox": [383, 378, 259, 78]}
+{"kind": "shape", "id": "sh/94vy9wve", "slide": 15, "bbox": [655, 303, 38, 22]}
+{"kind": "shape", "id": "sh/o3mhgret", "slide": 15, "bbox": [715, 269, 235, 92]}
+{"kind": "textbox", "id": "sh/0nqhwrmp", "slide": 15, "text": "配额与子集", "textPreview": "配额与子集", "textChars": 5, "textLines": 1, "bbox": [725, 285, 215, 40]}
+{"kind": "textbox", "id": "sh/1ozipw3a", "slide": 15, "text": "评分 + 聚类 + 预算", "textPreview": "评分 + 聚类 + 预算", "textChars": 12, "textLines": 1, "bbox": [703, 378, 259, 78]}
+{"kind": "shape", "id": "sh/el8zuh4j", "slide": 15, "bbox": [974, 303, 38, 22]}
+{"kind": "shape", "id": "sh/fmh0nml4", "slide": 15, "bbox": [1035, 269, 170, 92]}
+{"kind": "textbox", "id": "sh/sj6hsrmt", "slide": 15, "text": "训练评测", "textPreview": "训练评测", "textChars": 4, "textLines": 1, "bbox": [1045, 285, 150, 40]}
+{"kind": "textbox", "id": "sh/dkfilw3y", "slide": 15, "text": "子集 + 训练种子", "textPreview": "子集 + 训练种子", "textChars": 9, "textLines": 1, "bbox": [1023, 378, 194, 78]}
+{"kind": "textbox", "id": "sh/qhozqh4n", "slide": 15, "text": "任务表征：任务样本、顺序、预处理", "textPreview": "任务表征：任务样本、顺序、预处理", "textChars": 16, "textLines": 1, "bbox": [75, 471, 535, 71]}
+{"kind": "textbox", "id": "sh/rixgjml8", "slide": 15, "text": "聚类：完整候选池、顺序、聚类种子", "textPreview": "聚类：完整候选池、顺序、聚类种子", "textChars": 16, "textLines": 1, "bbox": [671, 471, 534, 71]}
+{"kind": "shape", "id": "sh/cfah4bmx", "slide": 15, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/xgjixg3i", "slide": 15, "text": "依赖清单同时记录配置、随机种子与产物校验值", "textPreview": "依赖清单同时记录配置、随机种子与产物校验值", "textChars": 21, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/7m5cje9w", "slide": 15, "text": "候选顺序纳入依赖；首版固定评分器版本。只有输入兼容、产物完整且校验通过，才允许命中。", "textPreview": "候选顺序纳入依赖；首版固定评分器版本。只有输入兼容、产物完整且校验通过，才允许命中。", "textChars": 42, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/6lwba9sb", "slide": 15, "text": "15", "textPreview": "15", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/9r6a4q", "slide": 15, "text": "第 15 页；建议 50 秒\n\n本页要点：依据内容与版本判断兼容性，沿依赖关系定位受影响的计算。\n\n分层缓存可以理解成给每份中间结果附上来源清单。样本特征依赖样本内容、模型和预处理；任务表示依赖任务样本与表示方式；评分再依赖目标 PEFT、任务表示和评分器版本；聚类依赖完整候选池的语义特征；子集依赖评分、聚类和预算。系统计划记录内容摘要、配置、随机种子及产物校验值。这样即使样本名字没变，只要内容变了，也能识别旧结果已经不适用。变化发生后，只沿受影响的依赖向下重算。\n\n转场：这些依赖关系对应几条明确的复用规则。\n\n提示：用“来源清单”解释依赖；指一条完整的样本到子集路径。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/features/cache.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/selection/selector.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/7l4v52", "slide": 16, "title": "机制一：明确复用与重算的边界", "textShapes": 3}
+{"kind": "textbox", "id": "sh/grml4vy9", "slide": 16, "name": "标题 8", "placeholder": "title", "text": "机制一：明确复用与重算的边界", "textPreview": "机制一：明确复用与重算的边界", "textChars": 14, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/7m9c3epc", "slide": 16, "text": "同名样本内容改变不能命中旧结果；训练学习率等若属于 PEFT 条件，也会影响选择依赖。", "textPreview": "同名样本内容改变不能命中旧结果；训练学习率等若属于 PEFT 条件，也会影响选择依赖。", "textChars": 43, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/8nitcz6x", "slide": 16, "text": "16", "textPreview": "16", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/94repwf2", "slide": 16, "name": "", "rows": 5, "cols": 3, "preview": "输入变化 | 允许复用 | 需要重算", "bbox": [75, 192, 1130, 420]}
+{"kind": "notes", "id": "nt/7l4v52", "slide": 16, "text": "第 16 页；建议 60 秒\n\n本页要点：预算、训练种子和候选池变化作用于不同层级，不能使用同一种失效规则。\n\n第一种情况，只改选数预算。评分和聚类不变，重新分配配额并生成子集即可。第二种情况，选择条件和选择种子都不变，只改下游训练随机种子，那么直接复用子集，重新训练和评测。第三种情况，候选池新增样本，而且评分条件不变，可以保留旧样本兼容的特征和逐样本分数，只补算新增样本。但整个数据池变了，完整池的聚类、配额和子集仍要重算。候选顺序也要进入依赖。另外，学习率等训练配方进入了 PEFT 编码，不能把它们的变化误当成仅改变训练种子。\n\n转场：有了正确的复用判定，还需要保证一批请求能够可靠执行。\n\n提示：逐行讲三个变化案例；最后专门区分训练种子与训练配方。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/peft_space/encoder.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/selection/cluster.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/4kpsx1", "slide": 17, "title": "机制二：公共计算去重与阶段恢复", "textShapes": 14}
+{"kind": "textbox", "id": "sh/jylwz6d4", "slide": 17, "name": "标题 8", "placeholder": "title", "text": "机制二：公共计算去重与阶段恢复", "textPreview": "机制二：公共计算去重与阶段恢复", "textChars": 15, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/n6h8v6hg", "slide": 17, "text": "把实验请求拆成依赖节点，相同输入的公共节点只执行一次", "textPreview": "把实验请求拆成依赖节点，相同输入的公共节点只执行一次", "textChars": 26, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/258721gv", "slide": 17, "bbox": [75, 282, 354, 275]}
+{"kind": "textbox", "id": "sh/p8jqxgz6", "slide": 17, "text": "合并公共计算", "textPreview": "合并公共计算", "textChars": 6, "textLines": 1, "bbox": [100, 306, 304, 55]}
+{"kind": "shape", "id": "sh/o7qp4by1", "slide": 17, "bbox": [100, 372, 304, 0]}
+{"kind": "textbox", "id": "sh/f2h8r6h4", "slide": 17, "text": "特征、任务表示、评分\n聚类、选数、训练、评测\n逐阶段判断输入是否相同", "textPreview": "特征、任务表示、评分 | 聚类、选数、训练、评测 | 逐阶段判断输入是否相同", "textChars": 34, "textLines": 3, "bbox": [100, 397, 304, 143]}
+{"kind": "shape", "id": "sh/e187y1gj", "slide": 17, "bbox": [100, 249, 58, 58]}
+{"kind": "textbox", "id": "sh/14zqtwza", "slide": 17, "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [100, 257, 58, 45]}
+{"kind": "shape", "id": "sh/g3qp0byp", "slide": 17, "bbox": [463, 282, 354, 275]}
+{"kind": "textbox", "id": "sh/ryxonmh8", "slide": 17, "text": "保证产物完整", "textPreview": "保证产物完整", "textChars": 6, "textLines": 1, "bbox": [488, 306, 304, 55]}
+{"kind": "shape", "id": "sh/6do7uhgn", "slide": 17, "bbox": [488, 372, 304, 0]}
+{"kind": "textbox", "id": "sh/u94r6hkf", "slide": 17, "text": "先写临时文件\n校验后原子提交\n写入完成标记", "textPreview": "先写临时文件 | 校验后原子提交 | 写入完成标记", "textChars": 21, "textLines": 3, "bbox": [488, 397, 304, 143]}
+{"kind": "shape", "id": "sh/vax8zm10", "slide": 17, "bbox": [488, 249, 58, 58]}
+{"kind": "textbox", "id": "sh/wb698ril", "slide": 17, "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [488, 257, 58, 45]}
+{"kind": "shape", "id": "sh/hwfq1wj6", "slide": 17, "bbox": [851, 282, 354, 275]}
+{"kind": "textbox", "id": "sh/ixora10r", "slide": 17, "text": "恢复失败阶段", "textPreview": "恢复失败阶段", "textChars": 6, "textLines": 1, "bbox": [876, 306, 304, 55]}
+{"kind": "shape", "id": "sh/jyx8361w", "slide": 17, "bbox": [876, 372, 304, 0]}
+{"kind": "textbox", "id": "sh/4z69crih", "slide": 17, "text": "请求使用独立目录\n复用已完成产物并校验\n仅重跑失败阶段", "textPreview": "请求使用独立目录 | 复用已完成产物并校验 | 仅重跑失败阶段", "textChars": 27, "textLines": 3, "bbox": [876, 397, 304, 143]}
+{"kind": "shape", "id": "sh/50fq5wj2", "slide": 17, "bbox": [876, 249, 58, 58]}
+{"kind": "textbox", "id": "sh/618re10n", "slide": 17, "text": "03", "textPreview": "03", "textChars": 2, "textLines": 1, "bbox": [876, 257, 58, 45]}
+{"kind": "shape", "id": "sh/r2h87618", "slide": 17, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/1wjux03a", "slide": 17, "text": "阶段恢复的目标：减少重复工作，并保持结果隔离", "textPreview": "阶段恢复的目标：减少重复工作，并保持结果隔离", "textChars": 22, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/0vat4v2p", "slide": 17, "text": "首版恢复到阶段边界；不承诺从训练中断的具体 step 继续执行。", "textPreview": "首版恢复到阶段边界；不承诺从训练中断的具体 step 继续执行。", "textChars": 32, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/fu1cvql4", "slide": 17, "text": "17", "textPreview": "17", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/4kpsx1", "slide": 17, "text": "第 17 页；建议 54 秒\n\n本页要点：相同依赖节点只执行一次，完成产物经校验后供请求复用，失败从阶段恢复。\n\n第二项机制把请求拆成特征、任务表示、评分、聚类、选数、训练和评测等阶段。两个请求如果某个阶段的输入依赖完全相同，就指向同一个计算节点，计划只执行一次。写结果时，先写临时文件，检查完整性后再原子发布，并记录完成标记；各请求则使用自己的目录和记录，避免互相覆盖。中断后，已经完成且校验通过的产物继续复用，只重跑失败或尚未完成的阶段。这里的恢复以阶段为单位，首版不承诺训练内部每一步的断点续训。\n\n转场：下面用一个小矩阵说明哪些计算能共享。\n\n提示：解释“原子发布”为写完整后一次性变成可用；恢复边界要讲清。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/pipeline/apply.py\n\n/Users/bytedance/code/data-selection/scripts/experiments/run_e1.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/uw9mp5", "slide": 18, "title": "具体示例：24 次训练如何共享前置计算", "textShapes": 16}
+{"kind": "textbox", "id": "sh/p03qhsr6", "slide": 18, "name": "标题 8", "placeholder": "title", "text": "具体示例：24 次训练如何共享前置计算", "textPreview": "具体示例：24 次训练如何共享前置计算", "textChars": 19, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/1ofadczq", "slide": 18, "text": "2 种 PEFT × 2 个任务 × 3 个预算 × 2 个训练种子", "textPreview": "2 种 PEFT × 2 个任务 × 3 个预算 × 2 个训练种子", "textChars": 34, "textLines": 1, "bbox": [75, 163, 1130, 55]}
+{"kind": "shape", "id": "sh/0nm947y5", "slide": 18, "bbox": [75, 274, 260, 241]}
+{"kind": "textbox", "id": "sh/zmdsbmh0", "slide": 18, "text": "4", "textPreview": "4", "textChars": 1, "textLines": 1, "bbox": [95, 300, 220, 103]}
+{"kind": "textbox", "id": "sh/el4r2hgf", "slide": 18, "text": "目标评分", "textPreview": "目标评分", "textChars": 4, "textLines": 1, "bbox": [95, 430, 220, 44]}
+{"kind": "shape", "id": "sh/dkva9czu", "slide": 18, "bbox": [365, 274, 260, 241]}
+{"kind": "textbox", "id": "sh/cjm907y9", "slide": 18, "text": "1", "textPreview": "1", "textChars": 1, "textLines": 1, "bbox": [385, 300, 220, 103]}
+{"kind": "textbox", "id": "sh/rids72ho", "slide": 18, "text": "完整池聚类", "textPreview": "完整池聚类", "textChars": 5, "textLines": 1, "bbox": [385, 430, 220, 44]}
+{"kind": "shape", "id": "sh/qx4ryxg3", "slide": 18, "bbox": [655, 274, 260, 241]}
+{"kind": "textbox", "id": "sh/xgzalwzy", "slide": 18, "text": "12", "textPreview": "12", "textChars": 2, "textLines": 1, "bbox": [675, 300, 220, 103]}
+{"kind": "textbox", "id": "sh/wfqtcryd", "slide": 18, "text": "独立子集", "textPreview": "独立子集", "textChars": 4, "textLines": 1, "bbox": [675, 430, 220, 44]}
+{"kind": "shape", "id": "sh/gzyd8f6p", "slide": 18, "bbox": [945, 274, 260, 241]}
+{"kind": "textbox", "id": "sh/hk7uhkna", "slide": 18, "text": "24", "textPreview": "24", "textChars": 2, "textLines": 1, "bbox": [965, 300, 220, 103]}
+{"kind": "textbox", "id": "sh/uxwv65oj", "slide": 18, "text": "训练实验", "textPreview": "训练实验", "textChars": 4, "textLines": 1, "bbox": [965, 430, 220, 44]}
+{"kind": "textbox", "id": "sh/vy5cfa54", "slide": 18, "text": "按任务与 PEFT 区分", "textPreview": "按任务与 PEFT 区分", "textChars": 12, "textLines": 1, "bbox": [75, 543, 260, 55]}
+{"kind": "textbox", "id": "sh/8ved4v6t", "slide": 18, "text": "同一语义候选池", "textPreview": "同一语义候选池", "textChars": 7, "textLines": 1, "bbox": [365, 543, 260, 55]}
+{"kind": "textbox", "id": "sh/twnud0ny", "slide": 18, "text": "4 个目标 × 3 预算", "textPreview": "4 个目标 × 3 预算", "textChars": 12, "textLines": 1, "bbox": [655, 543, 260, 55]}
+{"kind": "textbox", "id": "sh/6twb2lon", "slide": 18, "text": "12 子集 × 2 种子", "textPreview": "12 子集 × 2 种子", "textChars": 12, "textLines": 1, "bbox": [945, 543, 260, 55]}
+{"kind": "textbox", "id": "sh/7u5cbq58", "slide": 18, "text": "固定特征、评分器、聚类配置与选择种子。各目标使用自己的子集；这些执行次数不等于端到端加速倍数。", "textPreview": "固定特征、评分器、聚类配置与选择种子。各目标使用自己的子集；这些执行次数不等于端到端加速倍数。", "textChars": 47, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/krut0v6h", "slide": 18, "text": "18", "textPreview": "18", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/uw9mp5", "slide": 18, "text": "第 18 页；建议 52 秒\n\n本页要点：4 份目标评分、1 份公共聚类、12 份独立子集支撑 24 次训练；计数不代表加速倍数。\n\n以同一候选池为例，两种 PEFT、两个任务、三个预算和两个训练种子，共有二十四次训练。固定特征、评分器、聚类配置和选择种子后，PEFT 与任务形成四种目标条件，因此需要四份评分。聚类只依赖这一份完整池的语义特征，所以可共享一份。四种条件各做三个预算，得到十二份子集，每份子集再使用两个训练种子，完成二十四次训练。各任务和配置仍保留自己的子集。这是计划中的节点数量示例，既不是现有系统的实测结果，也不等于端到端加速倍数。\n\n转场：围绕这一类实验矩阵，首版系统保持明确的实现范围。\n\n提示：依次指 4→1→12→24；提醒计数未包含全部离线工作与 I/O。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/selection/cluster.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/cehtax", "slide": 19, "title": "首版系统范围与操作流程", "textShapes": 6}
+{"kind": "textbox", "id": "sh/x0fyxsna", "slide": 19, "name": "标题 8", "placeholder": "title", "text": "首版系统范围与操作流程", "textPreview": "首版系统范围与操作流程", "textChars": 11, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/h0fyhsf6", "slide": 19, "text": "采用单工作节点，围绕已有算法模块完成可运行的实验闭环", "textPreview": "采用单工作节点，围绕已有算法模块完成可运行的实验闭环", "textChars": 26, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "textbox", "id": "sh/fyxgfixg", "slide": 19, "text": "登记数据与任务   →   提交实验矩阵   →   查看复用计划", "textPreview": "登记数据与任务   →   提交实验矩阵   →   查看复用计划", "textChars": 33, "textLines": 1, "bbox": [75, 564, 1130, 41]}
+{"kind": "textbox", "id": "sh/uxof6dgv", "slide": 19, "text": "执行选数   →   按需训练评测   →   导出报告", "textPreview": "执行选数   →   按需训练评测   →   导出报告", "textChars": 28, "textLines": 1, "bbox": [75, 611, 1130, 41]}
+{"kind": "textbox", "id": "sh/twfyd8fa", "slide": 19, "text": "继续沿用第一项工作已验证的骨干与 PEFT 范围；首版聚焦本地单工作节点。", "textPreview": "继续沿用第一项工作已验证的骨干与 PEFT 范围；首版聚焦本地单工作节点。", "textChars": 37, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/sv6x43yp", "slide": 19, "text": "19", "textPreview": "19", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/zyt8rml8", "slide": 19, "name": "", "rows": 4, "cols": 2, "preview": "组件 | 职责", "bbox": [75, 237, 1130, 295]}
+{"kind": "notes", "id": "nt/cehtax", "slide": 19, "text": "第 19 页；建议 38 秒\n\n本页要点：单工作节点、任务队列、元数据索引和本地产物库，提供简洁控制台。\n\n首版采用单工作节点，不把分布式调度作为当前目标。系统包括任务队列、元数据索引和本地产物库，并提供简洁控制台。用户先登记数据与任务，再提交实验矩阵，查看预计复用和重算哪些阶段，然后执行选数，按需要接入训练评测，最后导出报告。支持范围继续沿用第一工作已经核验的骨干与 PEFT；尚未完成真实验证的配置只保留为待验证项。\n\n转场：系统做出来后，需要用对照实验验证两项机制的价值。\n\n提示：沿操作流程从左到右；不要把控制台设计图称为实际运行截图。\n\n来源：\n\n用户提供的第二工作点方案（本轮消息）\n\n/Users/bytedance/code/data-selection/scripts/experiments/README.md\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md"}
+{"kind": "slide", "id": "sl/k7cjy6", "slide": 20, "title": "定量验证：机制正确，也要测出实际收益", "textShapes": 5}
+{"kind": "textbox", "id": "sh/atczqp4n", "slide": 20, "name": "标题 8", "placeholder": "title", "text": "定量验证：机制正确，也要测出实际收益", "textPreview": "定量验证：机制正确，也要测出实际收益", "textChars": 18, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/83ex8f61", "slide": 20, "text": "对照组：已有脚本流程 / 加入依赖缓存 / 完整系统", "textPreview": "对照组：已有脚本流程 / 加入依赖缓存 / 完整系统", "textChars": 26, "textLines": 1, "bbox": [75, 159, 1130, 57]}
+{"kind": "shape", "id": "sh/61cf65ob", "slide": 20, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/72lwzapw", "slide": 20, "text": "正确性优先：与完整重算的评分、子集和依赖结果核对", "textPreview": "正确性优先：与完整重算的评分、子集和依赖结果核对", "textChars": 24, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/g7excf6d", "slide": 20, "text": "冷启动去重与热缓存增量复用分开测量；分别报告选数时间和端到端时间，不叠加收益比例。", "textPreview": "冷启动去重与热缓存增量复用分开测量；分别报告选数时间和端到端时间，不叠加收益比例。", "textChars": 41, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/h8ny5k7y", "slide": 20, "text": "20", "textPreview": "20", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/210361kf", "slide": 20, "name": "", "rows": 3, "cols": 3, "preview": "验证对象 | 实验设置 | 记录指标", "bbox": [75, 223, 1130, 314]}
+{"kind": "notes", "id": "nt/k7cjy6", "slide": 20, "text": "第 20 页；建议 55 秒\n\n本页要点：以已有脚本、加入依赖缓存和完整系统三组，分别验证正确性、效率和恢复代价。\n\n验证计划分三组：已有脚本流程、加入依赖缓存、完整系统。已有脚本本来就缓存部分特征，因此比较时保留这项基础。机制一测试改预算、改种子、增加样本和同名样本改内容，记录各层重算数量、时间与存储，并检查结果是否与完整重算一致。机制二运行同一批实验矩阵，记录实际执行次数，再注入中断，测恢复时间、重复工作和结果隔离。选择阶段与端到端耗时分开报告。缓存和节点去重的收益可能重叠，不能把两项节省比例相加，提升幅度以最终测量为准。\n\n转场：最后说明如何在中期之后完成实现和验证。\n\n提示：先说三组对照，再对应两项机制的场景与指标；不预填提升比例。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/features/cache.py\n\n/Users/bytedance/code/data-selection/scripts/experiments/run_e1.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/5yc0fw", "slide": 21, "title": "后续计划", "textShapes": 3}
+{"kind": "textbox", "id": "sh/5snehcfq", "slide": 21, "name": "标题", "placeholder": "title", "text": "后续计划", "textPreview": "后续计划", "textChars": 4, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/jqlwfmxk", "slide": 21, "name": "节编号", "placeholder": "body", "text": "04", "textPreview": "04", "textChars": 2, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/ipcvmhgz", "slide": 21, "text": "分阶段交付，并行完善论文", "textPreview": "分阶段交付，并行完善论文", "textChars": 14, "textLines": 1, "bbox": [590, 430, 610, 58]}
+{"kind": "notes", "id": "nt/5yc0fw", "slide": 21, "text": "第 21 页；建议 6 秒\n\n本页要点：按建议的八周节奏完成算法核验、系统实现与定量评价。\n\n第四部分是后续计划。我以中期答辩后八周为建议周期，将实现和实验核验并行推进。\n\n转场：每两周设置一个可检查的里程碑。\n\n提示：明确八周为相对建议计划，不是已确认的校历安排。\n\n来源：\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/jlnk26", "slide": 22, "title": "后续工作安排：建议中期后 8 周", "textShapes": 3}
+{"kind": "textbox", "id": "sh/hkzeponu", "slide": 22, "name": "标题 8", "placeholder": "title", "text": "后续工作安排：建议中期后 8 周", "textPreview": "后续工作安排：建议中期后 8 周", "textChars": 16, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "shape", "id": "sh/g7m5wbah", "slide": 22, "bbox": [75, 607, 1130, 65]}
+{"kind": "textbox", "id": "sh/f6d4n69w", "slide": 22, "text": "并行推进：整理实验记录、统计口径与配置支持范围", "textPreview": "并行推进：整理实验记录、统计口径与配置支持范围", "textChars": 28, "textLines": 1, "bbox": [95, 622, 1090, 39]}
+{"kind": "textbox", "id": "sh/e54nu1sb", "slide": 22, "text": "22", "textPreview": "22", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/udk3it4v", "slide": 22, "name": "", "rows": 5, "cols": 3, "preview": "时间 | 系统工作 | 可检查的里程碑", "bbox": [75, 175, 1130, 393]}
+{"kind": "notes", "id": "nt/jlnk26", "slide": 22, "text": "第 22 页；建议 50 秒\n\n本页要点：先确定依赖与接口，再完成缓存和执行机制，最后进行对照评价与论文整理。\n\n第一到第二周，固定系统范围和评分器版本，整理依赖清单、请求规范，并拆开评分、聚类和配额接口。第三到第四周，完成内容摘要、版本判定和局部重算，覆盖预算、种子与样本变化场景。第五到第六周，接入队列、公共节点、阶段恢复、结果隔离和控制台，跑通矩阵示例。第七到第八周，完成机制对照与故障实验，整理报告和论文。同时整理第一工作的实验记录和论文结果。\n\n转场：完成与否，将用具体交付和验收标准判断。\n\n提示：每阶段只讲任务和一个交付；强调双线并行及相对建议性质。\n\n来源：\n\n用户提供的第二工作点方案（本轮消息）\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md"}
+{"kind": "slide", "id": "sl/jwhtul", "slide": 23, "title": "预期成果与验收标准", "textShapes": 13}
+{"kind": "textbox", "id": "sh/kna90jq1", "slide": 23, "name": "标题 8", "placeholder": "title", "text": "预期成果与验收标准", "textPreview": "预期成果与验收标准", "textChars": 9, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/el8ny947", "slide": 23, "text": "交付一套可运行系统，以及两项可定量检验的工程机制", "textPreview": "交付一套可运行系统，以及两项可定量检验的工程机制", "textChars": 24, "textLines": 1, "bbox": [75, 156, 1130, 74]}
+{"kind": "shape", "id": "sh/f6h47u5s", "slide": 23, "bbox": [75, 283, 354, 294]}
+{"kind": "textbox", "id": "sh/g7q50zmd", "slide": 23, "text": "可运行系统", "textPreview": "可运行系统", "textChars": 5, "textLines": 1, "bbox": [100, 307, 304, 55]}
+{"kind": "shape", "id": "sh/18zm94ni", "slide": 23, "bbox": [100, 373, 304, 0]}
+{"kind": "textbox", "id": "sh/298n2943", "slide": 23, "text": "复现实验矩阵\n查看复用计划与阶段状态\n导出结果与依赖记录", "textPreview": "复现实验矩阵 | 查看复用计划与阶段状态 | 导出结果与依赖记录", "textChars": 28, "textLines": 3, "bbox": [100, 398, 304, 162]}
+{"kind": "shape", "id": "sh/nah4be5o", "slide": 23, "bbox": [100, 250, 58, 58]}
+{"kind": "textbox", "id": "sh/obq54jm9", "slide": 23, "text": "01", "textPreview": "01", "textChars": 2, "textLines": 1, "bbox": [100, 258, 58, 45]}
+{"kind": "shape", "id": "sh/pcj6donu", "slide": 23, "bbox": [463, 283, 354, 294]}
+{"kind": "textbox", "id": "sh/idonqp4z", "slide": 23, "text": "机制验证报告", "textPreview": "机制验证报告", "textChars": 6, "textLines": 1, "bbox": [488, 307, 304, 55]}
+{"kind": "shape", "id": "sh/jex4za5k", "slide": 23, "bbox": [488, 373, 304, 0]}
+{"kind": "textbox", "id": "sh/7itk7qlc", "slide": 23, "text": "缓存命中与重算边界正确\n统计重复计算和恢复开销\n报告时间与存储变化", "textPreview": "缓存命中与重算边界正确 | 统计重复计算和恢复开销 | 报告时间与存储变化", "textChars": 33, "textLines": 3, "bbox": [488, 398, 304, 162]}
+{"kind": "shape", "id": "sh/mhkjylkr", "slide": 23, "bbox": [488, 250, 58, 58]}
+{"kind": "textbox", "id": "sh/9kb29g3i", "slide": 23, "text": "02", "textPreview": "02", "textChars": 2, "textLines": 1, "bbox": [488, 258, 58, 45]}
+{"kind": "shape", "id": "sh/8j210b2x", "slide": 23, "bbox": [851, 283, 354, 294]}
+{"kind": "textbox", "id": "sh/zutk36l0", "slide": 23, "text": "论文与实验材料", "textPreview": "论文与实验材料", "textChars": 7, "textLines": 1, "bbox": [876, 307, 304, 55]}
+{"kind": "shape", "id": "sh/yt0ju1kv", "slide": 23, "bbox": [876, 373, 304, 0]}
+{"kind": "textbox", "id": "sh/lwb25g36", "slide": 23, "text": "原始日志可追溯\n算法实验整理重复与计时\n系统设计和对照结果入文", "textPreview": "原始日志可追溯 | 算法实验整理重复与计时 | 系统设计和对照结果入文", "textChars": 31, "textLines": 3, "bbox": [876, 398, 304, 162]}
+{"kind": "shape", "id": "sh/kv21wb2l", "slide": 23, "bbox": [876, 250, 58, 58]}
+{"kind": "textbox", "id": "sh/jqdkfalk", "slide": 23, "text": "03", "textPreview": "03", "textChars": 2, "textLines": 1, "bbox": [876, 258, 58, 45]}
+{"kind": "textbox", "id": "sh/ip4365kz", "slide": 23, "text": "不预设加速倍数；收益由实际运行记录决定，同时报告索引、校验和存储开销。", "textPreview": "不预设加速倍数；收益由实际运行记录决定，同时报告索引、校验和存储开销。", "textChars": 35, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/gjepk3e5", "slide": 23, "text": "23", "textPreview": "23", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/jwhtul", "slide": 23, "text": "第 23 页；建议 38 秒\n\n本页要点：交付可运行系统、可追溯实验产物、机制评价报告和完善后的论文。\n\n预期交付包括四项：第一，可运行的单节点系统，能够完成从矩阵提交到报告导出的流程；第二，带版本和依赖记录的实验产物；第三，两项工程机制的对照评价报告；第四，由实验结果支撑的论文。验收时重点检查：复用结果与参考重算是否一致，过期或损坏产物是否能识别，不同请求是否互不覆盖，中断后是否只重复必要阶段。效率提升不预设结论，由实际测量给出。\n\n转场：两项工作共同服务于课题最初的高效微调目标。\n\n提示：将“验收目标”和“已经达到”明确区分。\n\n来源：\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/y3yll6", "slide": 24, "title": "总结：算法进展与系统计划相互衔接", "textShapes": 8}
+{"kind": "textbox", "id": "sh/jm5wbil0", "slide": 24, "name": "标题 8", "placeholder": "title", "text": "总结：算法进展与系统计划相互衔接", "textPreview": "总结：算法进展与系统计划相互衔接", "textChars": 16, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/jilczid0", "slide": 24, "text": "总体目标：提高多配置微调中的数据使用效率与实验执行效率", "textPreview": "总体目标：提高多配置微调中的数据使用效率与实验执行效率", "textChars": 27, "textLines": 1, "bbox": [75, 160, 1130, 80]}
+{"kind": "shape", "id": "sh/ihcvqdcv", "slide": 24, "bbox": [75, 278, 545, 280]}
+{"kind": "textbox", "id": "sh/5k3u1sv6", "slide": 24, "text": "工作一：条件数据选择", "textPreview": "工作一：条件数据选择", "textChars": 10, "textLines": 1, "bbox": [100, 302, 495, 55]}
+{"kind": "shape", "id": "sh/4judsnul", "slide": 24, "bbox": [100, 368, 495, 0]}
+{"kind": "textbox", "id": "sh/ve1cvid4", "slide": 24, "text": "形成 PCU-Select 方法与代码基础\n共享表征与评分器，保留目标条件\n继续分析实验结果与适用边界", "textPreview": "形成 PCU-Select 方法与代码基础 | 共享表征与评分器，保留目标条件 | 继续分析实验结果与适用边界", "textChars": 51, "textLines": 3, "bbox": [100, 393, 495, 148]}
+{"kind": "shape", "id": "sh/udsvmdcj", "slide": 24, "bbox": [660, 278, 545, 280]}
+{"kind": "textbox", "id": "sh/hgjux8va", "slide": 24, "text": "工作二：实验管理系统", "textPreview": "工作二：实验管理系统", "textChars": 10, "textLines": 1, "bbox": [685, 302, 495, 55]}
+{"kind": "shape", "id": "sh/wfado3up", "slide": 24, "bbox": [685, 368, 495, 0]}
+{"kind": "textbox", "id": "sh/nq1cryd8", "slide": 24, "text": "复用第一项工作已有模块\n研究分层缓存、增量复用与阶段恢复\n以系统演示和定量对照完成验证", "textPreview": "复用第一项工作已有模块 | 研究分层缓存、增量复用与阶段恢复 | 以系统演示和定量对照完成验证", "textChars": 43, "textLines": 3, "bbox": [685, 393, 495, 148]}
+{"kind": "shape", "id": "sh/mp8vitwn", "slide": 24, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/ql8vutgf", "slide": 24, "text": "下一阶段重点：把方法、实验记录与系统验证一并落到可复现结果", "textPreview": "下一阶段重点：把方法、实验记录与系统验证一并落到可复现结果", "textChars": 29, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/bmhw3yx0", "slide": 24, "text": "24", "textPreview": "24", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "notes", "id": "nt/y3yll6", "slide": 24, "text": "第 24 页；建议 25 秒\n\n本页要点：工作一形成条件选数方法，工作二计划提高多配置实验的复用性和可管理性。\n\n总结来说，工作一研究在不同任务和微调配置下如何选择数据，已经形成方法与代码基础；工作二计划把这些资产组织成可复用、可恢复、可追溯的实验系统。后续重点是完成两项工程机制的实现和定量验证。\n\n转场：以上是我的中期汇报。\n\n提示：用一句话对应每项工作，收束到剩余任务。\n\n来源：\n\n/Users/bytedance/code/data-selection/README.md\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/l61dl4", "slide": 25, "title": "感谢各位老师", "textShapes": 2}
+{"kind": "textbox", "id": "sh/61ozipof", "slide": 25, "name": "标题", "placeholder": "title", "text": "感谢各位老师\n请批评指正", "textPreview": "感谢各位老师 | 请批评指正", "textChars": 12, "textLines": 2, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/va58rqtw", "slide": 25, "name": "署名", "placeholder": "body", "text": "汇报人: 林肯达", "textPreview": "汇报人: 林肯达", "textChars": 8, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "notes", "id": "nt/l61dl4", "slide": 25, "text": "第 25 页；建议 10 秒\n\n本页要点：进入提问环节。\n\n我的汇报到此结束。感谢各位老师的时间，恳请老师们对研究边界、验证方案和后续工作安排提出意见。\n\n转场：根据老师提问展开回答。\n\n提示：停留本页，准备根据问题调用两页备用内容。\n\n来源：\n\n/Users/bytedance/Library/Containers/com.tencent.xinWeChat/Data/Documents/xwechat_files/wxid_gv7hy4hchzzw22_bc53/msg/file/2026-09/开题答辩-林肯达.pptx"}
+{"kind": "slide", "id": "sl/omzddy", "slide": 26, "title": "备用：缓存键与恢复边界", "textShapes": 3}
+{"kind": "textbox", "id": "sh/tofypkne", "slide": 26, "name": "标题 8", "placeholder": "title", "text": "备用：缓存键与恢复边界", "textPreview": "备用：缓存键与恢复边界", "textChars": 11, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "textbox", "id": "sh/sj6x43i1", "slide": 26, "text": "完成状态 = 产物存在 + 校验通过 + 完成标记\n请求目录区分任务、配置、预算与训练种子", "textPreview": "完成状态 = 产物存在 + 校验通过 + 完成标记 | 请求目录区分任务、配置、预算与训练种子", "textChars": 45, "textLines": 2, "bbox": [75, 592, 1130, 70]}
+{"kind": "textbox", "id": "sh/7idwbyhg", "slide": 26, "text": "26", "textPreview": "26", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/y1o72h0r", "slide": 26, "name": "", "rows": 5, "cols": 2, "preview": "产物 | 必须纳入的关键依赖", "bbox": [75, 198, 1130, 360]}
+{"kind": "notes", "id": "nt/omzddy", "slide": 26, "text": "第 26 页；建议 70 秒\n\n本页要点：完整依赖决定复用资格；完成标记与校验共同确认产物；恢复以阶段为单位。\n\n缓存键不能只使用样本名或文件路径。特征要记录样本内容摘要、模型权重与预处理版本；任务表示要记录任务样本和编码配置；评分还要加入 PEFT 编码、评分器及必要校准版本；聚类要加入完整池顺序、语义特征、聚类参数和种子；子集要加入预算、配额参数和确定性的排序规则。训练另有随机种子和运行配置。恢复时，完成标记和校验必须同时通过；只有文件存在还不够。若训练阶段失败，首版从该训练阶段重新执行，不承诺模型训练内部 step 的断点恢复。\n\n转场：这样可以将复用判定与产物完整性分开检查。\n\n提示：只回答被问到的层级，不必全文朗读。\n\n来源：\n\n/Users/bytedance/code/data-selection/src/pcu_select/features/cache.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/peft_space/encoder.py\n\n/Users/bytedance/code/data-selection/src/pcu_select/selection/cluster.py\n\n用户提供的第二工作点方案（本轮消息）"}
+{"kind": "slide", "id": "sl/gmxf6j", "slide": 27, "title": "备用：论文数据核验与支持范围", "textShapes": 4}
+{"kind": "textbox", "id": "sh/kzyhgza5", "slide": 27, "name": "标题 8", "placeholder": "title", "text": "备用：论文数据核验与支持范围", "textPreview": "备用：论文数据核验与支持范围", "textChars": 14, "textLines": 1, "bbox": [0, 0, 0, 0]}
+{"kind": "shape", "id": "sh/fahcr6tw", "slide": 27, "bbox": [75, 582, 1130, 65]}
+{"kind": "textbox", "id": "sh/gbqt0buh", "slide": 27, "text": "实验结果按质量、成本和配置支持范围分别解释", "textPreview": "实验结果按质量、成本和配置支持范围分别解释", "textChars": 21, "textLines": 1, "bbox": [95, 597, 1090, 39]}
+{"kind": "textbox", "id": "sh/1cjutgb2", "slide": 27, "text": "依据：competition_numbers.py、revise_motivation_figure.py、competition_revision_notes.md。", "textPreview": "依据：competition_numbers.py、revise_motivation_figure.py、competition_revision_notes.md。", "textChars": 84, "textLines": 1, "bbox": [75, 663, 1090, 40]}
+{"kind": "textbox", "id": "sh/6l8bu1cf", "slide": 27, "text": "27", "textPreview": "27", "textChars": 2, "textLines": 1, "bbox": [1181, 680, 30, 23]}
+{"kind": "table", "id": "tb/5sneho32", "slide": 27, "name": "", "rows": 4, "cols": 3, "preview": "检查项 | 实验记录 | 复现要求", "bbox": [75, 206, 1130, 347]}
+{"kind": "notes", "id": "nt/gmxf6j", "slide": 27, "text": "第 27 页；建议 70 秒\n\n本页要点：代码支持、稿件描述和真实实验验证是不同状态，需要逐项对齐。\n\n目前主表按任务、配置和训练种子组织实验结果；计时也需要关联硬件、配置和原始阶段日志。复现实验时，应为每个实验记录数据版本、模型、PEFT、选择与训练种子、指标和产物路径，再由日志重建表格。系统首版以已经真实核验的骨干与 PEFT 为支持范围；仅在注册表或代码中出现，不代表完成了相同程度的实验验证。新增家族和跨骨干扩展列为后续验证事项。\n\n转场：各项结论对应具体实验配置与计时口径。\n\n提示：说明实验配置、统计口径与后续研究范围。\n\n来源：\n\n/Users/bytedance/code/data-selection/scripts/paper/competition_numbers.py\n\n/Users/bytedance/code/data-selection/paper/data/competition_revision_notes.md\n\n/Users/bytedance/code/data-selection/paper/data/competition_cost_model.json\n\n/Users/bytedance/code/data-selection/src/pcu_select/experiments/registry.py"}

@@ -1,0 +1,27 @@
+{
+  "source": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_公式与正文实验修订版.docx",
+  "source_sha256": "907695984c2e4ae27d3a0c866604a6ac154969c704e1f8e0b2165e68b526ba63",
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_更新版.docx",
+  "output_sha256": "37effb0fb242fd59222865d9da93d9d78798de5e42e38506b4d0397232fc0126",
+  "changes": [
+    {
+      "old": "注：图源为论文引言中的动机分析图；生成脚本对非对角元素统一加 0.10。",
+      "new": "注：图源为论文引言中的动机分析图。"
+    },
+    {
+      "old": "统一算法接口，设计产物依赖与元数据，复核论文实验记录。",
+      "new": "统一算法接口，设计产物依赖与元数据，归档论文实验记录。"
+    },
+    {
+      "old": "依赖规范、最小执行流程及结果核验清单。",
+      "new": "依赖规范、最小执行流程及实验结果归档清单。"
+    },
+    {
+      "old": "正在完善原始实验记录核验及论文论证",
+      "new": "正在整理实验材料并完善论文论证"
+    }
+  ],
+  "all_other_package_parts_preserved": true,
+  "math_and_drawings_preserved": true,
+  "official_tables_preserved": true
+}

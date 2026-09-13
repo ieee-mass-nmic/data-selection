@@ -1,0 +1,132 @@
+{
+  "docx": "/Users/bytedance/code/data-selection/output/midterm_v2/林肯达_中期答辩讲稿_论文重点版.docx",
+  "markdown": "/Users/bytedance/code/data-selection/output/midterm_v2/林肯达_中期答辩讲稿_论文重点版.md",
+  "page_count": 19,
+  "docx_sha256": "025b5f89b3803961ce6a688ae17eebd6808841c5a7aa2857323a2a96b3905fc3",
+  "slides_preserved": 33,
+  "qa_preserved": 12,
+  "main_seconds": 1200,
+  "renderer": "bundled LibreOffice via documents/render_docx.py",
+  "fontconfig": "/Users/bytedance/code/data-selection/tmp/defense_build/fontconfig.xml",
+  "cjk_font": "Arial Unicode MS",
+  "visual_review": "All 19 pages visually verified. Title synchronization changed pages 2–15, 17, and 18; all 16 changed pages were opened and checked again. Pages 1, 16, and 19 are byte-identical to previously reviewed page images. No clipping, overlap, missing glyphs, split slide blocks, or page orphans.",
+  "pages": [
+    {
+      "page": 1,
+      "content": "使用说明",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 2,
+      "content": "PPT 01–03",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 3,
+      "content": "PPT 04–06",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 4,
+      "content": "PPT 07–08",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 5,
+      "content": "PPT 09–10",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 6,
+      "content": "PPT 11–12",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 7,
+      "content": "PPT 13–14",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 8,
+      "content": "PPT 15–17",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 9,
+      "content": "PPT 18–19",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 10,
+      "content": "PPT 20–22",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 11,
+      "content": "PPT 23–25",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 12,
+      "content": "PPT 26–28",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 13,
+      "content": "备用 PPT 29–30",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 14,
+      "content": "备用 PPT 31–33",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 15,
+      "content": "问答 01–03",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 16,
+      "content": "问答 04–06",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 17,
+      "content": "问答 07–09",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 18,
+      "content": "问答 10–12",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    },
+    {
+      "page": 19,
+      "content": "来源索引",
+      "status": "pass",
+      "checks": "legible CJK; no clipping, overlap, split slide blocks, page orphans, or missing glyphs; footer positioned correctly"
+    }
+  ],
+  "render_directory": "/Users/bytedance/code/data-selection/tmp/midterm_v2/speech_render_titles_final",
+  "titles_match_final_ppt": true,
+  "content_consistency": "All 33 slide titles and scripts, all 12 answers, and total 1200 seconds verified against final content.json. Slide 20 L1 compatibility and fallback wording verified."
+}

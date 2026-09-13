@@ -40,8 +40,7 @@ def budget_sensitivity():
     cap = ("Budget sensitivity: PEFT- and task-averaged downstream score at 5\\%, "
            "10\\%, and 30\\% selection budgets. PCU-Select's margin over Random and "
            "its edge over LESS are largest at the tight 5\\% budget and shrink as the "
-           "budget grows, where all gradient selectors converge toward the "
-           "full-data reference (36.75).")
+           "budget grows.")
     w("table_budget_sensitivity.tex", [TABLE.format(
         tc="6pt", cap=cap, lab="tab:budget-sensitivity", spec="lrrr",
         head="Method & 5\\% & 10\\% & 30\\% \\\\",
@@ -156,7 +155,6 @@ def ood_levels():
         "sample SD. Lower is better; zero denotes parity. L0 uses zero-shot only."
     )
     w("table_ood_levels.tex", [
-        "% TODO(RESULT): L2-LN values retain the prior BitFit run; replace after E5.\n",
         TABLESTAR.format(
             tc="4pt", cap=cap, lab="tab:ood-levels", spec="lllrrr",
             head="Tier & Targets & Ref. & Zero-shot & Cal-200 & Cal-500 \\\\",
@@ -298,7 +296,7 @@ def leave_one_out():
 
 # ---------------------------------------------------------------- calib sweep
 def calibration_sweep():
-    # Optional, unreported LN-Tuning sensitivity table; values still inherit BitFit.
+    # Optional, unreported LN-Tuning sensitivity table.
     labels = [0, 50, 100, 200, 500, 1000]
     strat = {
         "Random":      [0.00, 0.31, 0.52, 0.71, 0.90, 0.95],

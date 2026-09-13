@@ -1,0 +1,26 @@
+Inspect result written to file: /Users/bytedance/code/data-selection/tmp/midterm_v2/candidate.pptx.inspect.ndjson
+Exported 33 slides
+Rendered 4
+Rendered 8
+Rendered 12
+Rendered 16
+Rendered 20
+Rendered 24
+Rendered 28
+Rendered 32
+node:internal/fs/promises:697
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: EEXIST: file already exists, open '/Users/bytedance/code/data-selection/tmp/midterm_v2/validation.json'
+    at async open (node:internal/fs/promises:697:25)
+    at async Object.writeFile (node:internal/fs/promises:1317:14)
+    at async finalizePresentation (file:///Users/bytedance/.codex/plugins/cache/openai-primary-runtime/presentations/26.904.11930/skills/presentations/container_tools/artifact_tool_utils.mjs:1058:5)
+    at async file:///Users/bytedance/code/data-selection/tmp/midterm_v2/build.mjs:101:14 {
+  errno: -17,
+  code: 'EEXIST',
+  syscall: 'open',
+  path: '/Users/bytedance/code/data-selection/tmp/midterm_v2/validation.json'
+}
+
+Node.js v24.19.0

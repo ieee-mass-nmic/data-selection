@@ -1,0 +1,18 @@
+{
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_中期考核表_公式与正文实验修订版.docx",
+  "sha256": "c3e64ff9c263c9ae0f5346e054e3a0769f7194919942a11a7364a91d4ea45e86",
+  "display_math": 7,
+  "inline_math": 8,
+  "original_figures": 3,
+  "editable_research_tables": 3,
+  "new_paragraph_and_nested_table_property_order": "PASS",
+  "cover_and_signature_tables_preserved": true,
+  "previous_version_unchanged": true,
+  "evidence_status": "Figure captions describe the experiment scope and metrics; the document reports means without SD or CI.",
+  "final_visual_review": {
+    "render": "render_final",
+    "pages": 10,
+    "all_pages_inspected_at_original_size": true,
+    "result": "PASS — equations upright operators and structured scripts; complete images and tables; labels and signatures remain intact"
+  }
+}

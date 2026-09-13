@@ -293,6 +293,10 @@ def fig_config_sensitivity() -> None:
     overlap = json.loads((DATA / "E4_overlap.json").read_text())["overlap"]
 
     fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.75), constrained_layout=True)
+    # Keep a clear visual gutter between the heatmap colorbar and the scatter
+    # plot's y-axis label.  The default constrained-layout spacing makes the
+    # two panels read as one crowded block at full two-column width.
+    fig.set_constrained_layout_pads(w_pad=0.05, h_pad=0.03, wspace=0.14, hspace=0.02)
     arr = Mn.to_numpy(float)
     im = axes[0].imshow(arr, cmap="RdYlGn", vmin=0.84, vmax=1.0, aspect="auto")
     axes[0].set_xticks(range(len(configs)), configs, rotation=45, ha="right")

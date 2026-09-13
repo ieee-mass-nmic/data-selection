@@ -88,12 +88,12 @@ gate and ≈ 1.4K tokens/s per GPU. The full run takes about
 der the (wall seconds × GPU count)/3600 convention. This                The three named baselines isolate two design choices:
 shared target-training cost is identical across selectors, so the       whether selection uses gradients and whether those gradients
 selection-only comparison excludes it.                                  depend on the target PEFT. We specify each implementation
-   A uniform draw from the entire 300K pool under the same              below so that the comparison is auditable.
-1000-step budget averages 36.75 across tasks. This is a fixed-
-compute reference, not a converged full-data upper bound:               RDS+ (representation similarity). RDS+ operates on the
-it covers only 0.43 pool epochs, whereas the 10% subset                 joint semantic embedding ejoint
+                                                                        below so that the comparison is auditable.
+
+                                                                        RDS+ (representation similarity). RDS+ operates on the
+                                                                        joint semantic embedding ejoint
                                                                                                     x   produced by a frozen external
-receives about 4.3 passes.                                              sentence encoder. PCU-Select’s sample tower reads the same
+                                                                        sentence encoder. PCU-Select’s sample tower reads the same
    The primary downstream metric for each task is its public-           input representation but does not train it. RDS+ therefore
 standard, task-native score, computed by a task evaluator               depends on no PCU-trained features; only the selection rule
 injected into the training runner. We log held-out response-            differs.

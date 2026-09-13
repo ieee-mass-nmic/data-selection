@@ -1,0 +1,48 @@
+{
+  "slides_visual_reviewed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33
+  ],
+  "final_render_count": 33,
+  "final_vs_reviewed_preview_pixel_differences": [
+    18
+  ],
+  "native_notes_match": true,
+  "basis": "Reviewed all initial slides and all changed slides, then compared final exported renders against the reviewed previews.",
+  "final_changed_slides_rechecked": [
+    18
+  ],
+  "visual_status": "pass",
+  "final_export_sha256": "bad7ae33a1c92fa117536ab2eaa937cbf6ee255d9825edaedab19d64b3a10968"
+}

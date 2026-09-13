@@ -1,0 +1,44 @@
+{
+  "source": "/Users/bytedance/Desktop/师兄的文档参考/陈瑾如-中期考核表.docx",
+  "source_sha256": "ecfa0f60ee6d743908bf8f8cbf7bb3a982952e6bac94f01d22a7671c6a222fd9",
+  "output": "/Users/bytedance/code/data-selection/output/midterm_assessment/林肯达_研究生学位论文中期考核表.docx",
+  "edited_parts": [
+    "[Content_Types].xml",
+    "docProps/app.xml",
+    "docProps/core.xml",
+    "word/_rels/document.xml.rels",
+    "word/document.xml",
+    "word/footer1.xml",
+    "word/settings.xml",
+    "word/styles.xml"
+  ],
+  "preserved_parts": [
+    "_rels/",
+    "_rels/.rels",
+    "docProps/",
+    "docProps/custom.xml",
+    "word/",
+    "word/_rels/",
+    "word/fontTable.xml",
+    "word/footer2.xml",
+    "word/header1.xml",
+    "word/header2.xml",
+    "word/media/image1.jpeg",
+    "word/numbering.xml",
+    "word/theme/",
+    "word/theme/theme1.xml"
+  ],
+  "removed_parts": [
+    "word/media/",
+    "word/media/image10.png",
+    "word/media/image11.png",
+    "word/media/image2.png",
+    "word/media/image3.png",
+    "word/media/image4.png",
+    "word/media/image5.png",
+    "word/media/image6.png",
+    "word/media/image7.png",
+    "word/media/image8.png",
+    "word/media/image9.png"
+  ]
+}

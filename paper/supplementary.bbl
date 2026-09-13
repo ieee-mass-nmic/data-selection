@@ -1,5 +1,18 @@
-\begin{thebibliography}{11}
+\begin{thebibliography}{19}
 \providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Austin et~al.(2021)Austin, Odena, Nye, Bosma, Michalewski, Dohan,
+  Jiang, Cai, Terry, Le, and Sutton}]{austin2021program}
+Austin, J.; Odena, A.; Nye, M.; Bosma, M.; Michalewski, H.; Dohan, D.; Jiang,
+  E.; Cai, C.; Terry, M.; Le, Q.~V.; and Sutton, C. 2021.
+\newblock Program Synthesis with Large Language Models.
+\newblock \emph{arXiv preprint arXiv:2108.07732}.
+
+\bibitem[{Chaudhary(2023)}]{chaudhary2023codealpaca}
+Chaudhary, S. 2023.
+\newblock {Code Alpaca}: An Instruction-Following {LLaMA} Model for Code
+  Generation.
+\newblock GitHub repository.
 
 \bibitem[{Chen et~al.(2021)}]{chen2021humaneval}
 Chen, M.; et~al. 2021.
@@ -22,6 +35,14 @@ Cobbe, K.; Kosaraju, V.; Bavarian, M.; Chen, M.; Jun, H.; Kaiser, L.; Plappert,
 \newblock Training Verifiers to Solve Math Word Problems.
 \newblock \emph{arXiv preprint arXiv:2110.14168}.
 
+\bibitem[{Conover et~al.(2023)Conover, Hayes, Mathur, Xie, Wan, Shah, Ghodsi,
+  Wendell, Zaharia, and Xin}]{conover2023dolly}
+Conover, M.; Hayes, M.; Mathur, A.; Xie, J.; Wan, J.; Shah, S.; Ghodsi, A.;
+  Wendell, P.; Zaharia, M.; and Xin, R. 2023.
+\newblock Free Dolly: Introducing the World's First Truly Open
+  Instruction-Tuned {LLM}.
+\newblock Databricks Blog.
+
 \bibitem[{Dao(2024)}]{dao2024flashattention2}
 Dao, T. 2024.
 \newblock {FlashAttention-2}: Faster Attention with Better Parallelism and Work
@@ -35,11 +56,47 @@ Hendrycks, D.; Burns, C.; Basart, S.; Zou, A.; Mazeika, M.; Song, D.; and
 \newblock Measuring Massive Multitask Language Understanding.
 \newblock In \emph{International Conference on Learning Representations}.
 
+\bibitem[{Ivison et~al.(2023)Ivison, Wang, Pyatkin, Lambert, Peters, Dasigi,
+  Jang, Wadden, Smith, Beltagy, and Hajishirzi}]{ivison2023camels}
+Ivison, H.; Wang, Y.; Pyatkin, V.; Lambert, N.; Peters, M.~E.; Dasigi, P.;
+  Jang, J.; Wadden, D.; Smith, N.~A.; Beltagy, I.; and Hajishirzi, H. 2023.
+\newblock Camels in a Changing Climate: Enhancing {LM} Adaptation with {Tulu}
+  2.
+\newblock \emph{arXiv preprint arXiv:2311.10702}.
+
 \bibitem[{Johnson and Lindenstrauss(1984)}]{johnson1984jl}
 Johnson, W.~B.; and Lindenstrauss, J. 1984.
 \newblock Extensions of Lipschitz Mappings into a Hilbert Space.
 \newblock In \emph{Conference in Modern Analysis and Probability}, volume~26 of
   \emph{Contemporary Mathematics}, 189--206. American Mathematical Society.
+
+\bibitem[{K{\"o}pf et~al.(2023)K{\"o}pf, Kilcher, von R{\"u}tte, Anagnostidis,
+  Tam, Stevens, Barhoum, Nguyen, Stanley, Nagyfi, ES, Suri, Glushkov,
+  Dantuluri, Maguire, Schuhmann, Nguyen, and Mattick}]{kopf2023openassistant}
+K{\"o}pf, A.; Kilcher, Y.; von R{\"u}tte, D.; Anagnostidis, S.; Tam, Z.~R.;
+  Stevens, K.; Barhoum, A.; Nguyen, D.; Stanley, O.; Nagyfi, R.; ES, S.; Suri,
+  S.; Glushkov, D.; Dantuluri, A.; Maguire, A.; Schuhmann, C.; Nguyen, H.; and
+  Mattick, A. 2023.
+\newblock {OpenAssistant} Conversations---Democratizing Large Language Model
+  Alignment.
+\newblock In \emph{Advances in Neural Information Processing Systems},
+  volume~36.
+
+\bibitem[{Lian et~al.(2023)Lian, Goodson, Pentland, Cook, Vong, and
+  {Teknium}}]{lian2023openorca}
+Lian, W.; Goodson, B.; Pentland, E.; Cook, A.; Vong, C.; and {Teknium}. 2023.
+\newblock {OpenOrca}.
+\newblock Hugging Face dataset repository.
+
+\bibitem[{Longpre et~al.(2023)Longpre, Hou, Vu, Webson, Chung, Tay, Zhou, Le,
+  Zoph, Wei, and Roberts}]{longpre2023flan}
+Longpre, S.; Hou, L.; Vu, T.; Webson, A.; Chung, H.~W.; Tay, Y.; Zhou, D.; Le,
+  Q.~V.; Zoph, B.; Wei, J.; and Roberts, A. 2023.
+\newblock The {Flan} Collection: Designing Data and Methods for Effective
+  Instruction Tuning.
+\newblock In \emph{Proceedings of the 40th International Conference on Machine
+  Learning}, volume 202 of \emph{Proceedings of Machine Learning Research},
+  22631--22648. PMLR.
 
 \bibitem[{Perez et~al.(2018)Perez, Strub, de~Vries, Dumoulin, and
   Courville}]{perez2018film}
@@ -72,5 +129,13 @@ Xia, M.; Malladi, S.; Gururangan, S.; Arora, S.; and Chen, D. 2024.
 \newblock In \emph{Proceedings of the 41st International Conference on Machine
   Learning}, volume 235 of \emph{Proceedings of Machine Learning Research},
   54104--54132. PMLR.
+
+\bibitem[{Xu et~al.(2024)Xu, Sun, Zheng, Geng, Zhao, Feng, Tao, Lin, and
+  Jiang}]{xu2024wizardlm}
+Xu, C.; Sun, Q.; Zheng, K.; Geng, X.; Zhao, P.; Feng, J.; Tao, C.; Lin, Q.; and
+  Jiang, D. 2024.
+\newblock {WizardLM}: Empowering Large Pre-Trained Language Models to Follow
+  Complex Instructions.
+\newblock In \emph{International Conference on Learning Representations}.
 
 \end{thebibliography}
